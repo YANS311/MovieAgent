@@ -1,0 +1,84 @@
+"""
+HybridRecallSkill — 多路混合召回 Skill
+=================================================
+封装五路并行召回（向量+内容+模型+图谱+热门）。
+对应原有 AgentTool: RecallHybridTool
+=================================================
+"""
+
+from .base import BaseSkill
+
+
+class HybridRecallSkill(BaseSkill):
+    """多路并行召回融合。"""
+
+    name = "recall_hybrid"
+    description = "五路并行召回（向量语义+内容特征+深度模型+知识图谱+热门兜底）"
+
+    input_schema = {
+        "type": "object",
+        "properties": {
+            "user": {"description": "用户对象（可选）"},
+            "query_text": {"type": "string", "description": "查询文本（可选）"},
+            "top_k": {"type": "integer", "description": "召回数量", "default": 15},
+        },
+    }
+
+    output_schema = {
+        "type": "object",
+        "properties": {
+            "results": {"type": "array", "description": "召回候选列表"},
+            "stats": {"type": "object", "description": "各路召回统计"},
+            "count": {"type": "integer"},
+        },
+    }
+
+    def __init__(self, neo_graph=None, rag_resources=None):
+        self.neo_graph = neo_graph
+        self.rag_resources = rag_resources
+
+    def can_handle(self, context: dict) -> bool:
+        intent = context.get('intent', '')
+        return intent in ('QUERY_PROFILE_REC', 'QUERY_MOVIE', 'RECOMMEND')
+
+    def run(self, context: dict) -> dict:
+        import time
+        t0 = time.time()
+
+        user = context.get('user')
+        query_text = context.get('query_text') or context.get('query', '')
+        top_k = context.get('top_k', 15)
+
+        from myapp.recommender.recall import multi_channel_recall, hot_recall
+
+        try:
+            results, stats = multi_channel_recall(
+                user, query_text=query_text, top_k=top_k,
+                neo_graph=self.neo_graph, rag_resources=self.rag_resources,
+            )
+        except Exception as e:
+            results = hot_recall(k=top_k)
+            stats = {'fallback': 'hot_due_to_error', 'error': str(e)}
+
+        elapsed = time.time() - t0
+
+        return self._success(
+            data=results,
+            stats=stats,
+            count=len(results),
+            elapsed=f"{elapsed:.3f}s",
+        )
+
+    def fallback(self, context: dict, error: Exception) -> dict:
+        """降级：返回热门电影。"""
+        try:
+            from myapp.recommender.recall import hot_recall
+            results = hot_recall(k=context.get('top_k', 15))
+            return {
+                'skill': self.name,
+                'success': True,
+                'data': results,
+                'meta': {'fallback': True, 'source': 'hot_fallback', 'error': str(error)},
+            }
+        except Exception:
+            return super().fallback(context, error)
