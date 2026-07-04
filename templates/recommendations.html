@@ -1,0 +1,881 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}为您推荐{% endblock %}
+
+{% block css %}
+<style>
+    /* 推荐页面专用样式 */
+    .rec-page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        border-radius: 16px;
+        padding: 25px 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+    }
+
+    .rec-page-header h1 {
+        margin: 0 0 10px;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .rec-page-header .algo-info {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    .rec-page-header .btn-refresh {
+        background: rgba(255,255,255,0.2);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 20px;
+        padding: 8px 18px;
+        transition: all 0.3s ease;
+    }
+
+    .rec-page-header .btn-refresh:hover {
+        background: #fff;
+        color: #667eea;
+    }
+
+    /* 标签页样式 */
+    .rec-tabs {
+        margin-bottom: 25px;
+        border-bottom: 2px solid #eee;
+        display: flex;
+        gap: 10px;
+    }
+
+    .rec-tab {
+        padding: 12px 24px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #666;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+        background: none;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+    }
+
+    .rec-tab:hover {
+        color: #667eea;
+    }
+
+    .rec-tab.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+    }
+
+    .rec-tab .badge {
+        background: #eee;
+        color: #666;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        margin-left: 8px;
+    }
+
+    .rec-tab.active .badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+    }
+
+    /* 推荐卡片网格 */
+    .rec-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .rec-movie-card {
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.04);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .rec-movie-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+    }
+
+    .rec-card-poster {
+        position: relative;
+        padding-top: 140%;
+        overflow: hidden;
+    }
+
+    .rec-card-poster img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .rec-movie-card:hover .rec-card-poster img {
+        transform: scale(1.08);
+    }
+
+    .rec-card-score {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: linear-gradient(135deg, #d9534f, #c9302c);
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 16px;
+        box-shadow: 0 4px 12px rgba(217, 83, 79, 0.4);
+    }
+
+    .rec-card-score small {
+        font-size: 10px;
+        font-weight: 400;
+        opacity: 0.8;
+    }
+
+    .rec-card-content {
+        padding: 16px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .rec-card-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        margin: 0 0 8px;
+        line-height: 1.4;
+    }
+
+    .rec-card-title a {
+        color: #333;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .rec-card-title a:hover {
+        color: #667eea;
+    }
+
+    .rec-card-genres {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 10px;
+    }
+
+    .rec-card-genres .genre-tag {
+        background: #f0f0f0;
+        color: #666;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+    }
+
+    .rec-card-summary {
+        font-size: 13px;
+        color: #666;
+        line-height: 1.5;
+        margin-bottom: 15px;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .rec-card-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .rec-card-actions .btn {
+        border-radius: 16px;
+        font-size: 12px;
+        padding: 6px 14px;
+        transition: all 0.2s ease;
+    }
+
+    .rec-card-actions .btn-explain {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        border: none;
+    }
+
+    .rec-card-actions .btn-explain:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .rec-card-actions .btn-kg-path {
+        background: #fff;
+        color: #9b59b6;
+        border: 1px solid #9b59b6;
+    }
+
+    .rec-card-actions .btn-kg-path:hover {
+        background: #9b59b6;
+        color: #fff;
+    }
+
+    .rec-card-actions .btn-exclude {
+        background: #fff;
+        color: #999;
+        border: 1px solid #ddd;
+    }
+
+    .rec-card-actions .btn-exclude:hover {
+        background: #f8d7da;
+        color: #d9534f;
+        border-color: #d9534f;
+    }
+
+    /* AI 理由框 */
+    .ai-reason-box {
+        background: linear-gradient(135deg, #f0f8ff, #e8f4f8);
+        border: 1px solid #bce8f1;
+        border-radius: 12px;
+        padding: 14px;
+        margin-top: 12px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #31708f;
+    }
+
+    /* 分页样式 */
+    .rec-pagination {
+        text-align: center;
+        margin: 30px 0;
+    }
+
+    .rec-pagination .pagination {
+        margin: 0;
+    }
+
+    .rec-pagination .pagination > li > a {
+        border-radius: 10px;
+        margin: 0 3px;
+        border: none;
+        color: #666;
+        padding: 8px 14px;
+    }
+
+    .rec-pagination .pagination > .active > a {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+    }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+        .rec-grid {
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 15px;
+        }
+
+        .rec-page-header {
+            padding: 20px;
+        }
+
+        .rec-page-header h1 {
+            font-size: 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .rec-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- 页面头部 -->
+    <div class="rec-page-header">
+        <h1 style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <span><i class="fa fa-thumbs-up"></i> 个性化推荐</span>
+            <a href="?refresh=true" class="btn btn-refresh">
+                <i class="fa fa-refresh"></i> 实时重排推荐
+            </a>
+        </h1>
+
+        <p class="algo-info">
+            {% if active_tab == 'deep' %}
+                {% if rec_source_main == 'skb_kag' %}
+
+                {% else %}
+
+                    <small>(请先对几部电影进行评分以唤醒 AI 模型)</small>
+                {% endif %}
+            {% else %}
+                {% if rec_source_fallback == 'content' %}
+                    <i class="fa fa-adjust"></i> 核心算法：<strong>Content-Based 内容近邻匹配</strong>
+                    <small>(基于您近期关注的类型与演员快速响应)</small>
+                {% else %}
+                    <i class="fa fa-fire"></i> 核心算法：<strong>Popularity 热门趋势基线</strong>
+                    <small>(系统冷启动模式，为您展示高分神作)</small>
+                {% endif %}
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- 标签页 -->
+    <div class="rec-tabs">
+        <button class="rec-tab {% if active_tab == 'deep' %}active{% endif %}" onclick="switchTab('deep')">
+            <i class="fa fa-rocket"></i> 基于评分
+            <span class="badge">{{ deep_count }}</span>
+        </button>
+        <button class="rec-tab {% if active_tab == 'cb' %}active{% endif %}" onclick="switchTab('content-based')">
+            <i class="fa fa-heart"></i> 基于收藏
+            <span class="badge">{{ content_count }}</span>
+        </button>
+    </div>
+
+    <div class="tab-content">
+        <!-- 基于评分的推荐 -->
+        <div role="tabpanel" class="tab-pane fade {% if active_tab == 'deep' %}in active{% endif %}" id="deep">
+            {% if deep_count > 0 %}
+                <div class="rec-grid">
+                    {% for rec in deep_rec_list %}
+                        <div class="rec-movie-card" data-movie-id="{{ rec.movie.pk }}">
+                            <div class="rec-card-poster">
+                                <a href="{% url 'movie_detail' rec.movie.pk %}">
+                                    {% if rec.movie.poster_file %}
+                                        <img src="{{ rec.movie.poster_file.url }}"
+                                             alt="{{ rec.movie.title }}"
+                                             onerror="this.onerror=null;this.src='/static/img/no_poster.png';">
+                                    {% elif rec.movie.poster %}
+                                        <img src="{{ rec.movie.poster }}"
+                                             alt="{{ rec.movie.title }}"
+                                             referrerpolicy="no-referrer"
+                                             onerror="this.onerror=null;this.src='/static/img/no_poster.png';">
+                                    {% else %}
+                                        <img src="/static/img/no_poster.png"
+                                             alt="{{ rec.movie.title }}">
+                                    {% endif %}
+                                </a>
+                                <div class="rec-card-score">
+                                    {{ rec.rating|floatformat:1 }}
+                                    <small>分</small>
+                                </div>
+                            </div>
+                            <div class="rec-card-content">
+                                <h3 class="rec-card-title">
+                                    <a href="{% url 'movie_detail' rec.movie.pk %}">
+                                        {{ rec.movie.title }}
+                                        {% if rec.movie.date %}
+                                            <small style="font-size: 12px; color: #999; font-weight: 400;">({{ rec.movie.date }})</small>
+                                        {% endif %}
+                                    </a>
+                                </h3>
+                                <div class="rec-card-genres">
+                                    {% for g in rec.movie.genres.all|slice:":3" %}
+                                        <span class="genre-tag">{{ g.name }}</span>
+                                    {% endfor %}
+                                </div>
+                                <p class="rec-card-summary">
+                                    {{ rec.movie.summary|striptags|truncatechars:80|default:"暂无简介..." }}
+                                </p>
+                                <div class="rec-card-actions">
+                                    <button class="btn btn-explain"
+                                            data-mid="{{ rec.movie.pk }}"
+                                            data-source="deep">
+                                        <i class="fa fa-magic"></i> AI 推荐理由
+                                    </button>
+                                    <button class="btn btn-kg-path"
+                                            data-mid="{{ rec.movie.pk }}"
+                                            data-title="{{ rec.movie.title }}">
+                                        <i class="fa fa-share-alt"></i> 推理路径
+                                    </button>
+                                    <button class="btn btn-exclude"
+                                            onclick="excludeMovie(this, {{ rec.movie.pk }})">
+                                        <i class="fa fa-thumbs-down"></i>
+                                    </button>
+                                </div>
+                                <div class="ai-reason-box" id="reason-{{ rec.movie.pk }}" style="display: none;"></div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="rec-pagination">
+                    <ul class="pagination">{{ deep_page_string|safe }}</ul>
+                </div>
+            {% else %}
+                <div class="alert alert-warning" style="border-radius: 12px;">
+                    <i class="fa fa-spinner fa-spin"></i> 深度推荐模型正在学习您的偏好，或者尚未生成推荐数据。
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- 基于收藏的推荐 -->
+        <div role="tabpanel" class="tab-pane fade {% if active_tab == 'cb' %}in active{% endif %}" id="content-based">
+            {% if content_count > 0 %}
+
+                {% if rec_source == 'content' %}
+                    <div class="alert alert-info" style="border-radius: 12px; border: none; background: linear-gradient(135deg, #e3f2fd, #bbdefb);">
+                        <i class="fa fa-check-circle" style="color: #1976d2;"></i>
+                        根据您最近喜欢的 <strong>{{ total_liked_count }}</strong> 部电影，为您找到以下高相似度的内容：
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning" style="border-radius: 12px; border: none; background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
+                        <i class="fa fa-fire" style="color: #f57c00;"></i>
+                        您的历史记录较少，为您推荐全站热门高分电影：
+                    </div>
+                {% endif %}
+
+                <div class="rec-grid">
+                    {% for movie in content_rec_list %}
+                        <div class="rec-movie-card" data-movie-id="{{ movie.pk }}">
+                            <div class="rec-card-poster">
+                                <a href="{% url 'movie_detail' movie.pk %}">
+                                    {% if movie.poster_file %}
+                                        <img src="{{ movie.poster_file.url }}"
+                                             alt="{{ movie.title }}"
+                                             onerror="this.onerror=null;this.src='/static/img/no_poster.png';">
+                                    {% elif movie.poster %}
+                                        <img src="{{ movie.poster }}"
+                                             alt="{{ movie.title }}"
+                                             referrerpolicy="no-referrer"
+                                             onerror="this.onerror=null;this.src='/static/img/no_poster.png';">
+                                    {% else %}
+                                        <img src="/static/img/no_poster.png"
+                                             alt="{{ movie.title }}">
+                                    {% endif %}
+                                </a>
+                                <div class="rec-card-score" style="{% if rec_source == 'content' %}background: linear-gradient(135deg, #5cb85c, #4cae4c);{% else %}background: linear-gradient(135deg, #f0ad4e, #eea236);{% endif %}">
+                                    {% if rec_source == 'content' %}
+                                        {{ movie.match_score|default:0 }}
+                                        <small>匹配</small>
+                                    {% else %}
+                                        {{ movie.score|default:"-" }}
+                                        <small>分</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="rec-card-content">
+                                <h3 class="rec-card-title">
+                                    <a href="{% url 'movie_detail' movie.pk %}">
+                                        {{ movie.title }}
+                                        {% if movie.date %}
+                                            <small style="font-size: 12px; color: #999; font-weight: 400;">({{ movie.date }})</small>
+                                        {% endif %}
+                                    </a>
+                                </h3>
+                                <div class="rec-card-genres">
+                                    {% for g in movie.genres.all|slice:":3" %}
+                                        <span class="genre-tag">{{ g.name }}</span>
+                                    {% endfor %}
+                                </div>
+                                <p class="rec-card-summary">
+                                    {{ movie.summary|striptags|truncatechars:80|default:"暂无简介..." }}
+                                </p>
+                                <div class="rec-card-actions">
+                                    <button class="btn btn-explain"
+                                            data-mid="{{ movie.id }}"
+                                            data-source="cb">
+                                        <i class="fa fa-magic"></i> AI 推荐理由
+                                    </button>
+                                    <button class="btn btn-kg-path"
+                                            data-mid="{{ movie.pk }}"
+                                            data-title="{{ movie.title }}">
+                                        <i class="fa fa-share-alt"></i> 推理路径
+                                    </button>
+                                    <button class="btn btn-exclude"
+                                            onclick="excludeMovie(this, {{ movie.pk }})">
+                                        <i class="fa fa-thumbs-down"></i>
+                                    </button>
+                                </div>
+                                <div class="ai-reason-box" id="reason-{{ movie.pk }}" style="display: none;"></div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="rec-pagination">
+                    <ul class="pagination">{{ content_page_string|safe }}</ul>
+                </div>
+            {% else %}
+                <div class="alert alert-danger" style="border-radius: 12px;">暂无推荐数据。</div>
+            {% endif %}
+        </div>
+    </div>
+    <style>
+        .btn-exclude { transition: all 0.3s; }
+        .btn-exclude:hover { transform: translateY(-1px); }
+        .excluding { opacity: 0.3; pointer-events: none; transition: opacity 0.5s; }
+
+        /* 默认 PC 端样式 */
+        .kg-modal-dialog {
+            width: 80%;
+            margin: 30px auto;
+        }
+
+        .kg-chart-container {
+            width: 100%;
+            height: 500px;
+        }
+
+        /* 手机端适配 (屏幕小于 768px) */
+        @media (max-width: 768px) {
+            .kg-modal-dialog {
+                width: 96%; /* 手机上几乎占满全屏 */
+                margin: 10px auto;
+            }
+
+            .kg-chart-container {
+                height: 60vh; /* 手机上高度占屏幕 60% */
+            }
+        }
+    </style>
+    <div class="modal fade" id="kgPathModal" tabindex="-1" role="dialog" aria-labelledby="kgPathLabel">
+        <div class="modal-dialog kg-modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="kgPathLabel">
+                        <i class="fa fa-project-diagram" style="color: #337ab7;"></i>
+
+                        <span id="kg-modal-title-text" style="font-weight: bold;">推荐路径推演</span>
+
+                        <button class="btn btn-default btn-sm btn-refresh-kg" style="margin-left: 15px;">
+                            <i class="fa fa-refresh"></i> 换一批
+                        </button>
+                    </h4>
+                </div>
+                <div class="modal-body" style="padding: 5px;">
+                    <div id="path-chart" class="kg-chart-container"></div>
+
+                    <div class="alert alert-info text-center"
+                         style="margin: 10px 0 0 0; padding: 5px; font-size: 12px;">
+                        <small>
+                            <span style="color:#337ab7;"> 电影</span> &nbsp;
+                            <span style="color:#d9534f;"> 人物</span> &nbsp;
+                            <span style="color:#5cb85c;"> 类型</span>
+                            <br>
+                            手机端可双指缩放 / 单指拖拽
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'plugins/echarts/echarts.min.js' %}"></script>
+
+    <script>
+        // 标签页切换
+        function switchTab(tabId) {
+            // 更新标签样式
+            $('.rec-tab').removeClass('active');
+            $(event.currentTarget).addClass('active');
+
+            // 更新内容显示
+            $('.tab-pane').removeClass('in active');
+            $('#' + tabId).addClass('in active');
+        }
+
+        $(document).ready(function () {
+
+            $(document).on('click', '.btn-explain', function () {
+                var mid = $(this).attr('data-mid') || $(this).attr('data-id');
+
+                // 🔥🔥🔥 新增：获取来源 (deep 或 cb)
+                var source = $(this).attr('data-source') || 'cb';
+
+                var $box = $("#reason-" + mid);
+                if ($box.is(':visible')) { $box.hide(); return; }
+
+                $box.show();
+                $box.html('<div class="text-muted"><i class="fa fa-spinner fa-spin"></i> 🤖 AI 正在阅读剧本...</div>');
+
+                $.ajax({
+                    url: "/ajax/explain_rec/",
+                    type: "GET",
+                    data: {
+                        'movie_id': mid,
+                        'source': source  // 🔥🔥🔥 新增：传给后端
+                    },
+                    success: function (response) {
+                        if (response.content) {
+                            $box.html('<div style="color:#333; line-height:1.6;">' + response.content + '</div>');
+                        } else {
+                            $box.html('<span class="text-danger">AI 暂无灵感</span>');
+                        }
+                    },
+                    error: function () { $box.html('<span class="text-danger">网络请求失败</span>'); }
+                });
+            });
+
+            // ============================================
+            // 2. KG 知识图谱 (V69: 颜色由后端接管)
+            // ============================================
+            var pathChart = null;
+            var currentKgMid = null;
+
+            // 绑定按钮
+            $(document).on('click', '.btn-kg-path', function () {
+                var mid = $(this).attr('data-mid');
+                var title = $(this).attr('data-title');
+                currentKgMid = mid;
+
+                var linkHtml = '<a href="/movie/' + mid + '/" target="_blank" style="color:#337ab7; text-decoration:underline;" title="点击跳转详情">《' + title + '》</a> 的知识图谱';
+                $('#kg-modal-title-text').html(linkHtml);
+
+                $('#kgPathModal').modal('show');
+
+                setTimeout(function () {
+                    loadKGData(mid);
+                }, 200);
+            });
+
+            $('.btn-refresh-kg').click(function () {
+                if (currentKgMid) {
+                    $(this).find('i').addClass('fa-spin');
+                    loadKGData(currentKgMid);
+                    setTimeout(() => {
+                        $(this).find('i').removeClass('fa-spin');
+                    }, 1000);
+                }
+            });
+
+            function loadKGData(mid) {
+                var dom = document.getElementById('path-chart');
+                if (!dom) return;
+
+                if (pathChart == null) {
+                    pathChart = echarts.init(dom);
+
+                    // ✅ 修复交互：只有带 url 的节点才跳转
+                    pathChart.on('click', function (params) {
+                        if (params.dataType === 'node' && params.data.url) {
+                            window.open(params.data.url, '_blank');
+                        }
+                    });
+                }
+
+                pathChart.showLoading({text: '正在构建语义网络...', color: '#337ab7'});
+
+                $.get('/ajax/kg_path/', {movie_id: mid})
+                    .done(function (graph) {
+                        pathChart.hideLoading();
+
+                        // ── 节点视觉增强（setOption 前执行）──────────────────────────
+                        graph.nodes.forEach(function (node) {
+                            if (node.is_center) {
+                                node.symbolSize = 70;
+                                node.itemStyle = {
+                                    color: '#d9534f',
+                                    borderColor: '#FFD700',
+                                    borderWidth: 5,
+                                    shadowBlur: 30,
+                                    shadowColor: 'rgba(255,215,0,0.85)'
+                                };
+                                node.label = { show: true, fontWeight: 'bold', fontSize: 14, color: '#222' };
+                            } else if (node.category === 5) {  // 导演
+                                node.itemStyle = {
+                                    borderColor: '#9b59b6',
+                                    borderWidth: 3,
+                                    shadowBlur: 18,
+                                    shadowColor: 'rgba(155,89,182,0.7)'
+                                };
+                                node.label = { show: true, fontWeight: 'bold', fontSize: 12 };
+                            } else if (node.category === 1) {  // 演员（锁定小尺寸）
+                                node.symbolSize = Math.min(node.symbolSize, 25);
+                            } else if (node.category === 3) {  // 地区（极小）
+                                node.symbolSize = Math.min(node.symbolSize, 15);
+                            }
+                        });
+                        // ──────────────────────────────────────────────────────────────
+
+                        var option = {
+                            tooltip: {
+                                trigger: 'item',
+                                formatter: function (params) {
+                                    if (params.dataType === 'node') {
+                                        var tip = params.name;
+                                        // 只有有 url 的才提示可点击
+                                        if (params.data.url) {
+                                            tip += '<br><span style="color:#FFD700;font-size:10px">👆 点击跳转</span>';
+                                        } else {
+                                            // 演员节点提示
+                                            if (params.data.category === 1) {
+                                                tip += '<br><span style="color:#ccc;font-size:10px">（演员节点不可点击）</span>';
+                                            }
+                                        }
+                                        return tip;
+                                    }
+                                    return params.data.value;
+                                }
+                            },
+                            legend: [{
+                                data: graph.categories.map(function (a) {
+                                    return a.name;
+                                })
+                            }],
+                            series: [{
+                                type: 'graph',
+                                layout: 'force',
+                                data: graph.nodes,
+                                links: graph.links,
+                                categories: graph.categories,
+                                roam: true,
+                                draggable: true,
+
+                                label: {
+                                    show: true,
+                                    position: 'right', // 文字放右边，不挡箭头
+                                    formatter: '{b}',
+                                    fontSize: 11
+                                },
+
+                                // 🔥 箭头配置
+                                edgeSymbol: ['none', 'arrow'], // 连线末端显示箭头
+                                edgeSymbolSize: 8,
+
+                                lineStyle: {
+                                    color: '#a0a0a0',
+                                    width: 1.5,
+                                    curveness: 0.1,
+                                    opacity: 0.8
+                                },
+                                // 🔥 启用链接级别样式以支持导演链接的自定义lineStyle
+                                itemStyle: {
+                                    opacity: 1
+                                },
+                                edgeLabel: {
+                                    show: true,
+                                    fontSize: 10,
+                                    formatter: function (params) {
+                                        return params.data.value;
+                                    }
+                                },
+                                force: {
+                                    repulsion: 600,
+                                    edgeLength: [80, 180],
+                                    gravity: 0.15
+                                }
+                            }]
+                        };
+
+                        pathChart.setOption(option);
+                    })
+                    .fail(function () {
+                        pathChart.hideLoading();
+                        alert("加载失败");
+                    });
+            }
+
+
+            window.onresize = function () {
+                if (pathChart) pathChart.resize();
+            };
+        });
+
+        // ═══ "不喜欢"排除电影（带候补替换）═══
+        function excludeMovie(btn, movieId) {
+            var card = $(btn).closest('.list-group-item');
+            card.addClass('excluding');
+
+            // 收集当前页面所有已显示的电影ID（避免候补重复）
+            var displayedIds = [];
+            $('.list-group-item').each(function() {
+                var mid = $(this).data('movie-id');
+                if (mid) displayedIds.push(mid);
+            });
+
+            $.ajax({
+                url: '/ajax/exclude/add/',
+                type: 'POST',
+                data: {
+                    movie_id: movieId,
+                    displayed_ids: displayedIds.join(','),
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(data) {
+                    if (data.status === 'ok') {
+                        if (data.backup_movie) {
+                            // ★ 有候补电影：替换卡片（平滑过渡）
+                            var bm = data.backup_movie;
+                            var scoreStr = bm.score ? bm.score.toFixed(1) : '暂无';
+                            var ratingStr = bm.rating ? bm.rating.toFixed(2) : '0.00';
+                            var posterSrc = bm.poster || '/static/img/no_poster.png';
+
+                            var newCard = $(
+                                '<div class="list-group-item" data-movie-id="' + bm.id + '" ' +
+                                'style="opacity:0;transition:opacity 0.5s;">' +
+                                '<div class="row">' +
+                                '<div class="col-sm-2 col-xs-3">' +
+                                '<a href="/movie/' + bm.id + '/">' +
+                                '<img src="' + posterSrc + '" class="img-responsive img-rounded" ' +
+                                'style="max-height:120px;" onerror="this.src=\'/static/img/no_poster.png\'">' +
+                                '</a></div>' +
+                                '<div class="col-sm-8 col-xs-6">' +
+                                '<h4 class="list-group-item-heading">' +
+                                '<a href="/movie/' + bm.id + '/" style="color:#333;">' +
+                                '<span class="text-danger" style="font-size:12px;">🆕</span> ' +
+                                escapeHtml(bm.title) + '</a>' +
+                                ' <small style="color:#999;">' + scoreStr + '分</small></h4>' +
+                                '<div style="margin-top:8px;">' +
+                                '<button class="btn btn-primary btn-xs btn-outline btn-kg-path" ' +
+                                'data-mid="' + bm.id + '" data-title="' + escapeHtml(bm.title) + '">' +
+                                '<i class="fa fa-share-alt"></i> 查看推理路径</button> ' +
+                                '<button class="btn btn-xs btn-outline-danger btn-exclude" ' +
+                                'onclick="excludeMovie(this, ' + bm.id + ')" style="margin-left:5px;">' +
+                                '<i class="fa fa-thumbs-down"></i> 不喜欢</button>' +
+                                '</div></div>' +
+                                '<div class="col-sm-2 col-xs-3 text-center" style="border-left:1px solid #eee;">' +
+                                '<h1 style="color:#d9534f;font-weight:bold;margin:0;">' + ratingStr + '</h1>' +
+                                '<small style="color:#999;">预测分</small>' +
+                                '</div></div></div>'
+                            );
+
+                            card.fadeOut(400, function() {
+                                $(this).replaceWith(newCard);
+                                newCard.animate({opacity: 1}, 400);
+                            });
+                        } else {
+                            // 无候补：直接移除
+                            card.fadeOut(500, function() { $(this).remove(); });
+                        }
+                    } else {
+                        card.removeClass('excluding');
+                        alert(data.msg || '操作失败');
+                    }
+                },
+                error: function() {
+                    card.removeClass('excluding');
+                    alert('网络错误，请稍后重试');
+                }
+            });
+        }
+
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Agent推理链历史{% endblock %}
+
+{% block css %}
+<style>
+    .trace-list { max-width: 960px; margin: 0 auto; }
+    .trace-card {
+        background: #fff; border-radius: 10px; padding: 18px;
+        margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border-left: 4px solid #667eea; transition: transform 0.2s;
+    }
+    .trace-card:hover { transform: translateX(3px); }
+    .trace-meta { display: flex; gap: 15px; font-size: 12px; color: #999; margin-top: 8px; }
+    .trace-meta span { display: inline-flex; align-items: center; gap: 4px; }
+    .intent-badge {
+        display: inline-block; padding: 2px 10px; border-radius: 12px;
+        font-size: 11px; font-weight: bold;
+    }
+    .intent-QUERY_MOVIE { background: #e3f2fd; color: #1565c0; }
+    .intent-QUERY_PROFILE_REC { background: #f3e5f5; color: #7b1fa2; }
+    .intent-CHAT { background: #e8f5e9; color: #2e7d32; }
+    .intent-QUERY_VISUAL { background: #fff3e0; color: #e65100; }
+    .intent-QUERY_SELF { background: #fce4ec; color: #c62828; }
+    .intent-QUERY_RANK { background: #f1f8e9; color: #558b2f; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="trace-list">
+    <h3><i class="fa fa-code-branch" style="color:#667eea;"></i> {{ page_title }}</h3>
+    <p style="color:#888; font-size:13px; margin-bottom:20px;">记录 Agent 的 ReAct 推理过程，支持论文答辩展示。</p>
+
+    {% if traces %}
+        {% for trace in traces %}
+        <a href="{% url 'agent_trace_detail' trace_id=trace.id %}" style="text-decoration:none; color:inherit;">
+            <div class="trace-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <strong>{{ trace.user_input|truncatechars:50 }}</strong>
+                        <span class="intent-badge intent-{{ trace.intent }}">{{ trace.intent }}</span>
+                    </div>
+                    <span style="font-size:12px; color:#aaa;">{{ trace.created_at|date:"Y-m-d H:i" }}</span>
+                </div>
+                <div class="trace-meta">
+                    <span><i class="fa fa-clock-o"></i> {{ trace.total_latency_ms }}ms</span>
+                    <span><i class="fa fa-list"></i> {{ trace.actions|length }} 步动作</span>
+                    <span><i class="fa fa-film"></i> {{ trace.recommended_movies|length }} 部推荐</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    {% else %}
+        <div style="text-align:center; padding:40px; color:#aaa;">
+            <i class="fa fa-inbox" style="font-size:40px;"></i>
+            <p>暂无推理链记录，去 <a href="{% url 'agent_chat' %}">AI Agent</a> 试试吧！</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

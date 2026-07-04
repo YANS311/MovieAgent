@@ -1,0 +1,378 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}首页 - 电影推荐{% endblock %}
+
+{% block css %}
+<style>
+    /* 首页专用样式 */
+
+    /* Jumbotron 优化 */
+    .home-jumbotron {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        border-radius: 20px;
+        padding: 50px 40px;
+        margin-bottom: 40px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+    }
+
+    .home-jumbotron::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -30%;
+        width: 80%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .home-jumbotron h1 {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        position: relative;
+    }
+
+    .home-jumbotron .lead {
+        font-size: 18px;
+        opacity: 0.9;
+        margin-bottom: 25px;
+        position: relative;
+    }
+
+    .home-jumbotron .btn {
+        border-radius: 30px;
+        padding: 14px 32px;
+        font-weight: 600;
+        font-size: 15px;
+        margin: 5px;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .home-jumbotron .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+
+    /* 修复 btn-light 在 Jumbotron 中的样式 */
+    .home-jumbotron .btn-light {
+        background: rgba(255, 255, 255, 0.95);
+        color: #333;
+        border: none;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .home-jumbotron .btn-light:hover {
+        background: #fff;
+        color: #333;
+    }
+
+    /* 快捷入口卡片 */
+    .quick-entry-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+        border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .quick-entry-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 36px rgba(0,0,0,0.12);
+    }
+
+    .quick-entry-card .icon-wrapper {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 28px;
+    }
+
+    .quick-entry-card h4 {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .quick-entry-card p {
+        font-size: 13px;
+        color: #666;
+        margin: 0;
+    }
+
+    /* 图表面板 */
+    .chart-panel {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+        margin-bottom: 30px;
+        border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .chart-panel-header {
+        padding: 18px 24px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .chart-panel-header h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .chart-panel-header .badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    .chart-panel-body {
+        padding: 20px;
+    }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+        .home-jumbotron {
+            padding: 30px 20px;
+        }
+
+        .home-jumbotron h1 {
+            font-size: 24px;
+        }
+
+        .home-jumbotron .lead {
+            font-size: 16px;
+        }
+
+        .home-jumbotron .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- 主视觉区域 -->
+    <div class="home-jumbotron animate-fadeInUp">
+        <h1>🎬 欢迎来到电影推荐网站</h1>
+        <p class="lead">基于 AI Agent 的智能推荐系统，为您量身定制个性化观影体验</p>
+        <hr style="border-color: rgba(255,255,255,0.3); margin: 25px 0;">
+        <p>
+            <a class="btn btn-light btn-lg" href="{% url 'depot' %}">
+                <i class="fa fa-database"></i> 浏览影片库
+            </a>
+            <a class="btn btn-light btn-lg" href="{% url 'recommendations' %}">
+                <i class="fa fa-thumbs-up"></i> 个性化推荐
+            </a>
+            <a class="btn btn-light btn-lg" href="{% url 'agent_chat' %}">
+                <i class="fa fa-robot"></i> AI 智能助手
+            </a>
+            {% if user.is_authenticated %}
+            <a class="btn btn-light btn-lg" href="{% url 'center' %}">
+                <i class="fa fa-user-circle"></i> 个人中心
+            </a>
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- 快捷入口 -->
+    <div class="row" style="margin-bottom: 40px;">
+        <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+            <a href="{% url 'agent_chat' %}" style="text-decoration: none;">
+                <div class="quick-entry-card">
+                    <div class="icon-wrapper" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fa fa-robot" style="color: #fff;"></i>
+                    </div>
+                    <h4>AI 智能助手</h4>
+                    <p>基于 ReAct 范式的推理引擎</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+            <a href="{% url 'recommendations' %}" style="text-decoration: none;">
+                <div class="quick-entry-card">
+                    <div class="icon-wrapper" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <i class="fa fa-heart" style="color: #fff;"></i>
+                    </div>
+                    <h4>个性化推荐</h4>
+                    <p>基于深度学习的精准推荐</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+            <a href="{% url 'rank' %}" style="text-decoration: none;">
+                <div class="quick-entry-card">
+                    <div class="icon-wrapper" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <i class="fa fa-bar-chart" style="color: #fff;"></i>
+                    </div>
+                    <h4>排行榜</h4>
+                    <p>热门电影与高分佳作</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 col-sm-6" style="margin-bottom: 20px;">
+            <a href="{% url 'search_visual' %}" style="text-decoration: none;">
+                <div class="quick-entry-card">
+                    <div class="icon-wrapper" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <i class="fa fa-magic" style="color: #fff;"></i>
+                    </div>
+                    <h4>视觉搜索</h4>
+                    <p>多模态智能检索</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- 图表区域 -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <h3><i class="fa fa-fire" style="color: #d9534f;"></i> Top 10 热门电影</h3>
+                    <span class="badge">按评分人数</span>
+                </div>
+                <div class="chart-panel-body">
+                    <div id="chart-hot" style="width: 100%; height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top: 10px;">
+        <div class="col-md-12">
+            <div class="chart-panel">
+                <div class="chart-panel-header">
+                    <h3><i class="fa fa-star" style="color: #f0ad4e;"></i> Top 10 高分电影</h3>
+                    <span class="badge">按评分</span>
+                </div>
+                <div class="chart-panel-body">
+                    <div id="chart-score" style="width: 100%; height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+<script type="text/javascript">
+
+    // --- 图表 1: Top 10 热门电影 (按评分人数) ---
+    var hotChart = echarts.init(document.getElementById('chart-hot'));
+
+    var hot_titles = [
+        {% for movie in query_hot_reversed %}"{{ movie.title|escapejs }}",{% endfor %}
+    ];
+    var hot_data = [
+        {% for movie in query_hot_reversed %}{{ movie.vote_count|default:0 }},{% endfor %}
+    ];
+
+    var hotOption = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(255,255,255,0.95)',
+            borderColor: '#eee',
+            textStyle: { color: '#333' }
+        },
+        xAxis: { type: 'value', name: '评分人数' },
+        yAxis: { type: 'category', data: hot_titles, axisLabel: { interval: 0 } },
+        series: [{
+            name: '评分人数',
+            type: 'bar',
+            data: hot_data,
+            itemStyle: {
+                borderRadius: [0, 6, 6, 0],
+                color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                    { offset: 0, color: '#667eea' },
+                    { offset: 1, color: '#764ba2' }
+                ])
+            },
+            emphasis: {
+                itemStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                        { offset: 0, color: '#764ba2' },
+                        { offset: 1, color: '#667eea' }
+                    ])
+                }
+            }
+        }],
+        grid: { left: 150, right: 40, top: 20, bottom: 20 }
+    };
+    hotChart.setOption(hotOption);
+
+
+    // --- 图表 2: Top 10 高分电影 (渐变色) ---
+    var scoreChart = echarts.init(document.getElementById('chart-score'));
+
+    var score_titles = [
+        {% for movie in query_high_reversed %}"{{ movie.title|escapejs }}",{% endfor %}
+    ];
+
+    var score_data = [
+        {% for movie in query_high_reversed %}{{ movie.score|default:0 }},{% endfor %}
+    ];
+
+    var scoreOption = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(255,255,255,0.95)',
+            borderColor: '#eee',
+            textStyle: { color: '#333' }
+        },
+        xAxis: { type: 'value', name: '评分', min: 0, max: 10 },
+        yAxis: { type: 'category', data: score_titles, axisLabel: { interval: 0 } },
+        series: [{
+            name: '评分',
+            type: 'bar',
+            data: score_data,
+            itemStyle: {
+                borderRadius: [0, 6, 6, 0],
+                color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                    {offset: 0, color: '#4facfe'},
+                    {offset: 1, color: '#00f2fe'}
+                ])
+            },
+            emphasis: {
+                itemStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                        {offset: 0, color: '#00f2fe'},
+                        {offset: 1, color: '#4facfe'}
+                    ])
+                }
+            }
+        }],
+        grid: { left: 150, right: 40, top: 20, bottom: 20 }
+    };
+
+    scoreChart.setOption(scoreOption);
+
+    // 图表自适应
+    window.addEventListener('resize', function() {
+        hotChart.resize();
+        scoreChart.resize();
+    });
+
+</script>
+{% endblock %}

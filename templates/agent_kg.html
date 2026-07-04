@@ -1,0 +1,543 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}知识图谱 - KAG 可视化{% endblock %}
+
+{% block css %}
+<style>
+    .kg-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+    .kg-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .kg-header h3 {
+        margin: 0;
+    }
+    /* 搜索栏 */
+    .kg-search {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .kg-search input {
+        border-radius: 20px;
+        padding: 8px 16px;
+        border: 2px solid #e0e0e0;
+        font-size: 14px;
+        width: 280px;
+        transition: border-color 0.3s;
+    }
+    .kg-search input:focus {
+        border-color: #9b59b6;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.15);
+    }
+    .btn-kg-search {
+        border-radius: 20px;
+        padding: 8px 20px;
+        background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        color: #fff;
+        border: none;
+        font-weight: bold;
+        transition: transform 0.2s;
+    }
+    .btn-kg-search:hover {
+        transform: scale(1.05);
+        color: #fff;
+    }
+    /* 快捷标签 */
+    .kg-tags {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+    .kg-tag {
+        border-radius: 16px;
+        padding: 4px 12px;
+        font-size: 12px;
+        border: 1px solid #ddd;
+        background: #fff;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .kg-tag:hover {
+        background: #9b59b6;
+        color: #fff;
+        border-color: #9b59b6;
+    }
+    /* 图谱容器 */
+    .kg-chart-wrapper {
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        overflow: hidden;
+        position: relative;
+    }
+    #kg-chart {
+        width: 100%;
+        height: 600px;
+    }
+    /* 统计栏 */
+    .kg-stats {
+        display: flex;
+        gap: 20px;
+        padding: 10px 15px;
+        background: #fff;
+        border-top: 1px solid #eee;
+        font-size: 12px;
+        color: #999;
+    }
+    .kg-stats span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .kg-stats .stat-num {
+        color: #333;
+        font-weight: bold;
+    }
+    /* 三元组面板 */
+    .triples-panel {
+        background: #1a1a2e;
+        color: #e0e0e0;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 15px;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        line-height: 1.8;
+        max-height: 250px;
+        overflow-y: auto;
+        display: none;
+    }
+    .triples-panel.show { display: block; }
+    .triple-line {
+        padding: 2px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .triple-entity { color: #4fc3f7; }
+    .triple-relation { color: #81c784; font-weight: bold; }
+    /* 加载动画 */
+    .kg-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 600px;
+        color: #999;
+    }
+    /* 返回按钮 */
+    .btn-back {
+        border-radius: 16px;
+        font-size: 12px;
+        padding: 5px 14px;
+        border: 1px solid #ddd;
+        background: #fff;
+        color: #555;
+        transition: all 0.2s;
+    }
+    .btn-back:hover {
+        background: #667eea;
+        color: #fff;
+        border-color: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="kg-container">
+    <!-- 头部 -->
+    <div class="kg-header">
+        <div>
+            <h3>
+                <i class="fa fa-share-alt" style="color: #9b59b6;"></i> 知识图谱可视化
+                <small style="font-size: 13px; color: #999;">— KAG Knowledge Graph</small>
+            </h3>
+            <p style="color: #888; font-size: 13px; margin: 5px 0 0;">
+                支持按关键词（电影名/导演/演员/类型）搜索知识图谱子图
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'chat_view' %}" class="btn-back">
+                <i class="fa fa-arrow-left"></i> 返回对话
+            </a>
+        </div>
+    </div>
+
+    <!-- 搜索栏 -->
+    <div class="kg-search">
+        <input type="text" id="kgQuery" placeholder="输入关键词（如：诺兰、科幻、周星驰）"
+               value="{{ query }}" onkeydown="if(event.key==='Enter') doSearch()">
+        <button class="btn-kg-search" onclick="doSearch()">
+            <i class="fa fa-search"></i> 搜索图谱
+        </button>
+        <button class="btn-kg-search" style="background: linear-gradient(135deg, #667eea, #764ba2);"
+                onclick="loadOverview()">
+            <i class="fa fa-globe"></i> 全量概览
+        </button>
+    </div>
+
+    <!-- 快捷标签 -->
+    <div class="kg-tags">
+        <span class="kg-tag" onclick="quickSearch('科幻')">🎬 科幻</span>
+        <span class="kg-tag" onclick="quickSearch('动作')">💥 动作</span>
+        <span class="kg-tag" onclick="quickSearch('Nolan')">🎭 诺兰</span>
+        <span class="kg-tag" onclick="quickSearch('Spielberg')">🎥 斯皮尔伯格</span>
+        <span class="kg-tag" onclick="quickSearch('喜剧')">😂 喜剧</span>
+        <span class="kg-tag" onclick="quickSearch('汤姆·汉克斯')">⭐ 汤姆·汉克斯</span>
+        <span class="kg-tag" onclick="quickSearch('动画')">🎨 动画</span>
+        <span class="kg-tag" onclick="quickSearch('悬疑')">🔍 悬疑</span>
+    </div>
+
+    <!-- 图谱图表 -->
+    <div class="kg-chart-wrapper">
+        <div id="kg-chart"></div>
+        <div class="kg-stats" id="kgStats">
+            <span><i class="fa fa-circle-o"></i> 节点: <span class="stat-num" id="statNodes">-</span></span>
+            <span><i class="fa fa-arrows-h"></i> 关系: <span class="stat-num" id="statLinks">-</span></span>
+            <span><i class="fa fa-cube"></i> 三元组: <span class="stat-num" id="statTriples">-</span></span>
+            <span><i class="fa fa-clock-o"></i> 耗时: <span class="stat-num" id="statTime">-</span></span>
+        </div>
+    </div>
+
+    <!-- 三元组面板 -->
+    <div style="margin-top: 10px;">
+        <button class="btn btn-xs btn-default" id="toggleTriples"
+                onclick="toggleTriplesPanel()" style="font-size: 12px; border-radius: 12px;">
+            <i class="fa fa-code"></i> 查看 KAG 三元组
+        </button>
+    </div>
+    <div class="triples-panel" id="triplesPanel"></div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'plugins/echarts/echarts.min.js' %}"></script>
+<script>
+var myChart = null;
+var currentTriples = [];
+
+$(document).ready(function() {
+    myChart = echarts.init(document.getElementById('kg-chart'));
+
+    // 窗口自适应
+    window.addEventListener('resize', function() {
+        if (myChart) myChart.resize();
+    });
+
+    // 根据初始参数决定加载模式
+    {% if movie_id %}
+        loadMovieGraph('{{ movie_id }}');
+    {% elif query %}
+        doSearch();
+    {% else %}
+        loadOverview();
+    {% endif %}
+});
+
+// ═══ 全量概览 ═══
+function loadOverview() {
+    $('#kgQuery').val('');
+    loadData({mode: 'overview'});
+}
+
+// ═══ 关键词搜索 ═══
+function doSearch() {
+    var q = $('#kgQuery').val().trim();
+    if (!q) {
+        loadOverview();
+        return;
+    }
+    loadData({q: q});
+}
+
+// ═══ 电影详情图谱 ═══
+function loadMovieGraph(movieId) {
+    loadData({movie_id: movieId});
+}
+
+// ═══ 快捷搜索 ═══
+function quickSearch(keyword) {
+    $('#kgQuery').val(keyword);
+    doSearch();
+}
+
+// ═══ 核心数据加载 ═══
+function loadData(params) {
+    myChart.showLoading({
+        text: '正在查询知识图谱...',
+        color: '#9b59b6',
+        textColor: '#000',
+        maskColor: 'rgba(255, 255, 255, 0.8)',
+    });
+
+    var t_start = Date.now();
+
+    $.ajax({
+        url: '{% url "ajax_agent_kg_query" %}',
+        type: 'GET',
+        data: params,
+        success: function(data) {
+            var elapsed = ((Date.now() - t_start) / 1000).toFixed(2);
+            myChart.hideLoading();
+
+            if (data.error) {
+                $('#kg-chart').html('<div class="kg-loading"><h4 style="color:#e57373;">' +
+                    '<i class="fa fa-exclamation-triangle"></i> ' + data.error + '</h4></div>');
+                return;
+            }
+
+            renderGraph(data);
+
+            // 更新统计
+            var stats = data.stats || {};
+            $('#statNodes').text(stats.node_count || data.nodes.length);
+            $('#statLinks').text(stats.link_count || data.links.length);
+            $('#statTriples').text(stats.triple_count || (data.triples || []).length);
+            $('#statTime').text(elapsed + 's');
+
+            // 保存三元组
+            currentTriples = data.triples || [];
+            renderTriplesPanel();
+        },
+        error: function() {
+            myChart.hideLoading();
+            $('#kg-chart').html('<div class="kg-loading"><h4 style="color:#e57373;">' +
+                '<i class="fa fa-exclamation-triangle"></i> 网络错误，请检查 Neo4j 连接</h4></div>');
+        }
+    });
+}
+
+// ═══ ECharts 图谱渲染（优化版）═══
+function renderGraph(data) {
+    if (!data.nodes || data.nodes.length === 0) {
+        $('#kg-chart').html('<div class="kg-loading"><h4 style="color:#999;">' +
+            '<i class="fa fa-info-circle"></i> 暂无图谱数据</h4></div>');
+        return;
+    }
+
+    // 计算 force 参数（节点多时增加斥力）
+    var nodeCount = data.nodes.length;
+    var repulsion = Math.max(300, Math.min(800, nodeCount * 4));
+
+    // 优化节点样式
+    data.nodes.forEach(function(node) {
+        // 根据类别设置不同的节点样式
+        if (node.category === 0) {
+            // 电影节点 - 红色系
+            node.symbolSize = Math.max(25, Math.min(50, node.symbolSize || 30));
+            node.itemStyle = {
+                color: '#d9534f',
+                borderColor: '#c9302c',
+                borderWidth: 2,
+                shadowBlur: 10,
+                shadowColor: 'rgba(217, 83, 79, 0.4)'
+            };
+        } else if (node.category === 1) {
+            // 演员节点 - 橙色系
+            node.symbolSize = Math.max(18, Math.min(35, node.symbolSize || 22));
+            node.itemStyle = {
+                color: '#f0ad4e',
+                borderColor: '#eea236',
+                borderWidth: 2,
+                shadowBlur: 8,
+                shadowColor: 'rgba(240, 173, 78, 0.3)'
+            };
+        } else if (node.category === 2) {
+            // 类型节点 - 绿色系
+            node.symbolSize = Math.max(20, Math.min(40, node.symbolSize || 28));
+            node.itemStyle = {
+                color: '#5cb85c',
+                borderColor: '#4cae4c',
+                borderWidth: 2,
+                shadowBlur: 8,
+                shadowColor: 'rgba(92, 184, 92, 0.3)'
+            };
+        } else if (node.category === 5) {
+            // 导演节点 - 紫色系
+            node.symbolSize = Math.max(22, Math.min(45, node.symbolSize || 30));
+            node.itemStyle = {
+                color: '#9b59b6',
+                borderColor: '#8e44ad',
+                borderWidth: 2,
+                shadowBlur: 10,
+                shadowColor: 'rgba(155, 89, 182, 0.4)'
+            };
+        } else {
+            // 其他节点 - 蓝色系
+            node.symbolSize = Math.max(15, Math.min(30, node.symbolSize || 20));
+            node.itemStyle = {
+                color: '#5bc0de',
+                borderColor: '#46b8da',
+                borderWidth: 2,
+                shadowBlur: 6,
+                shadowColor: 'rgba(91, 192, 222, 0.3)'
+            };
+        }
+
+        // 标签样式优化
+        node.label = {
+            show: true,
+            position: 'right',
+            formatter: '{b}',
+            fontSize: 11,
+            fontWeight: 'bold',
+            color: '#333'
+        };
+    });
+
+    // 优化连线样式
+    data.links.forEach(function(link) {
+        link.lineStyle = {
+            color: '#b0b0b0',
+            width: 1.5,
+            curveness: 0.3,
+            opacity: 0.6
+        };
+    });
+
+    var option = {
+        title: {
+            text: data.mode === 'query' ? ('搜索: ' + (data.query || '')) : '知识图谱概览',
+            subtext: '实体 ' + data.nodes.length + ' | 关系 ' + data.links.length,
+            top: 'bottom',
+            left: 'right',
+            textStyle: {
+                fontSize: 14,
+                fontWeight: 'bold',
+                color: '#333'
+            },
+            subtextStyle: {
+                fontSize: 12,
+                color: '#666'
+            }
+        },
+        tooltip: {
+            formatter: function(params) {
+                if (params.dataType === 'node') {
+                    var cat = (data.categories[params.data.category] || {}).name || '';
+                    return '<div style="font-weight:bold;margin-bottom:5px;">' + params.data.name + '</div>' +
+                           '<div style="font-size:12px;color:#666;">类别: ' + cat + '</div>';
+                }
+                if (params.dataType === 'edge') {
+                    return params.data.value || '关联';
+                }
+                return '';
+            },
+            backgroundColor: 'rgba(255,255,255,0.95)',
+            borderColor: '#eee',
+            textStyle: { color: '#333' }
+        },
+        legend: [{
+            data: (data.categories || []).map(function(c) { return c.name; }),
+            top: 10,
+            left: 10,
+            orient: 'vertical',
+            backgroundColor: 'rgba(255,255,255,0.9)',
+            padding: 12,
+            borderRadius: 8,
+            textStyle: {
+                fontSize: 12,
+                fontWeight: 'bold'
+            }
+        }],
+        animationDuration: 1500,
+        animationEasingUpdate: 'quinticInOut',
+        series: [{
+            name: '知识图谱',
+            type: 'graph',
+            layout: 'force',
+            data: data.nodes,
+            links: data.links,
+            categories: data.categories,
+            roam: true,
+            draggable: true,
+            label: {
+                show: true,
+                position: 'right',
+                formatter: '{b}',
+                fontSize: 11
+            },
+            lineStyle: {
+                color: 'source',
+                curveness: 0.3,
+                opacity: 0.7
+            },
+            force: {
+                repulsion: repulsion,
+                edgeLength: [60, 200],
+                gravity: 0.1,
+                layoutAnimation: true
+            },
+            emphasis: {
+                focus: 'adjacency',
+                lineStyle: { width: 5 },
+                itemStyle: {
+                    shadowBlur: 20,
+                    shadowColor: 'rgba(0,0,0,0.3)'
+                }
+            }
+        }]
+    };
+
+    myChart.setOption(option, true);
+
+    // 点击节点跳转
+    myChart.off('click');
+    myChart.on('click', function(params) {
+        if (params.dataType === 'node') {
+            var nodeData = params.data;
+            // 电影节点 → 跳转电影详情
+            if (nodeData.category === 0) {
+                var name = nodeData.name;
+                var nid = nodeData.id;
+                // 如果 id 格式是 m_123，提取 movie_id
+                if (nid && nid.startsWith('m_')) {
+                    var mid = nid.substring(2);
+                    window.open('/movie/' + mid + '/', '_blank');
+                }
+            }
+        }
+    });
+}
+
+// ═══ 三元组面板 ═══
+function renderTriplesPanel() {
+    var panel = document.getElementById('triplesPanel');
+    if (!currentTriples || currentTriples.length === 0) {
+        panel.innerHTML = '<div style="color:#999;">暂无三元组数据</div>';
+        return;
+    }
+    var html = '';
+    currentTriples.forEach(function(t, i) {
+        // 高亮实体和关系
+        var colored = t
+            .replace(/《([^》]+)》/g, '<span class="triple-entity">《$1》</span>')
+            .replace(/--\[(.+?)\]-->/g, '--[<span class="triple-relation">$1</span>]-->')
+            .replace(/-->/g, '<span style="color:#ffb74d;">→</span>');
+        html += '<div class="triple-line">' + (i + 1) + '. ' + colored + '</div>';
+    });
+    panel.innerHTML = html;
+}
+
+function toggleTriplesPanel() {
+    var panel = document.getElementById('triplesPanel');
+    var btn = document.getElementById('toggleTriples');
+    panel.classList.toggle('show');
+    if (panel.classList.contains('show')) {
+        btn.innerHTML = '<i class="fa fa-code"></i> 收起三元组';
+    } else {
+        btn.innerHTML = '<i class="fa fa-code"></i> 查看 KAG 三元组';
+    }
+}
+</script>
+{% endblock %}

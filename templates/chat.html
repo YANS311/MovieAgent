@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+{% block title %}电影智能助手{% endblock %}
+
+{% block css %}
+<style>
+    /* --- 布局样式 (完全保留你的原版设计) --- */
+    #chat-container {
+        height: calc(100vh - 160px);
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #ddd;
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    #chat-log {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        scroll-behavior: smooth;
+    }
+    #chat-input-area {
+        padding: 15px;
+        background-color: #fff;
+        border-top: 1px solid #ddd;
+    }
+
+    /* --- 气泡样式 (完全保留) --- */
+    .message-row { display: flex; margin-bottom: 5px; }
+    .row-user { justify-content: flex-end; }
+    .row-ai { justify-content: flex-start; }
+
+    .bubble {
+        max-width: 85%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 15px;
+        line-height: 1.6;
+        position: relative;
+    }
+    .bubble-user {
+        background-color: #95ec69;
+        color: #000;
+        border-top-right-radius: 2px;
+        word-break: break-all;
+    }
+    .bubble-ai {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        color: #333;
+        border-top-left-radius: 2px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    /* 视觉卡片补丁 (完全保留) */
+    .bubble-ai div[style*="display: flex"] { white-space: normal !important; }
+    .bubble-ai ::-webkit-scrollbar { height: 6px; }
+    .bubble-ai ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+    .bubble-ai a { color: #337ab7; font-weight: bold; text-decoration: none; border-bottom: 1px dashed #337ab7; }
+    .bubble-ai a:hover { border-bottom-style: solid; }
+    .bubble-ai img { transition: transform 0.2s; background: #f0f0f0; }
+    .bubble-ai img:hover { transform: scale(1.05); }
+
+    /* 🔥 新增：Thinking 开关的美化样式 (适应老版 Bootstrap) */
+    .thinking-switch-container {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        font-size: 13px;
+        color: #666;
+    }
+    .thinking-switch-container input[type="checkbox"] {
+        margin-right: 8px;
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+    }
+    .thinking-switch-container label {
+        cursor: pointer;
+        font-weight: normal;
+        margin-bottom: 0;
+    }
+    .text-warning { color: #f0ad4e; }
+    .text-muted { color: #999; font-size: 11px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        <div id="chat-container">
+            <div style="padding: 10px 20px; background: #337ab7; color: white;">
+                <i class="fa fa-comments"></i> 电影智能助手
+                <button class="btn btn-xs btn-danger pull-right" onclick="clearHistory()">
+                    <i class="fa fa-trash"></i> 清空
+                </button>
+            </div>
+
+            <div id="chat-log"></div>
+
+            <div id="chat-input-area">
+
+                <div class="thinking-switch-container">
+                    <input type="checkbox" id="thinking-toggle">
+                    <label for="thinking-toggle">
+                        <i class="fa fa-bolt text-warning"></i> 深度思考模式 <span class="text-muted">(启用 Thinking高级模型)</span>
+                    </label>
+                </div>
+
+                <form class="input-group" onsubmit="return false;">
+                    <input type="text" id="chat-input" class="form-control input-lg" placeholder="请输入问题，如：推荐几部深度的科幻片..." autocomplete="off">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary btn-lg" type="button" id="btn-send">发送</button>
+                    </span>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+$(document).ready(function() {
+    var chatLog = $('#chat-log');
+
+    function scrollToBottom() {
+        chatLog.animate({ scrollTop: chatLog[0].scrollHeight }, 300);
+    }
+
+    function addBubble(text, role) {
+        var rowClass = role === 'user' ? 'row-user' : 'row-ai';
+        var bubbleClass = role === 'user' ? 'bubble-user' : 'bubble-ai';
+        var contentHtml;
+
+        if (text) {
+            text = String(text);
+            text = text.replace(/^[\s\r\n]+/, '').replace(/^(<br\s*\/?>\s*)+/i, '').trim();
+        }
+
+        if (role === 'ai') {
+            contentHtml = text;
+        } else {
+            contentHtml = $('<div>').text(text).html();
+        }
+
+        var html = `
+            <div class="message-row ${rowClass}">
+                <div class="bubble ${bubbleClass}">${contentHtml}</div>
+            </div>
+        `;
+
+        var $message = $(html);
+        chatLog.append($message);
+
+        var $imgs = $message.find('img');
+        if ($imgs.length > 0) {
+            var loadedCount = 0;
+            $imgs.on('load', function() {
+                loadedCount++;
+                if (loadedCount === $imgs.length) {
+                    scrollToBottom();
+                }
+            });
+            setTimeout(scrollToBottom, 500);
+        }
+        scrollToBottom();
+    }
+
+    function sendMessage() {
+        var input = $('#chat-input');
+        var msg = input.val().trim();
+        if (!msg) return;
+
+        // 🔥 获取前端 Thinking 开关的状态
+        var isThinking = $('#thinking-toggle').is(':checked');
+
+        addBubble(msg, 'user');
+        input.val('').prop('disabled', true);
+        $('#btn-send').prop('disabled', true);
+
+        // 动态 Loading 提示
+        var loadingId = 'loading-' + Date.now();
+        var loadingText = isThinking ? "🧠 深度思考模式启动中，正在进行跨界关联推理..." : "正在搜索海报与资料...";
+        var loadingHtml = `<div class="message-row row-ai" id="${loadingId}"><div class="bubble bubble-ai"><i class="fa fa-spinner fa-spin"></i> ${loadingText}</div></div>`;
+
+        chatLog.append(loadingHtml);
+        scrollToBottom();
+
+        // 🔥 将 is_thinking 状态发送给后端
+        $.ajax({
+            url: "{% url 'ajax_chat' %}",
+            type: "POST",
+            data: {
+                'msg': msg,
+                'is_thinking': isThinking,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(res) {
+                $('#' + loadingId).remove();
+
+                var finalMsg = "";
+                if (res.hasOwnProperty('response')) {
+                    finalMsg = res.response;
+                } else if (res.hasOwnProperty('content')) {
+                    finalMsg = res.content;
+                } else {
+                    finalMsg = null;
+                }
+
+                if (finalMsg !== null) {
+                    if (finalMsg.trim() === "") {
+                        addBubble("AI 似乎陷入了沉思，什么也没说。请换个方式问问看？", 'ai');
+                    } else {
+                        addBubble(finalMsg, 'ai');
+                    }
+                } else {
+                    addBubble("⚠️ 系统返回数据格式异常", 'ai');
+                }
+
+                input.prop('disabled', false).focus();
+                $('#btn-send').prop('disabled', false);
+            },
+            error: function(xhr) {
+                $('#' + loadingId).remove();
+                addBubble("⚠️ 脑电波连接失败，请稍后再试。", 'ai');
+                input.prop('disabled', false);
+                $('#btn-send').prop('disabled', false);
+            }
+        });
+    }
+
+    $('#btn-send').click(sendMessage);
+    $('#chat-input').keypress(function(e) {
+        if (e.which == 13) sendMessage();
+    });
+
+    window.clearHistory = function() {
+        if(confirm("确认清空聊天记录？")) location.href = "{% url 'chat_clear_history' %}";
+    };
+
+    var history = {{ chat_history_json|safe }};
+    if (history && history.length) {
+        history.forEach(function(item) { addBubble(item.message, item.role); });
+    } else {
+        var welcomeMsg = "你好！我是全能电影助手 。<br>你可以：<br>1. <b>找海报</b>：'找赛博朋克风格的海报'<br>2. <b>搜电影</b>：'推荐几部关于AI的电影'<br>3. <b>分析我</b>：'分析我的观影口味'";
+        addBubble(welcomeMsg, 'ai');
+    }
+});
+</script>
+{% endblock %}

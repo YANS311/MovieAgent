@@ -1,0 +1,3447 @@
+{
+  "metadata": {
+    "total_tasks": 165,
+    "categories": {
+      "simple": 40,
+      "complex": 30,
+      "vague": 30,
+      "multiturn": 30,
+      "agent_only": 20,
+      "correction": 5,
+      "open_ended": 10
+    }
+  },
+  "tasks": [
+    {
+      "task_id": "SIM-001",
+      "category": "simple",
+      "input": "推荐科幻片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "genre_match",
+        "genre": "科幻"
+      },
+      "ground_truth_movies": [
+        "星际穿越",
+        "盗梦空间",
+        "复仇者联盟",
+        "复仇者联盟3：无限战争",
+        "银河护卫队"
+      ],
+      "ground_truth_ids": [
+        81692,
+        81418,
+        81551,
+        81971,
+        81741
+      ]
+    },
+    {
+      "task_id": "SIM-002",
+      "category": "simple",
+      "input": "想看喜剧电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "genre_match",
+        "genre": "喜剧"
+      },
+      "ground_truth_movies": [
+        "死侍",
+        "Pulp Fiction",
+        "Forrest Gump",
+        "华尔街之狼",
+        "头脑特工队"
+      ],
+      "ground_truth_ids": [
+        81838,
+        75718,
+        75777,
+        81623,
+        81765
+      ]
+    },
+    {
+      "task_id": "SIM-003",
+      "category": "simple",
+      "input": "推荐动作片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "genre_match",
+        "genre": "动作"
+      },
+      "ground_truth_movies": [
+        "盗梦空间",
+        "复仇者联盟",
+        "蝙蝠侠：黑暗骑士",
+        "阿凡达",
+        "死侍"
+      ],
+      "ground_truth_ids": [
+        81418,
+        81551,
+        81293,
+        81348,
+        81838
+      ]
+    },
+    {
+      "task_id": "SIM-004",
+      "category": "simple",
+      "input": "有什么好看的悬疑片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "genre_match",
+        "genre": "悬疑"
+      },
+      "ground_truth_movies": [
+        "禁闭岛",
+        "Seven",
+        "消失的爱人",
+        "降临",
+        "逃出绝命镇"
+      ],
+      "ground_truth_ids": [
+        81425,
+        75471,
+        81703,
+        81844,
+        81915
+      ]
+    },
+    {
+      "task_id": "SIM-005",
+      "category": "simple",
+      "input": "推荐爱情电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "genre_match",
+        "genre": "爱情"
+      },
+      "ground_truth_movies": [
+        "Forrest Gump",
+        "爱乐之城"
+      ],
+      "ground_truth_ids": [
+        75777,
+        81841
+      ]
+    },
+    {
+      "task_id": "SIM-006",
+      "category": "simple",
+      "input": "想看动画电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "genre_match",
+        "genre": "动画"
+      },
+      "ground_truth_movies": [
+        "飞屋环游记",
+        "寻梦环游记",
+        "海底总动员",
+        "机器人总动员",
+        "Toy Story"
+      ],
+      "ground_truth_ids": [
+        81351,
+        81901,
+        80994,
+        81296,
+        75425
+      ]
+    },
+    {
+      "task_id": "SIM-007",
+      "category": "simple",
+      "input": "推荐犯罪片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "genre_match",
+        "genre": "犯罪"
+      },
+      "ground_truth_movies": [
+        "蝙蝠侠：黑暗骑士",
+        "Shawshank Redemption, The",
+        "Pulp Fiction",
+        "华尔街之狼",
+        "蝙蝠侠：黑暗骑士崛起"
+      ],
+      "ground_truth_ids": [
+        81293,
+        75740,
+        75718,
+        81623,
+        81553
+      ]
+    },
+    {
+      "task_id": "SIM-008",
+      "category": "simple",
+      "input": "有什么战争片推荐",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "genre_match",
+        "genre": "战争"
+      },
+      "ground_truth_movies": [
+        "无耻混蛋",
+        "模仿游戏"
+      ],
+      "ground_truth_ids": [
+        81350,
+        81697
+      ]
+    },
+    {
+      "task_id": "SIM-009",
+      "category": "simple",
+      "input": "推荐恐怖片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "genre_match",
+        "genre": "恐怖"
+      },
+      "ground_truth_movies": [
+        "小丑回魂",
+        "Shining, The",
+        "逃出绝命镇",
+        "分裂"
+      ],
+      "ground_truth_ids": [
+        81903,
+        76663,
+        81915,
+        81925
+      ]
+    },
+    {
+      "task_id": "SIM-010",
+      "category": "simple",
+      "input": "想看奇幻电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "genre_match",
+        "genre": "奇幻"
+      },
+      "ground_truth_movies": [
+        "阿凡达",
+        "哈利·波特与魔法石",
+        "指环王1：护戒使者",
+        "指环王3：王者无敌",
+        "指环王2：双塔奇兵"
+      ],
+      "ground_truth_ids": [
+        81348,
+        80883,
+        80882,
+        80991,
+        80941
+      ]
+    },
+    {
+      "task_id": "SIM-011",
+      "category": "simple",
+      "input": "诺兰导演的电影有哪些",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "director_match",
+        "director": "克里斯托弗·诺兰"
+      },
+      "ground_truth_movies": [
+        "星际穿越",
+        "盗梦空间",
+        "蝙蝠侠：黑暗骑士",
+        "蝙蝠侠：黑暗骑士崛起",
+        "蝙蝠侠：侠影之谜"
+      ],
+      "ground_truth_ids": [
+        81692,
+        81418,
+        81293,
+        81553,
+        81111
+      ]
+    },
+    {
+      "task_id": "SIM-012",
+      "category": "simple",
+      "input": "周星驰的电影推荐",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "director_match",
+        "director": "周星驰"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "SIM-013",
+      "category": "simple",
+      "input": "斯皮尔伯格导演的作品",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "director_match",
+        "director": "史蒂文·斯皮尔伯格"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "SIM-014",
+      "category": "simple",
+      "input": "昆汀·塔伦蒂诺的电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "director_match",
+        "director": "昆汀·塔伦蒂诺"
+      },
+      "ground_truth_movies": [
+        "Pulp Fiction",
+        "被解救的姜戈",
+        "无耻混蛋",
+        "杀死比尔"
+      ],
+      "ground_truth_ids": [
+        75718,
+        81552,
+        81350,
+        80997
+      ]
+    },
+    {
+      "task_id": "SIM-015",
+      "category": "simple",
+      "input": "大卫·芬奇导演的电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "director_match",
+        "director": "大卫·芬奇"
+      },
+      "ground_truth_movies": [
+        "Fight Club",
+        "Seven",
+        "消失的爱人"
+      ],
+      "ground_truth_ids": [
+        78315,
+        75471,
+        81703
+      ]
+    },
+    {
+      "task_id": "SIM-016",
+      "category": "simple",
+      "input": "詹姆斯·卡梅隆的作品",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "director_match",
+        "director": "詹姆斯·卡梅隆"
+      },
+      "ground_truth_movies": [
+        "阿凡达"
+      ],
+      "ground_truth_ids": [
+        81348
+      ]
+    },
+    {
+      "task_id": "SIM-017",
+      "category": "simple",
+      "input": "彼得·杰克逊导演的电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "director_match",
+        "director": "彼得·杰克逊"
+      },
+      "ground_truth_movies": [
+        "指环王1：护戒使者",
+        "指环王3：王者无敌",
+        "指环王2：双塔奇兵",
+        "霍比特人1：意外之旅"
+      ],
+      "ground_truth_ids": [
+        80882,
+        80991,
+        80941,
+        81557
+      ]
+    },
+    {
+      "task_id": "SIM-018",
+      "category": "simple",
+      "input": "马丁·斯科塞斯的电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "director_match",
+        "director": "马丁·斯科塞斯"
+      },
+      "ground_truth_movies": [
+        "华尔街之狼",
+        "禁闭岛"
+      ],
+      "ground_truth_ids": [
+        81623,
+        81425
+      ]
+    },
+    {
+      "task_id": "SIM-019",
+      "category": "simple",
+      "input": "宫崎骏的动画电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "director_match",
+        "director": "宫崎骏"
+      },
+      "ground_truth_movies": [
+        "千与千寻"
+      ],
+      "ground_truth_ids": [
+        80886
+      ]
+    },
+    {
+      "task_id": "SIM-020",
+      "category": "simple",
+      "input": "克里斯托弗·诺兰的科幻片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "director_match",
+        "director": "克里斯托弗·诺兰"
+      },
+      "ground_truth_movies": [
+        "星际穿越",
+        "盗梦空间",
+        "蝙蝠侠：黑暗骑士",
+        "蝙蝠侠：黑暗骑士崛起",
+        "蝙蝠侠：侠影之谜"
+      ],
+      "ground_truth_ids": [
+        81692,
+        81418,
+        81293,
+        81553,
+        81111
+      ]
+    },
+    {
+      "task_id": "SIM-021",
+      "category": "simple",
+      "input": "评分8分以上的科幻片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "score_match",
+        "min_score": 8.0,
+        "genre": "科幻"
+      },
+      "ground_truth_movies": [
+        "星际穿越",
+        "盗梦空间",
+        "复仇者联盟3：无限战争",
+        "Matrix, The",
+        "复仇者联盟4：终局之战"
+      ],
+      "ground_truth_ids": [
+        81692,
+        81418,
+        81971,
+        77927,
+        82034
+      ]
+    },
+    {
+      "task_id": "SIM-022",
+      "category": "simple",
+      "input": "高分动作电影推荐",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "score_match",
+        "min_score": 8.0,
+        "genre": "动作"
+      },
+      "ground_truth_movies": [
+        "盗梦空间",
+        "蝙蝠侠：黑暗骑士",
+        "复仇者联盟3：无限战争",
+        "Matrix, The",
+        "复仇者联盟4：终局之战"
+      ],
+      "ground_truth_ids": [
+        81418,
+        81293,
+        81971,
+        77927,
+        82034
+      ]
+    },
+    {
+      "task_id": "SIM-023",
+      "category": "simple",
+      "input": "有没有评分9分以上的电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "score_match",
+        "min_score": 9.0,
+        "genre": null
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "SIM-024",
+      "category": "simple",
+      "input": "推荐高分悬疑片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "score_match",
+        "min_score": 8.0,
+        "genre": "悬疑"
+      },
+      "ground_truth_movies": [
+        "禁闭岛",
+        "Seven"
+      ],
+      "ground_truth_ids": [
+        81425,
+        75471
+      ]
+    },
+    {
+      "task_id": "SIM-025",
+      "category": "simple",
+      "input": "评分8.5以上的电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "score_match",
+        "min_score": 8.5,
+        "genre": null
+      },
+      "ground_truth_movies": [
+        "星际穿越",
+        "蝙蝠侠：黑暗骑士",
+        "Shawshank Redemption, The",
+        "Pulp Fiction",
+        "Forrest Gump"
+      ],
+      "ground_truth_ids": [
+        81692,
+        81293,
+        75740,
+        75718,
+        75777
+      ]
+    },
+    {
+      "task_id": "SIM-026",
+      "category": "simple",
+      "input": "高分喜剧推荐",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "score_match",
+        "min_score": 8.0,
+        "genre": "喜剧"
+      },
+      "ground_truth_movies": [
+        "Pulp Fiction",
+        "Forrest Gump",
+        "华尔街之狼",
+        "Back to the Future",
+        "飞屋环游记"
+      ],
+      "ground_truth_ids": [
+        75718,
+        75777,
+        81623,
+        76675,
+        81351
+      ]
+    },
+    {
+      "task_id": "SIM-027",
+      "category": "simple",
+      "input": "评分最高的犯罪片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "score_match",
+        "min_score": 8.0,
+        "genre": "犯罪"
+      },
+      "ground_truth_movies": [
+        "蝙蝠侠：黑暗骑士",
+        "Shawshank Redemption, The",
+        "Pulp Fiction",
+        "华尔街之狼",
+        "Seven"
+      ],
+      "ground_truth_ids": [
+        81293,
+        75740,
+        75718,
+        81623,
+        75471
+      ]
+    },
+    {
+      "task_id": "SIM-028",
+      "category": "simple",
+      "input": "推荐高分动画电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "score_match",
+        "min_score": 8.0,
+        "genre": "动画"
+      },
+      "ground_truth_movies": [
+        "飞屋环游记",
+        "寻梦环游记",
+        "机器人总动员",
+        "Toy Story",
+        "Lion King, The"
+      ],
+      "ground_truth_ids": [
+        81351,
+        81901,
+        81296,
+        75425,
+        75785
+      ]
+    },
+    {
+      "task_id": "SIM-029",
+      "category": "simple",
+      "input": "评分8分以上的爱情片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "score_match",
+        "min_score": 8.0,
+        "genre": "爱情"
+      },
+      "ground_truth_movies": [
+        "Forrest Gump"
+      ],
+      "ground_truth_ids": [
+        75777
+      ]
+    },
+    {
+      "task_id": "SIM-030",
+      "category": "simple",
+      "input": "有什么高分战争片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "score_match",
+        "min_score": 8.0,
+        "genre": "战争"
+      },
+      "ground_truth_movies": [
+        "无耻混蛋",
+        "模仿游戏"
+      ],
+      "ground_truth_ids": [
+        81350,
+        81697
+      ]
+    },
+    {
+      "task_id": "SIM-031",
+      "category": "simple",
+      "input": "近五年的高分科幻片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "year_match",
+        "min_year": 2021,
+        "genre": "科幻"
+      },
+      "ground_truth_movies": [
+        "蜘蛛侠：纵横宇宙",
+        "荒野机器人",
+        "变形金刚：起源",
+        "银河护卫队3",
+        "沙丘"
+      ],
+      "ground_truth_ids": [
+        82289,
+        82367,
+        82417,
+        82297,
+        82159
+      ]
+    },
+    {
+      "task_id": "SIM-032",
+      "category": "simple",
+      "input": "2020年以后的动作片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "year_match",
+        "min_year": 2020,
+        "genre": "动作"
+      },
+      "ground_truth_movies": [
+        "蜘蛛侠：纵横宇宙",
+        "电锯人剧场版：蕾塞篇",
+        "杀戮射击",
+        "鬼灭之刃剧场版：无限列车篇",
+        "扎克·施奈德版正义联盟"
+      ],
+      "ground_truth_ids": [
+        82289,
+        82461,
+        82351,
+        82098,
+        82164
+      ]
+    },
+    {
+      "task_id": "SIM-033",
+      "category": "simple",
+      "input": "最近三年的喜剧电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "year_match",
+        "min_year": 2023,
+        "genre": "喜剧"
+      },
+      "ground_truth_movies": [
+        "K-Pop 猎魔女团",
+        "如何输掉一场人气竞赛",
+        "无可奈何",
+        "临租家庭",
+        "可怜的东西"
+      ],
+      "ground_truth_ids": [
+        82446,
+        82514,
+        82452,
+        82445,
+        82300
+      ]
+    },
+    {
+      "task_id": "SIM-034",
+      "category": "simple",
+      "input": "2010年以后的悬疑片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "year_match",
+        "min_year": 2010,
+        "genre": "悬疑"
+      },
+      "ground_truth_movies": [
+        "禁闭岛",
+        "消失的爱人",
+        "降临",
+        "逃出绝命镇"
+      ],
+      "ground_truth_ids": [
+        81425,
+        81703,
+        81844,
+        81915
+      ]
+    },
+    {
+      "task_id": "SIM-035",
+      "category": "simple",
+      "input": "近十年的高分犯罪片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "year_match",
+        "min_year": 2016,
+        "genre": "犯罪"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "SIM-036",
+      "category": "simple",
+      "input": "2020年以后的动画电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "year_match",
+        "min_year": 2020,
+        "genre": "动画"
+      },
+      "ground_truth_movies": [
+        "荒野机器人",
+        "电锯人剧场版：蕾塞篇",
+        "蜘蛛侠：纵横宇宙",
+        "鬼灭之刃剧场版：无限列车篇",
+        "穿靴子的猫2"
+      ],
+      "ground_truth_ids": [
+        82367,
+        82461,
+        82289,
+        82098,
+        82228
+      ]
+    },
+    {
+      "task_id": "SIM-037",
+      "category": "simple",
+      "input": "最近五年的爱情片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "year_match",
+        "min_year": 2021,
+        "genre": "爱情"
+      },
+      "ground_truth_movies": [
+        "电锯人剧场版：蕾塞篇",
+        "紫心之恋",
+        "20世纪少女",
+        "如何输掉一场人气竞赛",
+        "谁可以这样爱我"
+      ],
+      "ground_truth_ids": [
+        82461,
+        82274,
+        82250,
+        82514,
+        82243
+      ]
+    },
+    {
+      "task_id": "SIM-038",
+      "category": "simple",
+      "input": "2015年以后的科幻片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "year_match",
+        "min_year": 2015,
+        "genre": "科幻"
+      },
+      "ground_truth_movies": [
+        "复仇者联盟3：无限战争",
+        "复仇者联盟4：终局之战",
+        "复仇者联盟2：奥创纪元",
+        "疯狂的麦克斯4：狂暴之路",
+        "美国队长3"
+      ],
+      "ground_truth_ids": [
+        81971,
+        82034,
+        81764,
+        81766,
+        81836
+      ]
+    },
+    {
+      "task_id": "SIM-039",
+      "category": "simple",
+      "input": "近八年的高分剧情片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "year_match",
+        "min_year": 2018,
+        "genre": "剧情"
+      },
+      "ground_truth_movies": [
+        "寄生虫",
+        "波西米亚狂想曲"
+      ],
+      "ground_truth_ids": [
+        82032,
+        81989
+      ]
+    },
+    {
+      "task_id": "SIM-040",
+      "category": "simple",
+      "input": "2020年以后的奇幻电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "year_match",
+        "min_year": 2020,
+        "genre": "奇幻"
+      },
+      "ground_truth_movies": [
+        "电锯人剧场版：蕾塞篇",
+        "鬼灭之刃剧场版：无限列车篇",
+        "穿靴子的猫2",
+        "咒术回战 0 剧场版",
+        "扎克·施奈德版正义联盟"
+      ],
+      "ground_truth_ids": [
+        82461,
+        82098,
+        82228,
+        82166,
+        82164
+      ]
+    },
+    {
+      "task_id": "COM-041",
+      "category": "complex",
+      "input": "类似《星际穿越》的科幻片",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "anchor_match",
+        "anchor": "星际穿越",
+        "genre": "科幻"
+      },
+      "ground_truth_movies": [
+        "星际穿越",
+        "盗梦空间",
+        "复仇者联盟",
+        "复仇者联盟3：无限战争",
+        "银河护卫队"
+      ],
+      "ground_truth_ids": [
+        81692,
+        81418,
+        81551,
+        81971,
+        81741
+      ]
+    },
+    {
+      "task_id": "COM-042",
+      "category": "complex",
+      "input": "和《盗梦空间》差不多的烧脑电影",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "anchor_match",
+        "anchor": "盗梦空间",
+        "genre": "科幻"
+      },
+      "ground_truth_movies": [
+        "星际穿越",
+        "盗梦空间",
+        "复仇者联盟",
+        "复仇者联盟3：无限战争",
+        "银河护卫队"
+      ],
+      "ground_truth_ids": [
+        81692,
+        81418,
+        81551,
+        81971,
+        81741
+      ]
+    },
+    {
+      "task_id": "COM-043",
+      "category": "complex",
+      "input": "推荐像《阿凡达》那样的奇幻大片",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "anchor_match",
+        "anchor": "阿凡达",
+        "genre": "奇幻"
+      },
+      "ground_truth_movies": [
+        "阿凡达",
+        "哈利·波特与魔法石",
+        "指环王1：护戒使者",
+        "指环王3：王者无敌",
+        "指环王2：双塔奇兵"
+      ],
+      "ground_truth_ids": [
+        81348,
+        80883,
+        80882,
+        80991,
+        80941
+      ]
+    },
+    {
+      "task_id": "COM-044",
+      "category": "complex",
+      "input": "类似《肖申克的救赎》的高分剧情片",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "anchor_match",
+        "anchor": "肖申克的救赎",
+        "genre": "剧情"
+      },
+      "ground_truth_movies": [
+        "星际穿越",
+        "Fight Club",
+        "Shawshank Redemption, The",
+        "Forrest Gump",
+        "被解救的姜戈"
+      ],
+      "ground_truth_ids": [
+        81692,
+        78315,
+        75740,
+        75777,
+        81552
+      ]
+    },
+    {
+      "task_id": "COM-045",
+      "category": "complex",
+      "input": "和《蝙蝠侠：黑暗骑士》风格相近的犯罪片",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "anchor_match",
+        "anchor": "蝙蝠侠：黑暗骑士",
+        "genre": "犯罪"
+      },
+      "ground_truth_movies": [
+        "蝙蝠侠：黑暗骑士",
+        "Shawshank Redemption, The",
+        "Pulp Fiction",
+        "华尔街之狼",
+        "蝙蝠侠：黑暗骑士崛起"
+      ],
+      "ground_truth_ids": [
+        81293,
+        75740,
+        75718,
+        81623,
+        81553
+      ]
+    },
+    {
+      "task_id": "COM-046",
+      "category": "complex",
+      "input": "推荐像《复仇者联盟》那样的超级英雄片",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "anchor_match",
+        "anchor": "复仇者联盟",
+        "genre": "动作"
+      },
+      "ground_truth_movies": [
+        "盗梦空间",
+        "复仇者联盟",
+        "蝙蝠侠：黑暗骑士",
+        "阿凡达",
+        "死侍"
+      ],
+      "ground_truth_ids": [
+        81418,
+        81551,
+        81293,
+        81348,
+        81838
+      ]
+    },
+    {
+      "task_id": "COM-047",
+      "category": "complex",
+      "input": "类似《搏击俱乐部》的惊悚片",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "anchor_match",
+        "anchor": "搏击俱乐部",
+        "genre": "惊悚"
+      },
+      "ground_truth_movies": [
+        "蝙蝠侠：黑暗骑士",
+        "Fight Club",
+        "Pulp Fiction",
+        "禁闭岛",
+        "蝙蝠侠：黑暗骑士崛起"
+      ],
+      "ground_truth_ids": [
+        81293,
+        78315,
+        75718,
+        81425,
+        81553
+      ]
+    },
+    {
+      "task_id": "COM-048",
+      "category": "complex",
+      "input": "和《指环王》风格类似的奇幻史诗",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "anchor_match",
+        "anchor": "指环王",
+        "genre": "奇幻"
+      },
+      "ground_truth_movies": [
+        "阿凡达",
+        "哈利·波特与魔法石",
+        "指环王1：护戒使者",
+        "指环王3：王者无敌",
+        "指环王2：双塔奇兵"
+      ],
+      "ground_truth_ids": [
+        81348,
+        80883,
+        80882,
+        80991,
+        80941
+      ]
+    },
+    {
+      "task_id": "COM-049",
+      "category": "complex",
+      "input": "推荐像《死侍》那样的喜剧动作片",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "anchor_match",
+        "anchor": "死侍",
+        "genre": "喜剧"
+      },
+      "ground_truth_movies": [
+        "死侍",
+        "Pulp Fiction",
+        "Forrest Gump",
+        "华尔街之狼",
+        "头脑特工队"
+      ],
+      "ground_truth_ids": [
+        81838,
+        75718,
+        75777,
+        81623,
+        81765
+      ]
+    },
+    {
+      "task_id": "COM-050",
+      "category": "complex",
+      "input": "类似《银翼杀手》的科幻经典",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "anchor_match",
+        "anchor": "银翼杀手",
+        "genre": "科幻"
+      },
+      "ground_truth_movies": [
+        "星际穿越",
+        "盗梦空间",
+        "复仇者联盟",
+        "复仇者联盟3：无限战争",
+        "银河护卫队"
+      ],
+      "ground_truth_ids": [
+        81692,
+        81418,
+        81551,
+        81971,
+        81741
+      ]
+    },
+    {
+      "task_id": "COM-051",
+      "category": "complex",
+      "input": "近五年的高分科幻片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multi_constraint",
+        "genre": "科幻",
+        "min_year": 2021,
+        "min_score": 8.0
+      },
+      "ground_truth_movies": [
+        "蜘蛛侠：纵横宇宙",
+        "荒野机器人",
+        "变形金刚：起源",
+        "银河护卫队3",
+        "沙丘"
+      ],
+      "ground_truth_ids": [
+        82289,
+        82367,
+        82417,
+        82297,
+        82159
+      ]
+    },
+    {
+      "task_id": "COM-052",
+      "category": "complex",
+      "input": "诺兰导演的科幻电影",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multi_constraint",
+        "genre": "科幻",
+        "director": "克里斯托弗·诺兰"
+      },
+      "ground_truth_movies": [
+        "星际穿越",
+        "盗梦空间"
+      ],
+      "ground_truth_ids": [
+        81692,
+        81418
+      ]
+    },
+    {
+      "task_id": "COM-053",
+      "category": "complex",
+      "input": "2020年以后的高分动作片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multi_constraint",
+        "genre": "动作",
+        "min_year": 2020,
+        "min_score": 8.0
+      },
+      "ground_truth_movies": [
+        "蜘蛛侠：纵横宇宙",
+        "电锯人剧场版：蕾塞篇",
+        "杀戮射击",
+        "鬼灭之刃剧场版：无限列车篇",
+        "扎克·施奈德版正义联盟"
+      ],
+      "ground_truth_ids": [
+        82289,
+        82461,
+        82351,
+        82098,
+        82164
+      ]
+    },
+    {
+      "task_id": "COM-054",
+      "category": "complex",
+      "input": "昆汀导演的犯罪片",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multi_constraint",
+        "genre": "犯罪",
+        "director": "昆汀·塔伦蒂诺"
+      },
+      "ground_truth_movies": [
+        "Pulp Fiction",
+        "杀死比尔"
+      ],
+      "ground_truth_ids": [
+        75718,
+        80997
+      ]
+    },
+    {
+      "task_id": "COM-055",
+      "category": "complex",
+      "input": "近八年的高分悬疑片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multi_constraint",
+        "genre": "悬疑",
+        "min_year": 2018,
+        "min_score": 8.0
+      },
+      "ground_truth_movies": [
+        "魔女",
+        "来自深渊：深魂的黎明",
+        "利刃出鞘",
+        "新蝙蝠侠",
+        "疯狂动物城2"
+      ],
+      "ground_truth_ids": [
+        82016,
+        82121,
+        82039,
+        82222,
+        82425
+      ]
+    },
+    {
+      "task_id": "COM-056",
+      "category": "complex",
+      "input": "斯皮尔伯格的战争片",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multi_constraint",
+        "genre": "战争",
+        "director": "史蒂文·斯皮尔伯格"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "COM-057",
+      "category": "complex",
+      "input": "2015年以后的高分动画",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multi_constraint",
+        "genre": "动画",
+        "min_year": 2015,
+        "min_score": 8.0
+      },
+      "ground_truth_movies": [
+        "寻梦环游记"
+      ],
+      "ground_truth_ids": [
+        81901
+      ]
+    },
+    {
+      "task_id": "COM-058",
+      "category": "complex",
+      "input": "大卫·芬奇的惊悚片",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multi_constraint",
+        "genre": "惊悚",
+        "director": "大卫·芬奇"
+      },
+      "ground_truth_movies": [
+        "Fight Club",
+        "Seven",
+        "消失的爱人"
+      ],
+      "ground_truth_ids": [
+        78315,
+        75471,
+        81703
+      ]
+    },
+    {
+      "task_id": "COM-059",
+      "category": "complex",
+      "input": "近五年的高分喜剧",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multi_constraint",
+        "genre": "喜剧",
+        "min_year": 2021,
+        "min_score": 8.0
+      },
+      "ground_truth_movies": [
+        "穿靴子的猫2",
+        "K-Pop 猎魔女团",
+        "黑白魔女库伊拉",
+        "如何输掉一场人气竞赛",
+        "生无可恋的奥托"
+      ],
+      "ground_truth_ids": [
+        82228,
+        82446,
+        82174,
+        82514,
+        82261
+      ]
+    },
+    {
+      "task_id": "COM-060",
+      "category": "complex",
+      "input": "詹姆斯·卡梅隆的科幻片",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multi_constraint",
+        "genre": "科幻",
+        "director": "詹姆斯·卡梅隆"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "COM-061",
+      "category": "complex",
+      "input": "轻松治愈的动画电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "动画",
+        "emotion": "轻松治愈"
+      },
+      "ground_truth_movies": [
+        "飞屋环游记",
+        "寻梦环游记",
+        "海底总动员",
+        "机器人总动员",
+        "Toy Story"
+      ],
+      "ground_truth_ids": [
+        81351,
+        81901,
+        80994,
+        81296,
+        75425
+      ]
+    },
+    {
+      "task_id": "COM-062",
+      "category": "complex",
+      "input": "烧脑的科幻悬疑片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "科幻",
+        "emotion": "烧脑"
+      },
+      "ground_truth_movies": [
+        "星际穿越",
+        "盗梦空间",
+        "复仇者联盟",
+        "复仇者联盟3：无限战争",
+        "银河护卫队"
+      ],
+      "ground_truth_ids": [
+        81692,
+        81418,
+        81551,
+        81971,
+        81741
+      ]
+    },
+    {
+      "task_id": "COM-063",
+      "category": "complex",
+      "input": "温馨感人的爱情片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "爱情",
+        "emotion": "温馨感人"
+      },
+      "ground_truth_movies": [
+        "Forrest Gump",
+        "爱乐之城"
+      ],
+      "ground_truth_ids": [
+        75777,
+        81841
+      ]
+    },
+    {
+      "task_id": "COM-064",
+      "category": "complex",
+      "input": "刺激的动作冒险片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "动作",
+        "emotion": "刺激"
+      },
+      "ground_truth_movies": [
+        "盗梦空间",
+        "复仇者联盟",
+        "蝙蝠侠：黑暗骑士",
+        "阿凡达",
+        "死侍"
+      ],
+      "ground_truth_ids": [
+        81418,
+        81551,
+        81293,
+        81348,
+        81838
+      ]
+    },
+    {
+      "task_id": "COM-065",
+      "category": "complex",
+      "input": "压抑深刻的剧情片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "剧情",
+        "emotion": "压抑深刻"
+      },
+      "ground_truth_movies": [
+        "星际穿越",
+        "Fight Club",
+        "Shawshank Redemption, The",
+        "Forrest Gump",
+        "被解救的姜戈"
+      ],
+      "ground_truth_ids": [
+        81692,
+        78315,
+        75740,
+        75777,
+        81552
+      ]
+    },
+    {
+      "task_id": "COM-066",
+      "category": "complex",
+      "input": "搞笑轻松的喜剧片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "喜剧",
+        "emotion": "搞笑轻松"
+      },
+      "ground_truth_movies": [
+        "死侍",
+        "Pulp Fiction",
+        "Forrest Gump",
+        "华尔街之狼",
+        "头脑特工队"
+      ],
+      "ground_truth_ids": [
+        81838,
+        75718,
+        75777,
+        81623,
+        81765
+      ]
+    },
+    {
+      "task_id": "COM-067",
+      "category": "complex",
+      "input": "黑暗风格的犯罪片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "犯罪",
+        "emotion": "黑暗"
+      },
+      "ground_truth_movies": [
+        "蝙蝠侠：黑暗骑士",
+        "Shawshank Redemption, The",
+        "Pulp Fiction",
+        "华尔街之狼",
+        "蝙蝠侠：黑暗骑士崛起"
+      ],
+      "ground_truth_ids": [
+        81293,
+        75740,
+        75718,
+        81623,
+        81553
+      ]
+    },
+    {
+      "task_id": "COM-068",
+      "category": "complex",
+      "input": "温暖治愈的家庭片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "家庭",
+        "emotion": "温暖治愈"
+      },
+      "ground_truth_movies": [
+        "头脑特工队",
+        "飞屋环游记",
+        "寻梦环游记",
+        "海底总动员",
+        "机器人总动员"
+      ],
+      "ground_truth_ids": [
+        81765,
+        81351,
+        81901,
+        80994,
+        81296
+      ]
+    },
+    {
+      "task_id": "COM-069",
+      "category": "complex",
+      "input": "紧张刺激的惊悚片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "惊悚",
+        "emotion": "紧张刺激"
+      },
+      "ground_truth_movies": [
+        "蝙蝠侠：黑暗骑士",
+        "Fight Club",
+        "Pulp Fiction",
+        "禁闭岛",
+        "蝙蝠侠：黑暗骑士崛起"
+      ],
+      "ground_truth_ids": [
+        81293,
+        78315,
+        75718,
+        81425,
+        81553
+      ]
+    },
+    {
+      "task_id": "COM-070",
+      "category": "complex",
+      "input": "浪漫甜蜜的爱情片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "爱情",
+        "emotion": "浪漫甜蜜"
+      },
+      "ground_truth_movies": [
+        "Forrest Gump",
+        "爱乐之城"
+      ],
+      "ground_truth_ids": [
+        75777,
+        81841
+      ]
+    },
+    {
+      "task_id": "VAG-071",
+      "category": "vague",
+      "input": "推荐电影",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "模糊查询，无任何约束"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-072",
+      "category": "vague",
+      "input": "好看的",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "极简输入，无类型/情感信息"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-073",
+      "category": "vague",
+      "input": "不知道看什么",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "无明确需求"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-074",
+      "category": "vague",
+      "input": "随便推荐",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "无明确需求"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-075",
+      "category": "vague",
+      "input": "有什么好看的",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "泛泛询问"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-076",
+      "category": "vague",
+      "input": "推荐一下",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "极简输入"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-077",
+      "category": "vague",
+      "input": "想看电影",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "无类型约束"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-078",
+      "category": "vague",
+      "input": "无聊想看电影",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "情感化输入，无具体需求"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-079",
+      "category": "vague",
+      "input": "最近有什么好看的",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "时间模糊，无类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-080",
+      "category": "vague",
+      "input": "帮我选一部电影",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "无具体偏好"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-081",
+      "category": "vague",
+      "input": "经典",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "极简输入，意图不明"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-082",
+      "category": "vague",
+      "input": "想哭",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "情感化输入，需追问类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-083",
+      "category": "vague",
+      "input": "想笑",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "情感化输入，需追问类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-084",
+      "category": "vague",
+      "input": "烧脑",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "极简情感输入，需追问类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-085",
+      "category": "vague",
+      "input": "治愈",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "极简情感输入，需追问类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-086",
+      "category": "vague",
+      "input": "热血",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "极简情感输入，需追问类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-087",
+      "category": "vague",
+      "input": "放松一下",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "情感化输入，无具体需求"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-088",
+      "category": "vague",
+      "input": "打发时间",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "目的性输入，无偏好"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-089",
+      "category": "vague",
+      "input": "睡前看的",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "场景化输入，需追问类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-090",
+      "category": "vague",
+      "input": "和朋友一起看",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "场景化输入，需追问类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-091",
+      "category": "vague",
+      "input": "适合一个人看的",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "场景化输入，需追问类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-092",
+      "category": "vague",
+      "input": "不想动脑子",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "情感化输入，需追问类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-093",
+      "category": "vague",
+      "input": "来点刺激的",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "情感化输入，需追问类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-094",
+      "category": "vague",
+      "input": "想看点有深度的",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "情感化输入，需追问类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-095",
+      "category": "vague",
+      "input": "轻松一点的",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "情感化输入，需追问类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-096",
+      "category": "vague",
+      "input": "不要恐怖的",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "排除性输入，需追问正面偏好"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-097",
+      "category": "vague",
+      "input": "不要太长的",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "约束性输入，需追问类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-098",
+      "category": "vague",
+      "input": "最近很火的",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "热度查询，无类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-099",
+      "category": "vague",
+      "input": "大家都在看什么",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "从众查询，无具体偏好"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "VAG-100",
+      "category": "vague",
+      "input": "有什么新片",
+      "expected_tool_chain": [],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "clarification_or_vague",
+        "reason": "新片查询，无类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-001",
+      "category": "multiturn",
+      "input": [
+        "想看动作片",
+        "不要太老的",
+        "评分高一点"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型收敛+时间+评分"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-002",
+      "category": "multiturn",
+      "input": [
+        "推荐犯罪推理片",
+        "不要国产的",
+        "最好是近五年的"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型收敛+地区+时间"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-003",
+      "category": "multiturn",
+      "input": [
+        "推荐一部好看的电影",
+        "想要轻松一点的喜剧",
+        "最好是周星驰的"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "泛→类型→导演"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-004",
+      "category": "multiturn",
+      "input": [
+        "想看科幻片",
+        "要有太空题材的",
+        "评分8分以上"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→题材→评分"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-005",
+      "category": "multiturn",
+      "input": [
+        "推荐动画电影",
+        "宫崎骏的",
+        "治愈一点的"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→导演→情感"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-006",
+      "category": "multiturn",
+      "input": [
+        "想看悬疑片",
+        "烧脑的那种",
+        "最好是近十年的"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→情感→时间"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-007",
+      "category": "multiturn",
+      "input": [
+        "推荐爱情电影",
+        "不要太虐的",
+        "轻松浪漫的"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→排除→情感"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-008",
+      "category": "multiturn",
+      "input": [
+        "想看战争片",
+        "二战题材",
+        "评分高的"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→题材→评分"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-009",
+      "category": "multiturn",
+      "input": [
+        "推荐好看的电影",
+        "动作片",
+        "要有追车场面的"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "泛→类型→场景"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-010",
+      "category": "multiturn",
+      "input": [
+        "想找类似盗梦空间的",
+        "诺兰导演的",
+        "科幻类的"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "锚点→导演→类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-011",
+      "category": "multiturn",
+      "input": [
+        "推荐高分电影",
+        "剧情片",
+        "不要太压抑的"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "评分→类型→情感"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-012",
+      "category": "multiturn",
+      "input": [
+        "想看喜剧",
+        "最近几年的",
+        "评分8分以上"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→时间→评分"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-013",
+      "category": "multiturn",
+      "input": [
+        "推荐电影",
+        "要有刘德华的",
+        "动作片"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "泛→演员→类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-014",
+      "category": "multiturn",
+      "input": [
+        "想看动画",
+        "日本的",
+        "宫崎骏或者新海诚的"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→地区→导演"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-015",
+      "category": "multiturn",
+      "input": [
+        "推荐悬疑片",
+        "不要国产的",
+        "近五年的高分"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→地区→时间+评分"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-016",
+      "category": "multiturn",
+      "input": [
+        "想看科幻大片",
+        "要有视觉冲击的",
+        "评分7.5以上"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→视觉→评分"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-017",
+      "category": "multiturn",
+      "input": [
+        "推荐犯罪片",
+        "韩国的",
+        "近十年的"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→地区→时间"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-018",
+      "category": "multiturn",
+      "input": [
+        "想看纪录片",
+        "自然题材",
+        "BBC的"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→题材→制作方"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-019",
+      "category": "multiturn",
+      "input": [
+        "推荐恐怖片",
+        "不要血腥的",
+        "心理恐怖那种"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→排除→子类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-020",
+      "category": "multiturn",
+      "input": [
+        "想看爱情片",
+        "经典老片",
+        "评分8分以上"
+      ],
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→时间→评分"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "AON-001",
+      "category": "agent_only",
+      "input": "不要刚才推荐的那些，换一批完全不同的",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "context_inheritance",
+        "description": "推荐结果应与上一轮不同"
+      },
+      "ground_truth_movies": [],
+      "notes": "上下文继承：需要读取短期记忆中的已推荐ID列表，排除后重新召回"
+    },
+    {
+      "task_id": "AON-002",
+      "category": "agent_only",
+      "input": "刚才推荐的第三部不错，找几部类似那种风格的",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "context_inheritance",
+        "description": "推荐结果应与上一轮第3部风格相似"
+      },
+      "ground_truth_movies": [],
+      "notes": "上下文继承：需要定位上一轮第3部电影，提取其风格特征，作为锚点重新召回"
+    },
+    {
+      "task_id": "AON-003",
+      "category": "agent_only",
+      "input": "刚才那些太老了，我要近五年的",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "context_inheritance",
+        "description": "推荐结果应为近5年电影"
+      },
+      "ground_truth_movies": [],
+      "notes": "上下文继承：需要继承上一轮的类型偏好，叠加年份约束"
+    },
+    {
+      "task_id": "AON-004",
+      "category": "agent_only",
+      "input": "第二部叫什么来着？就那个有太空的",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "context_inheritance",
+        "description": "应能回忆上一轮第2部电影并回答"
+      },
+      "ground_truth_movies": [],
+      "notes": "上下文继承：需要从记忆中检索上一轮推荐列表，定位第2部并回答"
+    },
+    {
+      "task_id": "AON-005",
+      "category": "agent_only",
+      "input": "刚才推荐的导演是谁？他还有什么其他作品",
+      "expected_tool_chain": [
+        "kg_query",
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "context_inheritance",
+        "description": "应能提取上一轮推荐电影的导演并查询其作品"
+      },
+      "ground_truth_movies": [],
+      "notes": "上下文继承+知识图谱：需要从记忆提取电影→查导演→查作品链"
+    },
+    {
+      "task_id": "AON-006",
+      "category": "agent_only",
+      "input": "最近压力很大，想看点轻松治愈的，不要太费脑子",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "喜剧"
+      },
+      "ground_truth_movies": [],
+      "notes": "情感推理：'压力大'+'轻松治愈'+'不费脑子' → 喜剧/动画类型"
+    },
+    {
+      "task_id": "AON-007",
+      "category": "agent_only",
+      "input": "失恋了，想看那种让人哭出来的电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "剧情"
+      },
+      "ground_truth_movies": [],
+      "notes": "情感推理：'失恋'+'哭出来' → 催泪剧情片"
+    },
+    {
+      "task_id": "AON-008",
+      "category": "agent_only",
+      "input": "想热血沸腾一下，来点燃的",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "动作"
+      },
+      "ground_truth_movies": [],
+      "notes": "情感推理：'热血沸腾'+'燃' → 动作/运动类型"
+    },
+    {
+      "task_id": "AON-009",
+      "category": "agent_only",
+      "input": "晚上睡不着，想看点细思极恐的",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "悬疑"
+      },
+      "ground_truth_movies": [],
+      "notes": "情感推理：'睡不着'+'细思极恐' → 悬疑/惊悚类型"
+    },
+    {
+      "task_id": "AON-010",
+      "category": "agent_only",
+      "input": "周末和女朋友约会看，要浪漫一点的",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "爱情"
+      },
+      "ground_truth_movies": [],
+      "notes": "情感推理：'约会'+'浪漫' → 爱情类型"
+    },
+    {
+      "task_id": "AON-011",
+      "category": "agent_only",
+      "input": "推荐高分恐怖片，但不要太吓人的",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "genre_match",
+        "genre": "恐怖"
+      },
+      "ground_truth_movies": [],
+      "notes": "冲突约束：恐怖+不吓人=矛盾，需要找'温和恐怖'或'心理恐怖'"
+    },
+    {
+      "task_id": "AON-012",
+      "category": "agent_only",
+      "input": "推荐最新的经典老片修复版",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "score_match",
+        "min_score": 8.0
+      },
+      "ground_truth_movies": [],
+      "notes": "冲突约束：最新+老片=矛盾，需要找'经典重映'或'修复版'"
+    },
+    {
+      "task_id": "AON-013",
+      "category": "agent_only",
+      "input": "类似《教父》的轻松喜剧",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "anchor_match",
+        "genre": "喜剧"
+      },
+      "ground_truth_movies": [],
+      "notes": "冲突约束：教父(犯罪)+喜剧=风格冲突，需要找'犯罪喜剧'或'黑色幽默'"
+    },
+    {
+      "task_id": "AON-014",
+      "category": "agent_only",
+      "input": "推荐评分9分以上的冷门小众片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "score_match",
+        "min_score": 9.0
+      },
+      "ground_truth_movies": [],
+      "notes": "冲突约束：高分+冷门=数量稀缺，需要在小众池中找高分"
+    },
+    {
+      "task_id": "AON-015",
+      "category": "agent_only",
+      "input": "推荐适合全家看的动作片，要有追车场面但不能太暴力",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "genre_match",
+        "genre": "动作"
+      },
+      "ground_truth_movies": [],
+      "notes": "冲突约束：全家+追车+不暴力=需要PG-13级动作片"
+    },
+    {
+      "task_id": "AON-016",
+      "category": "agent_only",
+      "input": "适合下雨天窝在家里看的温暖电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "剧情"
+      },
+      "ground_truth_movies": [],
+      "notes": "场景→类型映射：'下雨天'+'窝在家里'+'温暖' → 治愈系剧情片"
+    },
+    {
+      "task_id": "AON-017",
+      "category": "agent_only",
+      "input": "看完能让人思考人生的深度电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "剧情"
+      },
+      "ground_truth_movies": [],
+      "notes": "抽象需求：'思考人生'+'深度' → 哲学/文艺剧情片"
+    },
+    {
+      "task_id": "AON-018",
+      "category": "agent_only",
+      "input": "和朋友一起看，要能一起讨论的那种",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "悬疑"
+      },
+      "ground_truth_movies": [],
+      "notes": "社交场景：'一起讨论' → 悬疑/烧脑片（有讨论空间）"
+    },
+    {
+      "task_id": "AON-019",
+      "category": "agent_only",
+      "input": "推荐一部适合独处时看的安静电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "剧情"
+      },
+      "ground_truth_movies": [],
+      "notes": "场景→类型映射：'独处'+'安静' → 文艺/独立电影"
+    },
+    {
+      "task_id": "AON-020",
+      "category": "agent_only",
+      "input": "想要那种看完会去搜解析的电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "emotion_match",
+        "genre": "悬疑"
+      },
+      "ground_truth_movies": [],
+      "notes": "隐含需求：'看完搜解析' → 高信息密度悬疑/烧脑片"
+    },
+    {
+      "task_id": "COR-001",
+      "category": "correction",
+      "input": "推荐一部关于量子纠缠与存在主义虚无的先锋实验电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "semantic_relevance",
+        "description": "返回结果应为电影（即使不是精确匹配，只要系统不崩溃即算成功）"
+      },
+      "ground_truth_movies": [],
+      "notes": "极端抽象查询：'量子纠缠'+'存在主义虚无'与任何电影标题的BGE相似度都应低于0.6，触发低质量纠偏"
+    },
+    {
+      "task_id": "COR-002",
+      "category": "correction",
+      "input": "找一部类似《龘龘灪灪之量子复古未来主义》的冷门魔幻片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "semantic_relevance",
+        "description": "返回结果应为电影（系统应能处理不存在的锚点电影名）"
+      },
+      "ground_truth_movies": [],
+      "notes": "不存在的锚点电影：《龘龘灪灪之量子复古未来主义》不存在，kg_query会失败，应触发空结果纠偏或低质量纠偏"
+    },
+    {
+      "task_id": "COR-003",
+      "category": "correction",
+      "input": "推荐一部完全没有对白、纯靠视觉叙事的黑白默片动画纪录片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "semantic_relevance",
+        "description": "返回结果应为电影（高度小众的类型组合，可能触发低质量纠偏）"
+      },
+      "ground_truth_movies": [],
+      "notes": "极端小众类型组合：'完全没有对白'+'黑白默片'+'动画'+'纪录片'四种约束叠加，与数据库中任何电影的相似度都应很低"
+    },
+    {
+      "task_id": "COR-004",
+      "category": "correction",
+      "input": "推荐一部探讨超弦理论与平行宇宙的哲学思辨电影",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "semantic_relevance",
+        "description": "返回结果应为电影（高度抽象的科学哲学主题）"
+      },
+      "ground_truth_movies": [],
+      "notes": "抽象科学哲学主题：'超弦理论'+'平行宇宙'+'哲学思辨'与电影标题的语义距离应较大"
+    },
+    {
+      "task_id": "COR-005",
+      "category": "correction",
+      "input": "推荐一部由AI生成、完全由算法创作的实验性数字艺术短片",
+      "expected_tool_chain": [
+        "search_vector",
+        "maan_rerank",
+        "rerank"
+      ],
+      "success_criteria": {
+        "type": "semantic_relevance",
+        "description": "返回结果应为电影（不存在的电影类型，应触发低质量纠偏）"
+      },
+      "ground_truth_movies": [],
+      "notes": "不存在的电影类型：'由AI生成'+'完全由算法创作'的电影在数据库中不存在，应触发低质量纠偏"
+    },
+    {
+      "task_id": "MT-021",
+      "category": "multiturn",
+      "input": [
+        "推荐科幻片",
+        "不要漫威的",
+        "评分最高的那部叫什么"
+      ],
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→排除IP→排序，测试对话记忆中的否定约束"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-022",
+      "category": "multiturn",
+      "input": [
+        "推荐一部好看的电影",
+        "换成恐怖片",
+        "再换成喜剧"
+      ],
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "泛→恐怖→喜剧，测试意图切换能力"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-023",
+      "category": "multiturn",
+      "input": [
+        "推荐爱情片",
+        "有没有韩国的",
+        "评分8分以上的"
+      ],
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→地区→评分阈值，逐步收敛"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-024",
+      "category": "multiturn",
+      "input": [
+        "推荐动画片",
+        "宫崎骏的有吗",
+        "那新海诚的呢"
+      ],
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→导演A→导演B，测试导演切换"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-025",
+      "category": "multiturn",
+      "input": [
+        "推荐悬疑片",
+        "近五年的",
+        "不要美国的"
+      ],
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→年份→排除地区，三层约束叠加"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-026",
+      "category": "multiturn",
+      "input": [
+        "推荐和盗梦空间类似的电影",
+        "评分要更高的",
+        "再来几部不同类型的"
+      ],
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "锚点电影→评分过滤→类型放宽，测试约束升级和放宽"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-027",
+      "category": "multiturn",
+      "input": [
+        "有什么好看的电影吗",
+        "我想看诺兰导演的",
+        "星际穿越看过啦，换一部"
+      ],
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "泛→导演→排除已看，测试排除已知电影能力"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-028",
+      "category": "multiturn",
+      "input": [
+        "推荐犯罪片",
+        "像教父那种风格的",
+        "有没有更现代一点的"
+      ],
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→风格锚点→年份约束，测试风格理解"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-029",
+      "category": "multiturn",
+      "input": [
+        "推荐纪录片",
+        "关于自然的",
+        "关于太空的也行"
+      ],
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "类型→主题A→主题B扩展，测试主题扩展理解"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "MT-030",
+      "category": "multiturn",
+      "input": [
+        "推荐适合和朋友一起看的电影",
+        "要搞笑的",
+        "最好是比较新的"
+      ],
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "multiturn_convergence",
+        "description": "场景→类型→年份，测试场景化推荐理解"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "OE-001",
+      "category": "open_ended",
+      "input": "我今天心情不太好，想看一部能让我开心起来的电影",
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "llm_judge",
+        "description": "推荐应为轻松治愈类电影，回答应体现情感关怀"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "OE-002",
+      "category": "open_ended",
+      "input": "我和女朋友约会，想找一部两个人都能享受的电影",
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "llm_judge",
+        "description": "推荐应为浪漫/轻松类型，适合约会场景"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "OE-003",
+      "category": "open_ended",
+      "input": "我想看一部能引发思考的深度电影，最好是关于人性的",
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "llm_judge",
+        "description": "推荐应为高评分剧情片，回答应说明为什么引发思考"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "OE-004",
+      "category": "open_ended",
+      "input": "推荐一部适合周末晚上放松看的电影，不要太烧脑",
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "llm_judge",
+        "description": "推荐应为轻松娱乐类，不应推荐悬疑烧脑片"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "OE-005",
+      "category": "open_ended",
+      "input": "我最近看了很多科幻片，想换个口味，有什么推荐吗",
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "llm_judge",
+        "description": "推荐不应是科幻片，应理解'换个口味'并推荐其他类型"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "OE-006",
+      "category": "open_ended",
+      "input": "有没有适合和父母一起看的电影？要老少皆宜的",
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "llm_judge",
+        "description": "推荐应为温馨家庭类，不含暴力/恐怖元素"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "OE-007",
+      "category": "open_ended",
+      "input": "我想看一部能学到东西的电影，比如历史或者科学相关的",
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "llm_judge",
+        "description": "推荐应为传记/历史/科学题材，回答说明教育价值"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "OE-008",
+      "category": "open_ended",
+      "input": "推荐一部适合失眠时看的电影",
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "llm_judge",
+        "description": "推荐应为节奏缓慢、氛围舒缓的电影，不适合推荐动作/惊悚片"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "OE-009",
+      "category": "open_ended",
+      "input": "我刚看完盗梦空间，意犹未尽，有没有类似烧脑的",
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "llm_judge",
+        "description": "推荐应为同类型烧脑/悬疑片，回答体现对锚点电影的理解"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    },
+    {
+      "task_id": "OE-010",
+      "category": "open_ended",
+      "input": "有没有那种看完会让人久久不能平静的电影",
+      "expected_tool_chain": ["search_vector", "maan_rerank", "rerank"],
+      "expected_intent": "QUERY_MOVIE",
+      "success_criteria": {
+        "type": "llm_judge",
+        "description": "推荐应为情感深刻、结局震撼的电影，回答体现情感共鸣"
+      },
+      "ground_truth_movies": [],
+      "ground_truth_ids": []
+    }
+  ]
+}

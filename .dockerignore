@@ -1,0 +1,14 @@
+.git
+__pycache__
+*.pyc
+*.pyo
+.env
+.idea/
+*.pth
+*.csv
+*.pkl
+*.faiss
+ml-latest-small/
+node_modules/
+*.log
+.DS_Store

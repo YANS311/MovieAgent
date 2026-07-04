@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if query %}
+        搜索结果: {{ query }}
+    {% else %}
+        所有电影
+    {% endif %}
+{% endblock %}
+
+
+{% block content %}
+    <div class="page-header">
+        {% if query %}
+            <h1>搜索 "<strong style="color: #007bff;">{{ query }}</strong>" 的结果</h1>
+        {% else %}
+            <h1>显示所有电影</h1>
+        {% endif %}
+    </div>
+
+    {% if movies %}
+        <div class="list-group">
+        {% for movie in movies %}
+            <a href="{% url 'movie_detail' movie.pk %}" class="list-group-item">
+                <h4 class="list-group-item-heading">{{ movie.title }}</h4>
+                <p class="list-group-item-text">
+                    评分: {{ movie.score|default:"N/A" }} |
+                    类型: {% for g in movie.genres.all %}{{ g.name }} {% endfor %} |
+                    主演: {% for a in movie.actors.all|slice:":5" %}{{ a.name }}{% if not forloop.last %}, {% endif %}{% endfor %} |
+                    导演: {% for d in movie.directors.all %}{{ d.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                </p>
+            </a>
+        {% endfor %}
+        </div>
+    {% else %}
+        {% if query %}
+            <div class="alert alert-warning">
+                抱歉，没有找到与 "{{ query }}" 相关的电影。
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                影片库中暂无电影。
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}

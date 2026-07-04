@@ -1,0 +1,86 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: movie-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请设置 MYSQL_ROOT_PASSWORD 环境变量}
+      MYSQL_DATABASE: ${DB_NAME:-django_movie}
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: movie-redis
+    ports:
+      - "6379:6379"
+
+  neo4j:
+    image: neo4j:5
+    container_name: movie-neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: ${NEO4J_AUTH:?请设置 NEO4J_AUTH 环境变量，格式: neo4j/your_password}
+    volumes:
+      - neo4j_data:/data
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: movie-ollama
+    ports:
+      - "11434:11434"
+    environment:
+      OLLAMA_NUM_PARALLEL: "4"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  django:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: movie-django
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME:-django_movie}
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${DB_PASSWORD:?请设置 DB_PASSWORD 环境变量}
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: ${NEO4J_USER:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:?请设置 NEO4J_PASSWORD 环境变量}
+      OLLAMA_BASE: http://ollama:11434
+      REDIS_URL: redis://redis:6379/0
+      UVICORN_WORKERS: ${UVICORN_WORKERS:-8}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?请设置 DJANGO_SECRET_KEY 环境变量}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0}
+    volumes:
+      - ./static:/app/static
+      - ./media:/app/media
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      neo4j:
+        condition: service_started
+      ollama:
+        condition: service_started
+
+volumes:
+  mysql_data:
+  neo4j_data:
+  ollama_data:

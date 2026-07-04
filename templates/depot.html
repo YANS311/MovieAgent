@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}影片库{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>影片库</h1>
+    </div>
+
+    <form method="GET" action="{% url 'depot' %}" class="well">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>按类型:</label>
+                    <select name="genre" class="form-control">
+                        <option value="">— 全部类型 —</option>
+                        {% for g in genres %}
+                            <option value="{{ g.id }}" {% if g.id|stringformat:"s" == selected_genre_id %}selected{% endif %}>
+                                {{ g.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>按地区:</label>
+                    <select name="region" class="form-control">
+                        <option value="">— 全部地区 —</option>
+                        {% for r in regions %}
+                            <option value="{{ r.id }}" {% if r.id|stringformat:"s" == selected_region_id %}selected{% endif %}>
+                                {{ r.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>按年份:</label>
+                    <select name="year" class="form-control">
+                        <option value="">— 全部年份 —</option>
+                        {% for y in years %}
+                            <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>
+                                {{ y }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label>&nbsp;</label> <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fa fa-filter"></i> 筛选
+                </button>
+            </div>
+        </div>
+    </form>
+    <div class="list-group" style="margin-top: 2rem;">
+
+        {% for movie in movies %}
+            <a href="{% url 'movie_detail' movie.pk %}" class="list-group-item">
+                <h4 class="list-group-item-heading">{{ movie.title }}</h4>
+
+                <p class="list-group-item-text">
+                    评分: {{ movie.score|default:"N/A"|floatformat:1 }}
+
+                    {% if movie.vote_count > 0 %}
+                        <small>({{ movie.vote_count }} 人评分)</small> |
+                    {% else %}
+                        <small>(暂无评分)</small> |
+                    {% endif %}
+
+                    类型: {% for g in movie.genres.all %}{{ g.name }} {% endfor %} |
+                    导演: {% for d in movie.directors.all %}{{ d.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                </p>
+            </a>
+
+        {% empty %}
+            <p class="list-group-item text-center text-muted">
+                {% if selected_genre_id or selected_region_id or selected_year %}
+                    没有找到符合筛选条件的电影。
+                {% else %}
+                    影片库中暂无电影。
+                {% endif %}
+            </p>
+
+        {% endfor %}
+    </div>
+    <div class="text-center">
+        <ul class="pagination">
+            {{ page_string|safe }}
+        </ul>
+    </div>
+
+{% endblock %}

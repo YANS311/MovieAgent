@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}电影排行榜{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>电影排行榜</h1>
+    <p class="lead">根据全站 {{ total_movie_count }} 部电影的评分和热度生成。</p>
+</div>
+
+<div class="row">
+
+    <div class="col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-fire"></i> Top 10 热门电影 (按评分人数)</h3>
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    {% for movie in query_hot %}
+                    <li class="list-group-item">
+                        <span class="badge">{{ movie.vote_count }} 人评分</span>
+                        <a href="{% url 'movie_detail' movie.pk %}">{{ movie.title }}</a>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">暂无热门电影数据。</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-star"></i> Top 10 高分电影</h3>
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    {% for movie in query_high %}
+                    <li class="list-group-item">
+                        <span class="badge" style="background-color: #e67e22;">{{ movie.score }} 分</span>
+                        <a href="{% url 'movie_detail' movie.pk %}">{{ movie.title }}</a>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">暂无高分电影数据。</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

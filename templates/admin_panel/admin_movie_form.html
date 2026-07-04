@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fa fa-film"></i> {{ title }}</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">电影信息表单</h3>
+            </div>
+            <div class="panel-body">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                        <div class="form-group {% if field.errors %}has-error{% endif %}">
+                            <label for="{{ field.id_for_label }}" class="control-label">
+                                {{ field.label }}
+                                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+
+                            {{ field }} {% if field.help_text %}
+                                <p class="help-block"><small class="text-muted">{{ field.help_text }}</small></p>
+                            {% endif %}
+
+                            <span class="help-block">{{ field.errors.0 }}</span>
+                        </div>
+                    {% endfor %}
+
+                    <hr>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fa fa-save"></i> 保存
+                        </button>
+                        <a href="{% url 'admin_movie_list' %}" class="btn btn-default btn-lg">
+                            取消
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block css %}
+<style>
+    textarea.form-control {
+        height: 150px; /* 让简介框高一点 */
+        resize: vertical;
+    }
+</style>
+{% endblock %}

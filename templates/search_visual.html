@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}视觉灵感搜索{% endblock %}
+
+{% block content %}
+    <div class="container" style="margin-top: 30px;">
+        <div class="text-center" style="margin-bottom: 40px;">
+            <h1 style="font-weight: 300;">🎨 视觉灵感搜索</h1>
+            <p class="text-muted">输入风格或色调</p>
+
+            <form method="GET" action="{% url 'search_visual' %}" style="max-width: 600px; margin: 20px auto;">
+                <div class="input-group input-group-lg">
+                    <input type="text" name="q" class="form-control"
+                           placeholder="试试输入: astro..."
+                           value="{{ visual_query }}">
+                    <span class="input-group-btn">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fa fa-magic"></i> 搜灵感
+                    </button>
+                </span>
+                </div>
+            </form>
+        </div>
+
+        {% if error %}
+            <div class="alert alert-danger text-center">{{ error }}</div>
+        {% endif %}
+
+        {% if visual_query and not movies %}
+            <div class="alert alert-warning text-center">
+                没有找到符合 "<strong>{{ visual_query }}</strong>" 的海报。
+            </div>
+        {% endif %}
+
+        <div class="row">
+            {% for movie in movies %}
+                <div class="col-sm-6 col-md-3" style="margin-bottom: 30px;">
+                    <div class="thumbnail"
+                         style="border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden;">
+                        <a href="{% url 'movie_detail' movie.id %}" style="text-decoration: none;">
+                            <div style="position: relative;">
+                                <img src="{{ movie.poster_url }}"
+                                     style="width: 100%; height: 350px; object-fit: cover;"
+                                     alt="{{ movie.title }}">
+
+                                <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: #fff; padding: 2px 10px; border-radius: 20px; font-size: 12px;">
+                                    ⭐ {{ movie.score }}
+                                </div>
+                            </div>
+
+                            <div class="caption">
+                                <h4 style="font-size: 16px; font-weight: bold; color: #333; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    {{ movie.title }}
+                                </h4>
+                                <p style="font-size: 12px; color: #777; line-height: 1.4; height: 34px; overflow: hidden;">
+                                    <i class="fa fa-magic"></i> {{ movie.caption }}
+                                </p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-md-12 text-center" style="margin-top: 50px;">
+                    <p class="text-muted">未能找到包含 "{{ visual_query }}" 视觉特征的本地海报电影。</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if movies %}
+            <div class="text-center" style="margin-top: 20px;">
+                <ul class="pagination">
+                    {{ page_string }}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ movie.title }} - 电影详情{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        {% if movie.is_sensitive %}
+        <div class="safety-mask"
+             style="position: absolute; top: 0; left: 15px; right: 15px; bottom: 0; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10;">
+            <i class="fa fa-eye-slash fa-3x" style="color: #d9534f;"></i>
+            <p style="color: white; margin-top: 10px;">可能包含{{ movie.sensitive_type }}内容</p>
+        </div>
+        <img src="{% if movie.poster_file %}{{ movie.poster_file.url }}{% else %}/static/img/no_poster.png{% endif %}"
+             style="width: 100%; filter: blur(15px); box-shadow: 0 4px 8px rgba(0,0,0,0.1);"
+             class="img-responsive img-thumbnail">
+        {% else %}
+        {% if movie.poster_file %}
+        <img src="{{ movie.poster_file.url }}" class="img-responsive img-thumbnail"
+             style="width: 100%; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        {% else %}
+        <img src="/static/img/no_poster.png" class="img-responsive img-thumbnail"
+             style="width: 100%; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        {% endif %}
+        {% endif %}
+    </div>
+
+    <div class="col-md-8">
+        <h1 style="margin-top: 0;">{{ movie.title }}</h1>
+        <hr>
+
+        <div class="collect-buttons" style="margin-bottom: 20px;">
+            {% if user.is_authenticated %}
+            <button id="btn-collect" data-movie-id="{{ movie.pk }}"
+                    class="btn {% if is_collected %}btn-success{% else %}btn-default btn-outline{% endif %} btn-lg">
+                {% if is_collected %}<i class="fa fa-check"></i> 已收藏{% else %}<i class="fa fa-star-o"></i> 收藏{% endif %}
+            </button>
+            {% else %}
+            <a href="{% url 'login_user' %}?next={{ request.path }}" class="btn btn-primary btn-lg">
+                <i class="fa fa-star"></i> 登录后收藏
+            </a>
+            {% endif %}
+        </div>
+
+        <p style="font-size: 1.2em;">
+            <strong><i class="fa fa-star" style="color: #f0ad4e;"></i> 评分:</strong>
+            <span style="color: #d9534f; font-weight: bold; font-size: 1.5em;">{{ movie.score|default:"暂无" }}</span>
+        </p>
+
+        <div class="panel panel-default">
+            <div class="panel-heading"><i class="fa fa-file-text-o"></i> 剧情简介</div>
+            <div class="panel-body" style="line-height: 1.6; color: #555;">{{ movie.summary|default:"暂无简介" }}</div>
+        </div>
+
+        <ul class="list-group">
+            <li class="list-group-item"><strong><i class="fa fa-calendar"></i> 上映:</strong> {{ movie.date|default:"未知" }}
+            </li>
+
+            <li class="list-group-item">
+                <strong><i class="fa fa-bullhorn"></i> 导演:</strong>
+                {% for d in movie.directors.all %}
+                <a href="/depot/?keyword={{ d.name }}" class="text-primary">{{ d.name }}</a>
+                {% if not forloop.last %} / {% endif %}
+                {% empty %}
+                <span class="text-muted">未知</span>
+                {% endfor %}
+            </li>
+
+            <li class="list-group-item">
+                <strong><i class="fa fa-users"></i> 主演:</strong>
+                {% for actor in movie.actors.all|slice:":5" %}
+                {{ actor.name }}{% if not forloop.last %} / {% endif %}
+                {% empty %}未知{% endfor %}
+            </li>
+
+            <li class="list-group-item">
+                <strong><i class="fa fa-tags"></i> 类型:</strong>
+                {% for genre in movie.genres.all %}
+                <span class="label label-info">{{ genre.name }}</span>&nbsp;
+                {% endfor %}
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+<hr>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    <i class="fa fa-pencil-square-o"></i>
+                    {% if my_rating %}更新您的评价{% else %}看过这部电影？留下你的评价{% endif %}
+                </h3>
+            </div>
+            <div class="panel-body">
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'score_movie' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="movie_id" value="{{ movie.id }}">
+
+                    <div class="form-group">
+                        <label>您的评分 (1-10分)：</label>
+                        <input type="number" class="form-control" name="score" min="1" max="10" step="0.1"
+                               value="{{ my_rating.score|default:'' }}" required placeholder="例如：8.5">
+                    </div>
+
+                    <div class="form-group">
+                        <label>简评 (可选)：</label>
+                        <textarea class="form-control" name="discussion" rows="3" placeholder="说说你的看法...">{{ my_rating.discussion|default:'' }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fa fa-paper-plane"></i> {% if my_rating %}更新我的评价{% else %}提交评价{% endif %}
+                    </button>
+                </form>
+                {% else %}
+                <div class="alert alert-warning text-center" style="margin-bottom: 0;">
+                    <p>您必须登录后才能对电影进行评分。</p>
+                    <a href="{% url 'login_user' %}?next={{ request.path }}" class="btn btn-default"
+                       style="margin-top: 10px;">立即登录</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-comments-o"></i> 观众短评</h3>
+            </div>
+            <ul class="list-group" style="max-height: 350px; overflow-y: auto;">
+                {% for comment in comments %}
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <strong><i class="fa fa-user-circle"></i> {{ comment.user.username }}</strong>
+                        <span class="badge" style="background-color: #f0ad4e;">{{ comment.score }} 分</span>
+                    </div>
+                    <p style="margin-top: 10px; color: #555;">{{ comment.discussion|default:"该用户只打分，没留下只言片语。" }}</p>
+                    <small class="text-muted">{{ comment.comment_time|date:"Y-m-d H:i" }}</small>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-center text-muted">
+                    <i class="fa fa-inbox fa-2x"></i><br>暂无观众评价，快来抢沙发吧！
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<br><br>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'plugins/echarts/echarts.min.js' %}"></script>
+
+<script>
+    $(document).ready(function () {
+        // ================= 1. 收藏按钮 AJAX 逻辑 =================
+        $('#btn-collect').click(function () {
+            var btn = $(this);
+            var movieId = btn.data('movie-id');
+
+            $.ajax({
+                url: '/ajax_collect/',  // 👉 注意：请确保这是你 urls.py 中处理收藏的正确路由
+                type: 'POST',
+                data: {
+                    'movie_id': movieId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (res) {
+                    // 判断 res.status 是不是 success
+                    if (res.status === 'success') {
+                        if (res.action === 'collected') {
+                            btn.removeClass('btn-default btn-outline').addClass('btn-success');
+                            btn.html('<i class="fa fa-check"></i> 已收藏');
+                        } else if (res.action === 'uncollected') {
+                            btn.removeClass('btn-success').addClass('btn-default btn-outline');
+                            btn.html('<i class="fa fa-star-o"></i> 收藏');
+                        }
+                    } else {
+                        alert(res.msg || '操作失败'); // 注意这里用 res.msg 获取后台报错信息
+                    }
+                },
+                error: function () {
+                    alert('网络请求失败，请稍后再试。');
+                }
+            });
+        });
+
+        // ================= 2. 电影知识图谱渲染逻辑 =================
+        var chartDom = document.getElementById('kg-chart');
+        if (chartDom) {
+            var myChart = echarts.init(chartDom);
+            myChart.showLoading({
+                text: '正在从 Neo4j 提取多跳知识图谱...',
+                color: '#337ab7',
+                textColor: '#000',
+                maskColor: 'rgba(255, 255, 255, 0.8)',
+                zlevel: 0
+            });
+
+            $.get('/ajax/kg_path/?movie_id={{ movie.id }}')
+                .done(function (data) {
+                    myChart.hideLoading();
+
+                    // 容错：如果没有数据
+                    if (!data.nodes || data.nodes.length === 0) {
+                        document.getElementById('kg-chart').innerHTML = '<div style="text-align:center; padding-top:200px; color:#999;"><i class="fa fa-frown-o fa-3x"></i><br>暂无图谱关联数据</div>';
+                        return;
+                    }
+
+                    // ── 节点视觉增强（必须在 setOption 之前执行）──────────────────
+                    // 1. 中心电影节点：金色光晕，加粗标签，绝对最大
+                    // 2. 导演节点：紫色光晕，强调因果锚点地位
+                    // 3. 演员节点：橙色，主动缩小不让它们喧宾夺主
+                    data.nodes.forEach(function (node) {
+                        if (node.is_center) {
+                            node.symbolSize = 70;
+                            node.itemStyle = {
+                                color: '#d9534f',
+                                borderColor: '#FFD700',
+                                borderWidth: 5,
+                                shadowBlur: 30,
+                                shadowColor: 'rgba(255,215,0,0.85)'
+                            };
+                            node.label = { show: true, fontWeight: 'bold', fontSize: 15, color: '#222' };
+                        } else if (node.category === 5) {   // 导演
+                            node.itemStyle = {
+                                borderColor: '#9b59b6',
+                                borderWidth: 3,
+                                shadowBlur: 18,
+                                shadowColor: 'rgba(155,89,182,0.7)'
+                            };
+                            node.label = { show: true, fontWeight: 'bold', fontSize: 12 };
+                        } else if (node.category === 1) {   // 演员（强制锁定小尺寸）
+                            node.symbolSize = Math.min(node.symbolSize, 25);
+                        } else if (node.category === 3) {   // 地区（极小）
+                            node.symbolSize = Math.min(node.symbolSize, 15);
+                        }
+                    });
+                    // ─────────────────────────────────────────────────────────
+
+                    var option = {
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: function (params) {
+                                if (params.dataType === 'node') {
+                                    return params.data.category === 0 ? '目标电影: ' + params.name : params.name;
+                                }
+                                return params.data.value; // 显示连线关系
+                            }
+                        },
+                        legend: {
+                            data: data.categories.map(function (a) { return a.name; }),
+                            orient: 'horizontal',
+                            bottom: 10
+                        },
+                        animationDurationUpdate: 1500,
+                        animationEasingUpdate: 'quinticInOut',
+                        series: [{
+                            type: 'graph',
+                            layout: 'force',
+                            data: data.nodes,
+                            links: data.links,
+                            categories: data.categories,
+                            roam: true,  // 允许拖拽和平移缩放
+                            label: {
+                                show: true,
+                                position: 'right',
+                                formatter: '{b}'
+                            },
+                            edgeSymbol: ['none', 'arrow'], // 连线末端显示箭头
+                            edgeSymbolSize: 8,
+                            lineStyle: {
+                                color: 'source',
+                                curveness: 0.2, // 增加弧度，防止连线重叠
+                                width: 1.5,
+                                opacity: 0.8
+                            },
+                            edgeLabel: {
+                                show: true,
+                                fontSize: 11,
+                                formatter: function (params) {
+                                    return params.data.value;
+                                }
+                            },
+                            force: {
+                                repulsion: 600,          // 更大的排斥力，演员被推到外圈
+                                edgeLength: [80, 180],
+                                gravity: 0.15,           // 轻微向心力，防止图谱飞散
+                                layoutAnimation: true
+                            },
+                            emphasis: {
+                                focus: 'adjacency',
+                                lineStyle: { width: 4 }
+                            }
+                        }]
+                    };
+
+                    myChart.setOption(option);
+
+                    // 节点点击跳转逻辑
+                    myChart.on('click', function (params) {
+                        if (params.data.url) {
+                            window.open(params.data.url, '_blank');
+                        }
+                    });
+                })
+                .fail(function () {
+                    myChart.hideLoading();
+                    document.getElementById('kg-chart').innerHTML = '<div style="text-align:center; padding-top:200px; color:#d9534f;"><i class="fa fa-warning fa-3x"></i><br>图谱加载失败，请检查网络或 Neo4j 状态</div>';
+                });
+
+            // 窗口大小改变时图表自适应
+            window.addEventListener('resize', function() {
+                myChart.resize();
+            });
+        }
+    });
+</script>
+{% endblock %}

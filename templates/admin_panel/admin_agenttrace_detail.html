@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}推理链详情{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="page-header">
+            <h1><i class="fa fa-code"></i> 推理链详情 #{{ trace.id }}
+                <small>{{ trace.user.username }} | {{ trace.created_at|date:"Y-m-d H:i:s" }}</small>
+            </h1>
+        </div>
+
+        <!-- 基本信息 -->
+        <div class="panel panel-info">
+            <div class="panel-heading"><i class="fa fa-info-circle"></i> 基本信息</div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-3"><strong>用户：</strong>{{ trace.user.username }}</div>
+                    <div class="col-md-3"><strong>意图：</strong><span class="label label-primary">{{ trace.intent }}</span></div>
+                    <div class="col-md-3"><strong>耗时：</strong>{{ trace.total_latency_ms }}ms</div>
+                    <div class="col-md-3"><strong>推荐数：</strong>{{ trace.recommended_movies|length }}</div>
+                </div>
+                <hr>
+                <p><strong>用户输入：</strong>{{ trace.user_input }}</p>
+            </div>
+        </div>
+
+        <!-- Thought -->
+        <div class="panel panel-default" style="border-left: 4px solid #4fc3f7;">
+            <div class="panel-heading" style="background:#f0f9ff;"><strong style="color:#4fc3f7;">[Thought]</strong> Agent 思考过程</div>
+            <div class="panel-body">
+                <pre style="background:#f8f9fa;white-space:pre-wrap;">{{ trace.thought }}</pre>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        {% if trace.actions %}
+        <div class="panel panel-default" style="border-left: 4px solid #81c784;">
+            <div class="panel-heading" style="background:#f0fff0;"><strong style="color:#81c784;">[Action]</strong> 执行动作</div>
+            <div class="panel-body">
+                {% for action in trace.actions %}
+                <div style="margin-bottom:8px;padding:8px;background:#f8f9fa;border-radius:4px;">
+                    <span class="label label-success">Action {{ forloop.counter }}</span>
+                    <strong>工具:</strong> {{ action.tool|default:"N/A" }}
+                    | <strong>输入:</strong> {{ action.input|default:"N/A" }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Observations -->
+        {% if trace.observations %}
+        <div class="panel panel-default" style="border-left: 4px solid #ffb74d;">
+            <div class="panel-heading" style="background:#fffaf0;"><strong style="color:#ffb74d;">[Observation]</strong> 观察结果</div>
+            <div class="panel-body">
+                {% for obs in trace.observations %}
+                <div style="margin-bottom:8px;padding:8px;background:#f8f9fa;border-radius:4px;">
+                    <span class="label label-warning">Obs {{ forloop.counter }}</span>
+                    <strong>工具:</strong> {{ obs.tool|default:"N/A" }}
+                    | <strong>结果数:</strong> {{ obs.count|default:0 }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Final Answer -->
+        <div class="panel panel-default" style="border-left: 4px solid #f48fb1;">
+            <div class="panel-heading" style="background:#fff0f5;"><strong style="color:#f48fb1;">[Final Answer]</strong> 最终回答</div>
+            <div class="panel-body">
+                <pre style="background:#f8f9fa;white-space:pre-wrap;">{{ trace.final_answer }}</pre>
+            </div>
+        </div>
+
+        <!-- 推荐电影 -->
+        {% if trace.recommended_movies %}
+        <div class="panel panel-success">
+            <div class="panel-heading"><i class="fa fa-film"></i> 推荐电影列表</div>
+            <div class="panel-body">
+                {% for mid in trace.recommended_movies %}
+                <a href="/movie/{{ mid }}/" class="btn btn-outline btn-default btn-sm" style="margin:2px;">Movie #{{ mid }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- 完整推理链文本 -->
+        <div class="panel panel-default">
+            <div class="panel-heading"><i class="fa fa-list"></i> 完整推理链文本</div>
+            <div class="panel-body">
+                <pre style="background:#1a1a2e;color:#e0e0e0;padding:15px;border-radius:8px;max-height:400px;overflow-y:auto;white-space:pre-wrap;">{{ react_display }}</pre>
+            </div>
+        </div>
+
+        <a href="{% url 'admin_agent_trace_list' %}" class="btn btn-default"><i class="fa fa-arrow-left"></i> 返回列表</a>
+    </div>
+</div>
+{% endblock %}

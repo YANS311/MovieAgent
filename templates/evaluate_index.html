@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}系统评估总览{% endblock %}
+
+{% block css %}
+<style>
+    .eval-container { max-width: 900px; margin: 0 auto; }
+    .stat-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .stat-card {
+        background: #fff; border-radius: 10px; padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06); text-align: center;
+        border-left: 4px solid #667eea;
+    }
+    .stat-card .number { font-size: 28px; font-weight: bold; color: #333; }
+    .stat-card .label { font-size: 13px; color: #888; margin-top: 5px; }
+    .eval-panel {
+        background: #fff; border-radius: 10px; padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 20px;
+    }
+    .eval-panel h4 { color: #333; margin-bottom: 15px; }
+    .metric-table { width: 100%; border-collapse: collapse; }
+    .metric-table th, .metric-table td { padding: 10px 15px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+    .metric-table th { background: #f8f9fa; color: #555; font-weight: 600; font-size: 13px; }
+    .metric-table td { font-size: 14px; }
+    .btn-eval {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff; border: none; border-radius: 8px; padding: 10px 24px;
+        font-weight: bold; cursor: pointer; transition: transform 0.2s;
+    }
+    .btn-eval:hover { transform: scale(1.03); color: #fff; }
+    .result-box {
+        background: #1a1a2e; color: #e0e0e0; border-radius: 8px; padding: 15px;
+        font-family: 'Courier New', monospace; font-size: 12px; max-height: 400px;
+        overflow-y: auto; display: none; margin-top: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="eval-container">
+    <h3><i class="fa fa-line-chart" style="color:#667eea;"></i> 系统评估总览</h3>
+    <p style="color:#888; font-size:13px; margin-bottom:20px;">论文实验数据采集与离线评估接口</p>
+
+    <!-- 数据统计 -->
+    <div class="stat-cards">
+        <div class="stat-card"><div class="number">{{ stats.total_users }}</div><div class="label">活跃用户</div></div>
+        <div class="stat-card"><div class="number">{{ stats.total_movies }}</div><div class="label">电影总数</div></div>
+        <div class="stat-card"><div class="number">{{ stats.total_ratings }}</div><div class="label">评分记录</div></div>
+        <div class="stat-card"><div class="number">{{ stats.total_recs }}</div><div class="label">推荐结果</div></div>
+        <div class="stat-card"><div class="number">{{ stats.total_traces }}</div><div class="label">Agent推理链</div></div>
+        <div class="stat-card"><div class="number">{{ stats.total_feedbacks }}</div><div class="label">用户反馈</div></div>
+    </div>
+
+    <!-- 评估接口 -->
+    <div class="eval-panel">
+        <h4><i class="fa fa-flask"></i> 离线评估指标</h4>
+        <table class="metric-table">
+            <thead><tr><th>指标</th><th>API路径</th><th>说明</th><th>操作</th></tr></thead>
+            <tbody>
+                <tr><td><strong>AUC</strong></td><td><code>/evaluate/auc/</code></td><td>排序质量（Area Under ROC Curve）</td><td><button class="btn btn-xs btn-default" onclick="runEval('auc')">运行</button></td></tr>
+                <tr><td><strong>NDCG@K</strong></td><td><code>/evaluate/ndcg/?k=10</code></td><td>排序精度（Normalized Discounted Cumulative Gain）</td><td><button class="btn btn-xs btn-default" onclick="runEval('ndcg')">运行</button></td></tr>
+                <tr><td><strong>HR@K</strong></td><td><code>/evaluate/hr/?k=10</code></td><td>命中率（Hit Rate at K）</td><td><button class="btn btn-xs btn-default" onclick="runEval('hr')">运行</button></td></tr>
+                <tr><td><strong>MRR</strong></td><td><code>/evaluate/mrr/</code></td><td>平均倒数排名（Mean Reciprocal Rank）</td><td><button class="btn btn-xs btn-default" onclick="runEval('mrr')">运行</button></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 一键评估 -->
+    <div class="eval-panel">
+        <h4><i class="fa fa-play-circle"></i> 一键完整评估</h4>
+        <p style="color:#888; font-size:13px;">运行所有指标的完整评估，结果可用于论文实验数据表。</p>
+        <button class="btn-eval" onclick="runFullEval()" id="btnFullEval">
+            <i class="fa fa-bolt"></i> 运行完整评估
+        </button>
+        <div class="result-box" id="evalResult"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+function runEval(metric) {
+    $.get('/evaluate/' + metric + '/', {sample_users: 30}, function(data) {
+        alert(metric.toUpperCase() + ': ' + data.value.toFixed(4) + ' (±' + data.std.toFixed(4) + ')\n采样用户: ' + data.sample_count);
+    }).fail(function() { alert('评估失败，请确保数据库中有足够的评分数据。'); });
+}
+
+function runFullEval() {
+    const btn = document.getElementById('btnFullEval');
+    const resultBox = document.getElementById('evalResult');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 评估中...';
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = '正在运行完整评估，请稍候...\n';
+
+    $.get('/evaluate/full/', {sample_users: 30}, function(data) {
+        resultBox.innerHTML = JSON.stringify(data.results, null, 2);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-play-circle"></i> 重新评估';
+    }).fail(function() {
+        resultBox.innerHTML = '评估失败。';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-play-circle"></i> 重试';
+    });
+}
+</script>
+{% endblock %}

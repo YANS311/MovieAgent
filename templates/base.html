@@ -1,0 +1,218 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}电影推荐网站{% endblock %}</title>
+
+    <link href="{% static 'plugins/bootstrap-3.4.1/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'plugins/font-awesome-4.7.0/css/font-awesome.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+
+    {% if user.is_authenticated and user.navbar_color %}
+        <style type="text/css">
+            /* 1. 应用到导航栏 */
+            .navbar-default {
+                background-color: {{ user.navbar_color }};
+                border-color: {{ user.navbar_color }};
+            }
+
+            /* 2. 应用到主页的 Jumbotron */
+            .home-page-jumbotron {
+                background-color: {{ user.navbar_color }};
+                border-bottom: 1px solid{{ user.navbar_color }};
+                background-image: none; /* 移除默认渐变 */
+            }
+
+            {% if user.navbar_color|slice:"1:3"|lower < "80" %}
+
+                /* -- 修复导航栏文字 -- */
+                .navbar-default .navbar-brand,
+                .navbar-default .navbar-nav > li > a {
+                    color: #ffffff;
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                }
+                .navbar-default .navbar-brand:hover,
+                .navbar-default .navbar-nav > li > a:hover {
+                    color: #eeeeee;
+                }
+                .navbar-default .navbar-nav > li > a .label {
+                    color: #fff;
+                }
+
+                /* -- 修复搜索框 -- */
+                .navbar-default .navbar-form .form-control {
+                    background-color: rgba(255, 255, 255, 0.2);
+                    border-color: rgba(255, 255, 255, 0.3);
+                    color: #fff;
+                }
+                .navbar-default .navbar-form .form-control::placeholder {
+                    color: rgba(255, 255, 255, 0.7);
+                }
+                .navbar-default .navbar-form .btn-default {
+                    background-color: rgba(255, 255, 255, 0.2);
+                    border-color: rgba(255, 255, 255, 0.3);
+                    color: #fff;
+                }
+
+                /* -- 修复 Jumbotron 文字 -- */
+                .home-page-jumbotron,
+                .home-page-jumbotron h1,
+                .home-page-jumbotron .lead {
+                    color: #ffffff;
+                    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+                }
+                /* -- 修复 Jumbotron 按钮 -- */
+                .home-page-jumbotron a.btn {
+                    color: #fff;
+                    background-color: transparent;
+                    border-color: #fff;
+                }
+                .home-page-jumbotron a.btn:hover {
+                    background-color: #fff;
+                    color: #333;
+                }
+
+                /* -- 修复下拉菜单 -- */
+                .navbar-default .navbar-nav > .open > a,
+                .navbar-default .navbar-nav > .open > a:hover,
+                .navbar-default .navbar-nav > .open > a:focus {
+                    background-color: rgba(0, 0, 0, 0.1);
+                    color: #fff;
+                }
+                .dropdown-menu {
+                    background-color: #fff;
+                }
+                .dropdown-menu > li > a {
+                    color: #333;
+                }
+                .dropdown-menu > li > a:hover {
+                    background-color: #f5f5f5;
+                    color: #333;
+                }
+
+            {% endif %}
+        </style>
+    {% endif %}
+
+    {% block css %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#main-navbar-collapse" aria-expanded="false">
+                <span class="sr-only">切换导航</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{% url 'front_index' %}">
+                <i class="fa fa-home"></i> 首页
+            </a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="main-navbar-collapse">
+
+            <ul class="nav navbar-nav">
+                <li><a href="{% url 'rank' %}"><i class="fa fa-bar-chart"></i> 排行榜</a></li>
+                <li><a href="{% url 'depot' %}"><i class="fa fa-database"></i> 影片库</a></li>
+                <li><a href="{% url 'recommendations' %}"><i class="fa fa-thumbs-up"></i> 个性化推荐</a></li>
+                <li>
+                    <a href="{% url 'agent_chat' %}">
+                        <i class="fa fa-robot"></i> 智能助手
+                        <span class="label label-success"
+                              style="position: relative; top: -2px; font-size: 10px;">ReAct</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'search_visual' %}">
+                        <i class="fa fa-magic"></i> 视觉搜索
+                        <span class="label label-danger"
+                              style="position: relative; top: -2px; font-size: 10px;">New</span>
+                    </a>
+                </li>
+            </ul>
+
+            <form class="navbar-form navbar-right" role="search" action="{% url 'search_results' %}" method="GET">
+                <div class="form-group">
+                    <input type="text" name="q" class="form-control" placeholder="搜索电影、演员..."
+                           value="{{ request.GET.q }}">
+                </div>
+                <button type="submit" class="btn btn-default">
+                    <i class="fa fa-search"></i>
+                </button>
+            </form>
+
+            <ul class="nav navbar-nav navbar-right">
+                {% if user.is_authenticated %}
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">
+                            <i class="fa fa-user-circle"></i> 欢迎, {{ user.username }} <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="{% url 'center' %}">
+                                    <i class="fa fa-id-card"></i> 个人中心
+                                </a>
+                            </li>
+                            {% if user.is_staff %}
+                                <li role="separator" class="divider"></li>
+                                <li>
+                                    <a href="{% url 'admin_index' %}">
+                                        <i class="fa fa-cogs"></i> 后台管理
+                                    </a>
+                                </li>
+                            {% endif %}
+                            <li role="separator" class="divider"></li>
+                            <li>
+                                <a href="{% url 'logout_user' %}">
+                                    <i class="fa fa-sign-out"></i> 登出
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'login_user' %}"><i class="fa fa-sign-in"></i> 登录</a></li>
+                    <li><a href="{% url 'register' %}"><i class="fa fa-user-plus"></i> 注册</a></li>
+                {% endif %}
+            </ul>
+
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% block content %}
+    {% endblock %}
+</div>
+
+<footer style="text-align: center; padding: 2rem; margin-top: 2rem; border-top: 1px solid #eee; color: #888;">
+    <p>电影推荐系统 &copy; 2025. All Rights Reserved.</p>
+</footer>
+
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap-3.4.1/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'plugins/echarts/echarts.min.js' %}"></script>
+
+{% block js %}{% endblock %}
+</body>
+</html>

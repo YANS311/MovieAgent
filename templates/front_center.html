@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+{% block title %}个人中心{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div class="row">
+            <div class="col-md-8">
+                <h1>
+                    <i class="fa fa-user-circle"></i>
+                    {{ user.username }} 的个人中心
+                </h1>
+                <p class="lead">
+                    在这里管理你的收藏、评论和偏好设置。
+                </p>
+
+                <div style="margin-top: 10px;">
+                    <span class="label {% if user.sex == 1 %}label-info{% elif user.sex == 2 %}label-danger{% else %}label-default{% endif %}" style="margin-right: 5px; font-size: 100%;">
+                        <i class="fa {% if user.sex == 1 %}fa-mars{% elif user.sex == 2 %}fa-venus{% else %}fa-genderless{% endif %}"></i>
+                        {{ user.get_sex_display }}
+                    </span>
+
+                    <span class="label label-primary" style="margin-right: 5px; font-size: 100%;">
+                        <i class="fa fa-birthday-cake"></i>
+                        {% if user.age %}{{ user.age }}岁{% else %}年龄保密{% endif %}
+                    </span>
+
+                    <span class="label label-success" style="margin-right: 5px; font-size: 100%;">
+                        <i class="fa fa-briefcase"></i>
+                        {% if user.occupation %}{{ user.get_occupation_display }}{% else %}职业保密{% endif %}
+                    </span>
+
+                    {% if not user.age and not user.occupation %}
+                        <small class="text-muted" style="margin-left: 10px;">
+                            (您尚未完善画像，AI 可能会“乱猜”哦~)
+                        </small>
+                    {% endif %}
+                </div>
+                </div>
+
+            <div class="col-md-4 text-right" style="margin-top: 20px;">
+                <p class="text-muted">
+                    <i class="fa fa-clock-o"></i> 注册于: {{ user.registration|date:"Y-m-d" }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="{% if active_tab == 'collections' %}active{% endif %}">
+                <a href="#collections" aria-controls="collections" role="tab" data-toggle="tab">
+                    我的收藏 <span class="badge">{{ collections_count }}</span>
+                </a>
+            </li>
+            <li role="presentation" class="{% if active_tab == 'ratings' %}active{% endif %}">
+                <a href="#ratings" aria-controls="ratings" role="tab" data-toggle="tab">
+                    我的评论/评分 <span class="badge">{{ ratings_count }}</span>
+                </a>
+            </li>
+            <li role="presentation" class="{% if active_tab == 'settings' %}active{% endif %}">
+                <a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">
+                    <i class="fa fa-paint-brush"></i> 个性化设置
+                </a>
+            </li>
+            <li role="presentation" class="{% if active_tab == 'excluded' %}active{% endif %}">
+                <a href="#excluded" aria-controls="excluded" role="tab" data-toggle="tab">
+                    <i class="fa fa-ban"></i> 排除列表
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content" style="padding-top: 20px;">
+
+            <div role="tabpanel" class="tab-pane fade {% if active_tab == 'collections' %}in active{% endif %}"
+                 id="collections">
+                <div class="row">
+                    {% for collect in collections_list %}
+                        <div class="col-md-2 col-sm-4 col-xs-6">
+                            <div class="thumbnail">
+                                <a href="{% url 'movie_detail' collect.movie.pk %}">
+
+                                    {# 1. 优先：如果有本地海报 #}
+                                    {% if collect.movie.poster_file %}
+                                        <img src="{{ collect.movie.poster_file.url }}"
+                                             alt="{{ collect.movie.title }}"
+                                             style="height: 200px; width: 100%; object-fit: cover;">
+
+                                        {# 2. 其次：如果有远程 URL (加上 no-referrer 防盗链) #}
+                                    {% elif collect.movie.poster %}
+                                        <img src="{{ collect.movie.poster }}"
+                                             referrerpolicy="no-referrer"
+                                             alt="{{ collect.movie.title }}"
+                                             style="height: 200px; width: 100%; object-fit: cover;">
+
+                                        {# 3. 兜底：既没本地也没远程，显示默认图 #}
+                                    {% else %}
+                                        <img src="/static/img/no_poster.png"
+                                             alt="暂无海报"
+                                             style="height: 200px; width: 100%; object-fit: cover;">
+                                    {% endif %}
+                                </a>
+                                <div class="caption" style="text-align: center; padding: 5px;">
+                                    <h5 style="margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        <a href="{% url 'movie_detail' collect.movie.pk %}"
+                                           title="{{ collect.movie.title }}">
+                                            {{ collect.movie.title }}
+                                        </a>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-md-12">
+                            <p class="text-muted">你还没有收藏任何电影。</p>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="text-center">
+                    <ul class="pagination">
+                        {{ collections_page_string|safe }}
+                    </ul>
+                </div>
+            </div>
+
+            <div role="tabpanel" class="tab-pane fade {% if active_tab == 'ratings' %}in active{% endif %}"
+                 id="ratings">
+
+                {% if ratings_count > 0 %}
+                    <div class="list-group">
+                        {% for rating in ratings_list %}
+                            <div class="list-group-item">
+                                <div class="row">
+                                    <div class="col-md-9">
+                                        <h4 class="list-group-item-heading">
+                                            <a href="{% url 'movie_detail' rating.movie.id %}">
+                                                {{ rating.movie.title }}
+                                            </a>
+                                            <small class="text-muted">
+                                                {{ rating.comment_time|date:"Y-m-d H:i" }}
+                                            </small>
+                                        </h4>
+                                    </div>
+                                    <div class="col-md-3 text-right">
+                                        {% if rating.score %}
+                                            <span class="label label-warning">{{ rating.score }} 分</span>
+                                        {% else %}
+                                            <span class="label label-default">未评分</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <p class="list-group-item-text" style="margin-top: 10px; color: #666;">
+                                    {% if rating.discussion %}
+                                        {{ rating.discussion }}
+                                    {% else %}
+                                        <i class="text-muted">(无文字评论)</i>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="text-center">
+                        <ul class="pagination">
+                            {{ ratings_page_string|safe }}
+                        </ul>
+                    </div>
+
+                {% else %}
+                    <div class="alert alert-warning" style="margin-top: 20px;">
+                        您还没有发表过任何评论或评分。
+                        <br>快去 <a href="{% url 'depot' %}" class="alert-link">影片库</a> 看看吧！
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <div role="tabpanel" class="tab-pane fade {% if active_tab == 'settings' %}in active{% endif %}" id="settings">
+                <div class="row">
+
+                    <div class="col-md-7">
+                        <div class="panel panel-info">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-id-card-o"></i> 修改个人资料</h3>
+                            </div>
+                            <div class="panel-body">
+                                <form method="POST">
+                                    {% csrf_token %}
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>{{ profile_form.username.label }}</label>
+                                                {{ profile_form.username }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>{{ profile_form.email.label }}</label>
+                                                {{ profile_form.email }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>{{ profile_form.sex.label }}</label>
+                                                {{ profile_form.sex }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>{{ profile_form.age.label }}</label>
+                                                {{ profile_form.age }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>{{ profile_form.occupation.label }}</label>
+                                                {{ profile_form.occupation }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr style="margin-top: 10px; margin-bottom: 15px;">
+
+                                    <button type="submit" name="submit_profile" class="btn btn-info btn-block">
+                                        <i class="fa fa-save"></i> 更新资料
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-paint-brush"></i> 外观设置</h3>
+                            </div>
+                            <div class="panel-body">
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label>{{ color_form.navbar_color.label }}</label>
+                                        {{ color_form.navbar_color }}
+                                        <p class="help-block">选择您喜欢的导航栏颜色。</p>
+                                    </div>
+
+                                    <hr>
+
+                                    <button type="submit" name="submit_color" class="btn btn-default btn-block">
+                                        <i class="fa fa-check"></i> 应用主题
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ═══ 排除列表 Tab ═══ -->
+            <div role="tabpanel" class="tab-pane fade {% if active_tab == 'excluded' %}in active{% endif %}" id="excluded">
+                <div class="alert alert-info">
+                    <i class="fa fa-info-circle"></i>
+                    以下电影已从<a href="{% url 'recommendations' %}" style="font-weight:bold; color:#31708f;">个性化推荐</a>和<a href="{% url 'agent_chat' %}" style="font-weight:bold; color:#31708f;">Agent推荐</a>中排除。
+                    点击「恢复推荐」可重新纳入推荐范围。
+                </div>
+                <div id="excludedList">
+                    <p class="text-muted text-center"><i class="fa fa-spinner fa-spin"></i> 加载中...</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+<script>
+// ═══ 加载排除列表 ═══
+function loadExcludedList() {
+    $.ajax({
+        url: '{% url "ajax_exclude_list" %}',
+        type: 'GET',
+        success: function(data) {
+            var container = document.getElementById('excludedList');
+            if (data.status !== 'ok' || !data.excluded_movies || data.excluded_movies.length === 0) {
+                container.innerHTML = '<div class="text-center" style="padding: 30px;">' +
+                    '<i class="fa fa-check-circle" style="color: #5cb85c; font-size: 48px;"></i>' +
+                    '<p style="margin-top: 15px; color: #999;">排除列表为空，所有电影均可被推荐。</p></div>';
+                return;
+            }
+            var html = '<div class="row">';
+            data.excluded_movies.forEach(function(m) {
+                var poster = m.poster || '/static/img/no_poster.png';
+                html += '<div class="col-md-3 col-sm-4 col-xs-6" style="margin-bottom: 20px;" id="exc-' + m.id + '">' +
+                    '<div class="thumbnail" style="position: relative;">' +
+                    '<img src="' + poster + '" style="height: 200px; width: 100%; object-fit: cover;" ' +
+                    'onerror="this.onerror=null;this.src=\'/static/img/no_poster.png\';">' +
+                    '<div class="caption">' +
+                    '<h5 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' +
+                    '<a href="/movie/' + m.id + '/">' + (m.title || '未知电影') + '</a></h5>' +
+                    '<p style="font-size: 11px; color: #999; margin: 0;">' + (m.created_at || '') + '</p>' +
+                    '<button class="btn btn-xs btn-success btn-block" style="margin-top: 5px;" ' +
+                    'onclick="restoreMovie(' + m.id + ', this)">' +
+                    '<i class="fa fa-undo"></i> 恢复推荐</button>' +
+                    '</div></div></div>';
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        },
+        error: function() {
+            document.getElementById('excludedList').innerHTML =
+                '<p class="text-danger text-center">加载失败，请刷新重试。</p>';
+        }
+    });
+}
+
+// ═══ 恢复推荐 ═══
+function restoreMovie(movieId, btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 处理中...';
+    $.ajax({
+        url: '{% url "ajax_exclude_remove" %}',
+        type: 'POST',
+        data: {
+            movie_id: movieId,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function(data) {
+            if (data.status === 'ok') {
+                var card = document.getElementById('exc-' + movieId);
+                if (card) {
+                    $(card).fadeOut(400, function() { $(this).remove(); });
+                }
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa fa-undo"></i> 恢复推荐';
+                alert(data.msg || '操作失败');
+            }
+        },
+        error: function() {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa fa-undo"></i> 恢复推荐';
+            alert('网络错误');
+        }
+    });
+}
+
+// 页面加载时获取排除列表
+$(document).ready(function() {
+    loadExcludedList();
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}确认删除{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-danger" style="margin-top: 50px;">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-exclamation-triangle"></i> 确认删除</h3>
+            </div>
+            <div class="panel-body text-center">
+                <p style="font-size: 18px; margin: 20px 0;">
+                    您确定要删除 <strong>{{ target_name }}</strong> 吗？
+                </p>
+                <p class="text-muted">此操作不可撤销。</p>
+                <hr>
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-lg">
+                        <i class="fa fa-trash"></i> 确认删除
+                    </button>
+                    <a href="{% url cancel_url %}" class="btn btn-default btn-lg">
+                        <i class="fa fa-arrow-left"></i> 取消返回
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

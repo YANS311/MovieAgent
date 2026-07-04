@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}编辑用户画像{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-2">
+        <div class="list-group">
+            <a href="{% url 'admin_index' %}" class="list-group-item"><i class="fa fa-dashboard"></i> 仪表盘</a>
+            <a href="{% url 'admin_user_list' %}" class="list-group-item"><i class="fa fa-users"></i> 用户管理</a>
+            <a href="{% url 'admin_movie_list' %}" class="list-group-item"><i class="fa fa-film"></i> 电影管理</a>
+            <a href="{% url 'admin_actor_list' %}" class="list-group-item"><i class="fa fa-star"></i> 演员管理</a>
+            <a href="{% url 'admin_comments' %}" class="list-group-item"><i class="fa fa-comments"></i> 评论管理</a>
+            <a href="{% url 'admin_director_list' %}" class="list-group-item"><i class="fa fa-male"></i> 导演管理</a>
+            <a href="{% url 'admin_user_profile_list' %}" class="list-group-item active"><i class="fa fa-id-card"></i> 用户画像</a>
+            <a href="{% url 'admin_agent_trace_list' %}" class="list-group-item"><i class="fa fa-code"></i> Agent推理链</a>
+            <a href="{% url 'admin_user_feedback_list' %}" class="list-group-item"><i class="fa fa-thumbs-up"></i> 用户反馈</a>
+        </div>
+    </div>
+
+    <div class="col-md-10">
+        <div class="page-header" style="margin-top: 0;">
+            <h1><i class="fa fa-pencil"></i> 编辑画像: {{ profile.user.username }}</h1>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">用户偏好数据（只读）</div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5>类型偏好 (genre_preferences)</h5>
+                        <pre>{{ profile.genre_preferences|pprint }}</pre>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>导演偏好 (director_preferences)</h5>
+                        <pre>{{ profile.director_preferences|pprint }}</pre>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>演员偏好 (actor_preferences)</h5>
+                        <pre>{{ profile.actor_preferences|pprint }}</pre>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>总评分数:</strong> {{ profile.total_ratings }} | <strong>平均评分:</strong> {{ profile.avg_score|floatformat:1 }} | <strong>总收藏:</strong> {{ profile.total_collections }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>最后更新:</strong> {{ profile.updated_at|date:"Y-m-d H:i:s" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">可编辑字段</div>
+            <div class="panel-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>画像描述 (profile_text)</label>
+                        <textarea name="profile_text" class="form-control" rows="5" placeholder="用户画像文本描述...">{{ profile.profile_text }}</textarea>
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" name="is_cold_start" {% if profile.is_cold_start %}checked{% endif %}>
+                            标记为冷启动状态
+                        </label>
+                    </div>
+                    <hr>
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> 保存修改</button>
+                    <a href="{% url 'admin_user_profile_list' %}" class="btn btn-default">返回列表</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

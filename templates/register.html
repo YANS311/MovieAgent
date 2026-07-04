@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}欢迎注册{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">欢迎注册</h3>
+            </div>
+            <div class="panel-body">
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form action="{% url 'register' %}" method="POST" novalidate>
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                        {% if field.name in 'username,email,password,password2' %}
+                            <div class="form-group {% if field.errors %}has-error{% endif %}">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }} {% if field.errors %}
+                                    <span class="help-block">{{ field.errors.0 }}</span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="panel panel-info" style="margin-top: 20px; border-style: dashed;">
+                        <div class="panel-heading" role="button" data-toggle="collapse" href="#profileCollapse" aria-expanded="false" aria-controls="profileCollapse" style="cursor: pointer;">
+                            <h3 class="panel-title">
+                                <i class="fa fa-magic"></i> 完善画像（选填）
+                                <small class="pull-right"><i class="fa fa-chevron-down"></i></small>
+                            </h3>
+                        </div>
+                        <div class="collapse in" id="profileCollapse">
+                            <div class="panel-body">
+                                <p class="text-muted" style="font-size: 12px; margin-bottom: 15px;">
+                                    填写以下信息，AI 助手可以在您还没看电影时，就为您推荐感兴趣的内容。（例如：为程序员推荐科幻片）
+                                </p>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{ form.sex.label }}</label>
+                                            {{ form.sex }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{ form.age.label }}</label>
+                                            {{ form.age }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{ form.occupation.label }}</label>
+                                            {{ form.occupation }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-block" style="margin-top: 20px;">
+                        <i class="fa fa-user-plus"></i> 立即注册
+                    </button>
+
+                    <div style="margin-top: 10px; text-align: center;">
+                        已有账户? <a href="{% url 'login_user' %}">立即登录</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

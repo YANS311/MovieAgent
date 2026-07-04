@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}电影知识图谱可视化{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="page-header" style="margin-top: 0;">
+            <h1><i class="fa fa-share-alt" style="color: #337ab7;"></i> 电影知识图谱概览 
+                <small>Knowledge Graph Visualization</small>
+            </h1>
+        </div>
+        
+        <div class="panel panel-default" style="border-top: 3px solid #337ab7;">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    <i class="fa fa-eye"></i> 实体关系网络 (Top 300 Relations)
+                    <button class="btn btn-xs btn-primary pull-right" onclick="window.location.reload()">
+                        <i class="fa fa-refresh"></i> 刷新图谱
+                    </button>
+                </h3>
+            </div>
+            <div class="panel-body" style="padding: 0;">
+                <div id="kg-container" style="width: 100%; height: 700px; background-color: #f8f9fa;"></div>
+            </div>
+            <div class="panel-footer text-muted">
+                <i class="fa fa-info-circle"></i> 
+                <strong>操作提示：</strong> 滚轮缩放 | 拖拽节点 | 鼠标悬停查看详情
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'plugins/echarts/echarts.min.js' %}"></script>
+<script>
+$(document).ready(function() {
+    var myChart = echarts.init(document.getElementById('kg-container'));
+    
+    myChart.showLoading({
+        text: '正在加载图谱数据...',
+        color: '#337ab7',
+        textColor: '#000',
+        maskColor: 'rgba(255, 255, 255, 0.8)',
+    });
+
+    $.get('{% url "api_kg_data" %}', function (graph) {
+        myChart.hideLoading();
+        
+        if (!graph.nodes || graph.nodes.length === 0) {
+            $('#kg-container').html('<h3 class="text-center" style="line-height:700px; color:#999;">暂无图谱数据，请先执行构建脚本</h3>');
+            return;
+        }
+
+        var option = {
+            title: {
+                text: 'Movie Knowledge Graph',
+                subtext: 'Entities: ' + graph.nodes.length + ' | Relations: ' + graph.links.length,
+                top: 'bottom',
+                left: 'right'
+            },
+            tooltip: {},
+            legend: [{
+                data: graph.categories.map(function (a) { return a.name; }),
+                top: 10,
+                left: 10,
+                orient: 'vertical',
+                backgroundColor: 'rgba(255,255,255,0.8)',
+                padding: 10,
+                borderRadius: 5
+            }],
+            animationDuration: 1500,
+            animationEasingUpdate: 'quinticInOut',
+            series: [
+                {
+                    name: '知识图谱',
+                    type: 'graph',
+                    layout: 'force',
+                    data: graph.nodes,
+                    links: graph.links,
+                    categories: graph.categories,
+                    roam: true, // 开启缩放和平移
+                    
+                    // 节点样式
+                    label: {
+                        show: true,
+                        position: 'right',
+                        formatter: '{b}',
+                        fontSize: 10
+                    },
+                    
+                    // 关系连线样式
+                    lineStyle: {
+                        color: 'source',
+                        curveness: 0.3,
+                        opacity: 0.7
+                    },
+                    
+                    // 力引导布局配置
+                    force: {
+                        repulsion: 200,    // 排斥力，越大节点越分散
+                        edgeLength: [50, 150], // 边的长度范围
+                        gravity: 0.1       // 引力，防止节点飞出屏幕
+                    },
+                    
+                    // 高亮样式
+                    emphasis: {
+                        focus: 'adjacency', // 鼠标悬停时，高亮邻居
+                        lineStyle: {
+                            width: 5
+                        }
+                    }
+                }
+            ]
+        };
+        myChart.setOption(option);
+        
+        // 窗口大小改变时自动调整
+        window.onresize = function() {
+            myChart.resize();
+        };
+    });
+});
+</script>
+{% endblock %}
