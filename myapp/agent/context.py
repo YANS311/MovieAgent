@@ -158,10 +158,12 @@ class SkillContext:
         if 'output' in result and isinstance(result['output'], list):
             self.candidate_movies = result['output']
 
-    def complete(self, final_answer: str = "", recommended_ids: list = None):
+    def complete(self, final_answer: str = None, recommended_ids: list = None):
         """标记推理完成。"""
-        self.final_answer = final_answer
-        self.recommended_ids = recommended_ids or []
+        if final_answer is not None:
+            self.final_answer = final_answer
+        if recommended_ids is not None:
+            self.recommended_ids = recommended_ids
         self.metadata['completed_at'] = time.time()
         if self.metadata['created_at']:
             self.metadata['latency_ms'] = int(
