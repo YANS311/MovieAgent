@@ -1,5 +1,5 @@
 """
-VectorSearchSkill — 向量语义搜索 Skill
+VectorSearchSkill — 向量语义搜索 Skill（v2）
 =================================================
 封装 FAISS 向量召回 + 热门兜底逻辑。
 对应原有 AgentTool: SearchVectorTool
@@ -14,6 +14,15 @@ class VectorSearchSkill(BaseSkill):
 
     name = "search_vector"
     description = "基于语义相似度搜索电影（FAISS + BGE 向量召回，热门兜底）"
+    version = "2.0.0"
+    priority = 90
+    latency_level = "low"
+    cost_level = "low"
+    tags = ["retrieval", "semantic", "vector"]
+    examples = [
+        {"input": {"query": "推荐科幻电影"}, "output": "候选电影列表"},
+        {"input": {"query": "类似盗梦空间的"}, "output": "语义相似电影"},
+    ]
 
     input_schema = {
         "type": "object",
@@ -27,16 +36,7 @@ class VectorSearchSkill(BaseSkill):
     output_schema = {
         "type": "object",
         "properties": {
-            "results": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "movie_id": {"type": "integer"},
-                        "score": {"type": "number"},
-                    },
-                },
-            },
+            "results": {"type": "array"},
             "count": {"type": "integer"},
             "source": {"type": "string"},
         },
@@ -45,16 +45,23 @@ class VectorSearchSkill(BaseSkill):
     def __init__(self, rag_resources=None):
         self.rag_resources = rag_resources
 
-    def can_handle(self, context: dict) -> bool:
-        intent = context.get('intent', '')
+    def can_handle(self, context) -> bool:
+        if hasattr(context, 'intent'):
+            intent = context.intent
+        else:
+            intent = context.get('intent', '')
         return intent in ('QUERY_MOVIE', 'QUERY_COMPARISON', 'QUERY_PROFILE_REC')
 
-    def run(self, context: dict) -> dict:
+    def run(self, context) -> dict:
         import time
         t0 = time.time()
 
-        query = context.get('query', '')
-        k = context.get('k', 10)
+        if hasattr(context, 'user_input'):
+            query = context.user_input
+            k = context.metadata.get('k', 10) if hasattr(context, 'metadata') else 10
+        else:
+            query = context.get('query', '')
+            k = context.get('k', 10)
 
         from myapp.recommender.recall import vector_recall, hot_recall
 
@@ -74,11 +81,11 @@ class VectorSearchSkill(BaseSkill):
             elapsed=f"{elapsed:.3f}s",
         )
 
-    def fallback(self, context: dict, error: Exception) -> dict:
-        """降级：返回热门电影。"""
+    def fallback(self, context, error: Exception) -> dict:
         try:
             from myapp.recommender.recall import hot_recall
-            results = hot_recall(k=context.get('k', 10))
+            k = context.metadata.get('k', 10) if hasattr(context, 'metadata') else context.get('k', 10)
+            results = hot_recall(k=k)
             return {
                 'skill': self.name,
                 'success': True,

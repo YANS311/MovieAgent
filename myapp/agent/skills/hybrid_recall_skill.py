@@ -1,5 +1,5 @@
 """
-HybridRecallSkill — 多路混合召回 Skill
+HybridRecallSkill — 多路混合召回 Skill（v2）
 =================================================
 封装五路并行召回（向量+内容+模型+图谱+热门）。
 对应原有 AgentTool: RecallHybridTool
@@ -14,21 +14,29 @@ class HybridRecallSkill(BaseSkill):
 
     name = "recall_hybrid"
     description = "五路并行召回（向量语义+内容特征+深度模型+知识图谱+热门兜底）"
+    version = "2.0.0"
+    priority = 95
+    latency_level = "medium"
+    cost_level = "medium"
+    tags = ["retrieval", "hybrid", "multi-channel"]
+    examples = [
+        {"input": {"query": "推荐好看的电影"}, "output": "多路融合候选"},
+    ]
 
     input_schema = {
         "type": "object",
         "properties": {
-            "user": {"description": "用户对象（可选）"},
-            "query_text": {"type": "string", "description": "查询文本（可选）"},
-            "top_k": {"type": "integer", "description": "召回数量", "default": 15},
+            "user": {"description": "用户对象"},
+            "query_text": {"type": "string"},
+            "top_k": {"type": "integer", "default": 15},
         },
     }
 
     output_schema = {
         "type": "object",
         "properties": {
-            "results": {"type": "array", "description": "召回候选列表"},
-            "stats": {"type": "object", "description": "各路召回统计"},
+            "results": {"type": "array"},
+            "stats": {"type": "object"},
             "count": {"type": "integer"},
         },
     }
@@ -37,17 +45,25 @@ class HybridRecallSkill(BaseSkill):
         self.neo_graph = neo_graph
         self.rag_resources = rag_resources
 
-    def can_handle(self, context: dict) -> bool:
-        intent = context.get('intent', '')
+    def can_handle(self, context) -> bool:
+        if hasattr(context, 'intent'):
+            intent = context.intent
+        else:
+            intent = context.get('intent', '')
         return intent in ('QUERY_PROFILE_REC', 'QUERY_MOVIE', 'RECOMMEND')
 
-    def run(self, context: dict) -> dict:
+    def run(self, context) -> dict:
         import time
         t0 = time.time()
 
-        user = context.get('user')
-        query_text = context.get('query_text') or context.get('query', '')
-        top_k = context.get('top_k', 15)
+        if hasattr(context, 'user'):
+            user = context.user
+            query_text = context.user_input or ''
+            top_k = context.metadata.get('top_k', 15) if hasattr(context, 'metadata') else 15
+        else:
+            user = context.get('user')
+            query_text = context.get('query_text') or context.get('query', '')
+            top_k = context.get('top_k', 15)
 
         from myapp.recommender.recall import multi_channel_recall, hot_recall
 
@@ -69,11 +85,11 @@ class HybridRecallSkill(BaseSkill):
             elapsed=f"{elapsed:.3f}s",
         )
 
-    def fallback(self, context: dict, error: Exception) -> dict:
-        """降级：返回热门电影。"""
+    def fallback(self, context, error: Exception) -> dict:
         try:
             from myapp.recommender.recall import hot_recall
-            results = hot_recall(k=context.get('top_k', 15))
+            top_k = context.metadata.get('top_k', 15) if hasattr(context, 'metadata') else context.get('top_k', 15)
+            results = hot_recall(k=top_k)
             return {
                 'skill': self.name,
                 'success': True,

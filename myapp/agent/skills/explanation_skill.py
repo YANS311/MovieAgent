@@ -1,5 +1,5 @@
 """
-ExplanationSkill — 推荐理由生成 Skill
+ExplanationSkill — 推荐理由生成 Skill（v2）
 =================================================
 封装推荐可解释性逻辑（知识图谱归因 + 用户画像匹配）。
 对应原有 AgentTool: ExplainTool
@@ -14,17 +14,21 @@ class ExplanationSkill(BaseSkill):
 
     name = "explain"
     description = "生成推荐理由（含知识图谱归因 + 用户画像匹配）"
+    version = "2.0.0"
+    priority = 60
+    latency_level = "medium"
+    cost_level = "low"
+    tags = ["explanation", "xai", "knowledge"]
+    examples = [
+        {"input": {"movie_id": 1}, "output": "推荐理由文本"},
+    ]
 
     input_schema = {
         "type": "object",
         "properties": {
             "user": {"description": "用户对象"},
-            "movie_id": {"type": "integer", "description": "目标电影ID"},
-            "enable_kag": {
-                "type": "boolean",
-                "description": "是否启用知识图谱增强",
-                "default": True,
-            },
+            "movie_id": {"type": "integer"},
+            "enable_kag": {"type": "boolean", "default": True},
         },
         "required": ["user", "movie_id"],
     }
@@ -32,10 +36,9 @@ class ExplanationSkill(BaseSkill):
     output_schema = {
         "type": "object",
         "properties": {
-            "reason_text": {"type": "string", "description": "推荐理由文本"},
-            "reason_type": {"type": "string", "description": "理由类型"},
-            "strength": {"type": "number", "description": "推荐强度"},
-            "kg_path": {"type": "array", "description": "知识图谱归因路径"},
+            "reason_text": {"type": "string"},
+            "reason_type": {"type": "string"},
+            "strength": {"type": "number"},
         },
     }
 
@@ -43,21 +46,24 @@ class ExplanationSkill(BaseSkill):
         self.neo_graph = neo_graph
         self.enable_kag = enable_kag
 
-    def can_handle(self, context: dict) -> bool:
-        # 有 user 和 movie_id 就能生成解释
+    def can_handle(self, context) -> bool:
+        if hasattr(context, 'user') and hasattr(context, 'metadata'):
+            return context.user is not None and context.metadata.get('current_movie_id') is not None
         return context.get('user') is not None and context.get('movie_id') is not None
 
-    def run(self, context: dict) -> dict:
+    def run(self, context) -> dict:
         import time
         t0 = time.time()
 
-        user = context['user']
-        movie_id = context['movie_id']
+        if hasattr(context, 'user'):
+            user = context.user
+            movie_id = context.metadata.get('current_movie_id')
+        else:
+            user = context.get('user')
+            movie_id = context.get('movie_id')
 
-        # 复用原有 ExplainTool 的逻辑
         from myapp.agent.movie_agent import ExplainTool
         tool = ExplainTool(neo_graph=self.neo_graph, enable_kag=self.enable_kag)
-
         result = tool.execute(user=user, movie_id=movie_id)
 
         elapsed = time.time() - t0
@@ -72,9 +78,11 @@ class ExplanationSkill(BaseSkill):
             elapsed=f"{elapsed:.3f}s",
         )
 
-    def fallback(self, context: dict, error: Exception) -> dict:
-        """降级：返回通用推荐理由。"""
-        movie_id = context.get('movie_id')
+    def fallback(self, context, error: Exception) -> dict:
+        if hasattr(context, 'metadata'):
+            movie_id = context.metadata.get('current_movie_id')
+        else:
+            movie_id = context.get('movie_id')
         try:
             from myapp.models import Movie
             movie = Movie.objects.get(mid=movie_id)

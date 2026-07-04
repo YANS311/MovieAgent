@@ -1,5 +1,5 @@
 """
-NeuralRerankSkill — 神经网络精排 Skill
+NeuralRerankSkill — 神经网络精排 Skill（v2）
 =================================================
 封装 MAAN / SKB-FMLP 深度模型精排。
 对应原有 AgentTool: MAANRerankTool
@@ -21,16 +21,21 @@ class NeuralRerankSkill(BaseSkill):
 
     name = "maan_rerank"
     description = "使用 MAAN 深度多模态模型对候选电影精排（模型不可用时自动降级）"
+    version = "2.0.0"
+    priority = 85
+    latency_level = "high"
+    cost_level = "high"
+    tags = ["ranking", "neural", "multimodal"]
+    examples = [
+        {"input": {"candidates": "候选列表"}, "output": "精排后列表"},
+    ]
 
     input_schema = {
         "type": "object",
         "properties": {
-            "candidates": {
-                "type": "array",
-                "description": "候选电影列表（含 movie_id 和 score）",
-            },
-            "user": {"description": "用户对象（可选）"},
-            "top_k": {"type": "integer", "description": "精排后保留数量", "default": 10},
+            "candidates": {"type": "array"},
+            "user": {"description": "用户对象"},
+            "top_k": {"type": "integer", "default": 10},
         },
         "required": ["candidates"],
     }
@@ -38,27 +43,33 @@ class NeuralRerankSkill(BaseSkill):
     output_schema = {
         "type": "object",
         "properties": {
-            "results": {"type": "array", "description": "精排后候选列表"},
-            "model_used": {"type": "string", "description": "实际使用的模型"},
+            "results": {"type": "array"},
+            "model_used": {"type": "string"},
             "count": {"type": "integer"},
         },
     }
 
-    _model_available = None  # 类级别缓存，避免重复检测
+    _model_available = None
 
-    def can_handle(self, context: dict) -> bool:
+    def can_handle(self, context) -> bool:
+        if hasattr(context, 'candidate_movies'):
+            return len(context.candidate_movies) > 0
         candidates = context.get('candidates', [])
         return len(candidates) > 0
 
-    def run(self, context: dict) -> dict:
+    def run(self, context) -> dict:
         import time
         t0 = time.time()
 
-        candidates = context.get('candidates', [])
-        user = context.get('user')
-        top_k = context.get('top_k', 10)
+        if hasattr(context, 'candidate_movies'):
+            candidates = context.candidate_movies
+            user = context.user
+            top_k = context.metadata.get('top_k', 10) if hasattr(context, 'metadata') else 10
+        else:
+            candidates = context.get('candidates', [])
+            user = context.get('user')
+            top_k = context.get('top_k', 10)
 
-        # 检测模型是否可用
         if self._model_available is None:
             self._model_available = self._check_model_files()
 
@@ -71,11 +82,9 @@ class NeuralRerankSkill(BaseSkill):
             except Exception as e:
                 logger.warning(f"[NeuralRerankSkill] 模型推理失败，降级: {e}")
 
-        # 降级：按原始 score 排序
         return self.fallback(context, Exception("模型不可用"))
 
     def _run_neural(self, candidates, user, top_k) -> dict:
-        """调用原有 MAANRerankTool。"""
         from myapp.agent.movie_agent import MAANRerankTool
         tool = MAANRerankTool()
         result = tool.execute(candidates=candidates, user=user, top_k=top_k)
@@ -89,16 +98,16 @@ class NeuralRerankSkill(BaseSkill):
             },
         }
 
-    def fallback(self, context: dict, error: Exception) -> dict:
-        """降级：按原始 score 排序，截取 top_k。"""
-        candidates = context.get('candidates', [])
-        top_k = context.get('top_k', 10)
+    def fallback(self, context, error: Exception) -> dict:
+        if hasattr(context, 'candidate_movies'):
+            candidates = context.candidate_movies
+            top_k = context.metadata.get('top_k', 10) if hasattr(context, 'metadata') else 10
+        else:
+            candidates = context.get('candidates', [])
+            top_k = context.get('top_k', 10)
 
-        # 按 score 降序排序
         sorted_candidates = sorted(
-            candidates,
-            key=lambda x: x.get('score', 0),
-            reverse=True,
+            candidates, key=lambda x: x.get('score', 0), reverse=True,
         )[:top_k]
 
         return {
@@ -115,25 +124,19 @@ class NeuralRerankSkill(BaseSkill):
 
     @staticmethod
     def _check_model_files() -> bool:
-        """检查模型权重文件是否存在。"""
         import os
         from django.conf import settings
-
         base = getattr(settings, 'BASE_DIR', os.path.dirname(os.path.dirname(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-
-        # 检查常见模型路径
         model_paths = [
             os.path.join(base, 'deepfm_best.pth'),
             os.path.join(base, 'deepfm_sota.pth'),
             os.path.join(base, 'local_models', 'maan_best.pth'),
             os.path.join(base, 'ml_artifacts', 'model.pth'),
         ]
-
         for path in model_paths:
             if os.path.exists(path):
                 logger.info(f"[NeuralRerankSkill] 找到模型权重: {path}")
                 return True
-
         logger.info("[NeuralRerankSkill] 未找到模型权重，将使用降级排序")
         return False

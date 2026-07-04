@@ -1,5 +1,5 @@
 """
-GraphReasoningSkill — 知识图谱推理 Skill
+GraphReasoningSkill — 知识图谱推理 Skill（v2）
 =================================================
 封装 Neo4j 图谱查询 + NL2Cypher 逻辑。
 对应原有 AgentTool: KGQueryTool
@@ -14,16 +14,21 @@ class GraphReasoningSkill(BaseSkill):
 
     name = "kg_query"
     description = "将自然语言约束动态转换为 Cypher 查询知识图谱"
+    version = "2.0.0"
+    priority = 70
+    latency_level = "medium"
+    cost_level = "low"
+    tags = ["retrieval", "graph", "knowledge"]
+    examples = [
+        {"input": {"query": "诺兰导演的科幻片"}, "output": "图谱三元组"},
+    ]
 
     input_schema = {
         "type": "object",
         "properties": {
             "query": {"type": "string", "description": "自然语言查询"},
-            "constraints": {
-                "type": "object",
-                "description": "结构化约束（genre/director/actor/year/rating）",
-            },
-            "anchor_mid": {"type": "integer", "description": "锚点电影ID（可选）"},
+            "constraints": {"type": "object"},
+            "anchor_mid": {"type": "integer"},
         },
         "required": ["query"],
     }
@@ -31,8 +36,8 @@ class GraphReasoningSkill(BaseSkill):
     output_schema = {
         "type": "object",
         "properties": {
-            "triples": {"type": "array", "description": "图谱三元组"},
-            "cypher": {"type": "string", "description": "生成的 Cypher 查询"},
+            "triples": {"type": "array"},
+            "cypher": {"type": "string"},
             "count": {"type": "integer"},
         },
     }
@@ -40,27 +45,27 @@ class GraphReasoningSkill(BaseSkill):
     def __init__(self, neo_graph=None):
         self.neo_graph = neo_graph
 
-    def can_handle(self, context: dict) -> bool:
-        intent = context.get('intent', '')
+    def can_handle(self, context) -> bool:
+        if hasattr(context, 'intent'):
+            intent = context.intent
+        else:
+            intent = context.get('intent', '')
         return intent in ('QUERY_KG', 'QUERY_MOVIE', 'QUERY_COMPARISON')
 
-    def run(self, context: dict) -> dict:
+    def run(self, context) -> dict:
         import time
         t0 = time.time()
 
-        query = context.get('query', '')
-        constraints = context.get('constraints', {})
-        anchor_mid = context.get('anchor_mid')
+        if hasattr(context, 'user_input'):
+            query = context.user_input
+            constraints = context.constraints
+        else:
+            query = context.get('query', '')
+            constraints = context.get('constraints', {})
 
-        # 复用原有 KGQueryTool 的逻辑
         from myapp.agent.movie_agent import KGQueryTool
         tool = KGQueryTool(neo_graph=self.neo_graph)
-
-        result = tool.execute(
-            query=query,
-            constraints=constraints,
-            anchor_mid=anchor_mid,
-        )
+        result = tool.execute(query=query, constraints=constraints)
 
         elapsed = time.time() - t0
 
