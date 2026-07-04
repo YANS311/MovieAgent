@@ -2,7 +2,7 @@
 """Quick script to run Pure LLM and Naive RAG baselines"""
 import os, sys, time, json, math, requests
 sys.path.insert(0, os.path.dirname(__file__))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'DjangoProject3.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'movie.settings')
 
 import django
 django.setup()

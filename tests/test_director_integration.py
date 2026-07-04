@@ -10,7 +10,7 @@ import django
 import sys
 
 # 设置Django环境
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'DjangoProject3.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'movie.settings')
 django.setup()
 
 from myapp.models import Movie, Actor

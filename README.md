@@ -67,7 +67,7 @@ MovieAgent（ReAct 推理引擎）
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/<your-username>/MovieAgent.git
+git clone https://github.com/YANS311/MovieAgent.git
 cd MovieAgent
 
 # 2. 配置环境变量
@@ -181,32 +181,26 @@ MovieAgent/
 │   ├── settings.py              数据库 / 缓存 / LLM / 安全配置
 │   └── urls.py                  根路由
 ├── myapp/                       Django 主应用
-│   ├── models.py                数据模型（Movie / UserInfo / UserRating / Collect / Rec / ChatHistory）
-│   ├── models_upgrade.py        扩展模型（AgentTrace / UserProfile / RecommendLog / UserFeedback）
-│   ├── views.py                 前台视图（首页 / 推荐 / 搜索 / 收藏 / 评分 / 后台管理）
-│   ├── agent_views.py           Agent 视图（聊天 / SSE 流式 / 推理链 / 反馈）
-│   ├── evaluate_views.py        离线评估视图
+│   ├── models.py                数据模型
+│   ├── views.py                 前台视图
+│   ├── agent_views.py           Agent 视图
 │   ├── agent/                   ReAct Agent 引擎
-│   │   ├── movie_agent.py       MovieAgent 核心（意图分类 / 工具集 / ReAct 循环）
-│   │   ├── memory.py            对话记忆管理
-│   │   └── evaluate_agent.py    Agent 离线评估
+│   │   ├── movie_agent.py       MovieAgent 核心
+│   │   └── memory.py            对话记忆管理
 │   ├── recommender/             推荐管线
 │   │   ├── recall.py            五路并行召回
-│   │   ├── rank.py              精排（加权评分 / 深度模型 / 多样性感知）
-│   │   ├── rerank.py            重排（敏感过滤 / 去重 / 未成年保护）
+│   │   ├── rank.py              精排
+│   │   ├── rerank.py            重排
 │   │   └── explain.py           推荐理由生成
 │   ├── services/                业务服务层
-│   │   └── agent_chat_service.py  Agent 聊天服务封装
-│   ├── utils/                   工具模块
-│   │   ├── graph_rag.py         Neo4j 图谱问答
-│   │   ├── vector_rag.py        FAISS 向量检索
-│   │   ├── xai_explainer.py     可解释性增强（拟人化思考流 / 归因雷达）
-│   │   ├── content_safety.py    内容安全检测
-│   │   └── director_styles.py   导演风格库
+│   ├── utils/                   工具模块（GraphRAG / VectorRAG / XAI）
 │   ├── management/commands/     Django 管理命令（30+）
 │   └── migrations/              数据库迁移
 ├── templates/                   HTML 模板
-├── static/                      静态资源（CSS / JS / 图片 / 插件）
+├── static/                      静态资源
+├── experiments/                 实验脚本（run_*.py / 消融 / 基准测试）
+├── tests/                       测试脚本
+├── scripts/                     数据处理与工具脚本
 ├── Dockerfile                   Docker 镜像定义
 ├── docker-compose.yml           Docker 编排（5 服务）
 ├── entrypoint.sh                Docker 启动脚本
@@ -214,20 +208,6 @@ MovieAgent/
 ├── .env.example                 环境变量模板
 └── LICENSE                      MIT License
 ```
-
-## 截图
-
-> 以下截图位置待补充
-
-| 页面 | 路径 |
-|------|------|
-| 首页 | `/` |
-| Agent 聊天 | `/agent/chat/` |
-| 推理链展示 | `/agent/trace/` |
-| 推荐解释 | `/movie/<id>/explain/` |
-| 知识图谱 | `/agent/kg/` |
-| 管理后台 | `/admin_panel/` |
-| 离线评估 | `/evaluate/` |
 
 ## 许可证
 
