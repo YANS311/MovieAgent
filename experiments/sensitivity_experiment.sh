@@ -3,7 +3,7 @@
 # 对不同超参组合进行对比实验
 # 超参范围: LR (1e-4, 1e-3, 5e-3), Batch (512, 1024, 2048)
 set -e
-PROJECT_DIR="/home/daylight/下载/DjangoProject3/DjangoProject3"
+PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 TRAIN_SCRIPT="run_ml1m_benchmark_final.py"
 RESULTS_DIR="${PROJECT_DIR}/sensitivity_results"
 RESULTS_CSV="${RESULTS_DIR}/sensitivity_experiment_summary.csv"

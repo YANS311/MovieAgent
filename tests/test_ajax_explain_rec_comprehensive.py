@@ -8,7 +8,7 @@ import django
 
 # 设置 Django 环境
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'movie.settings')
-sys.path.insert(0, '/home/daylight/下载/DjangoProject3/DjangoProject3')
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 django.setup()
 

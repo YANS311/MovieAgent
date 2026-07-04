@@ -11,10 +11,13 @@ from django.db import transaction
 from django.db.models import Q, Count
 
 # --- 1. 代理设置 ---
-proxies_dict = {
-    'http': 'http://127.0.0.1:7897',
-    'https': 'http://127.0.0.1:7897',
-}
+_http_proxy = os.environ.get('HTTP_PROXY', '')
+_https_proxy = os.environ.get('HTTPS_PROXY', '')
+proxies_dict = {}
+if _http_proxy:
+    proxies_dict['http'] = _http_proxy
+if _https_proxy:
+    proxies_dict['https'] = _https_proxy
 
 # --- 2. (增强版) 地区名称规范化字典 ---
 REGION_NORMALIZE_MAP = {

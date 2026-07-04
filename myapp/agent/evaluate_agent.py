@@ -5,7 +5,7 @@ MovieAgent 真实评测管线 (Agent Evaluation Pipeline)
 → 保存 logs/*.json → 输出统计结果到 Markdown
 
 用法:
-    cd /home/daylight/下载/DjangoProject3/DjangoProject3
+    cd <项目根目录>
     python manage.py shell < myapp/agent/evaluate_agent.py
     
     或在 Django shell 中:

@@ -5,7 +5,7 @@
 # ==========================================
 set -e
 
-BASE_DIR="/home/daylight/下载/DjangoProject3/DjangoProject3"
+BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 LOG_DIR="$BASE_DIR/experiment_logs"
 mkdir -p "$LOG_DIR"
 

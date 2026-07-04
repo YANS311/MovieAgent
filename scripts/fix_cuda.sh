@@ -30,7 +30,7 @@ fi
 
 echo ""
 echo "验证修复结果..."
-/home/daylight/anaconda3/envs/DjangoProject3/bin/python -c "
+python3 -c "
 import torch
 print('CUDA available:', torch.cuda.is_available())
 if torch.cuda.is_available():

@@ -414,7 +414,7 @@ output = {
     'tasks': tasks,
 }
 
-filepath = '/home/daylight/下载/DjangoProject3/DjangoProject3/myapp/management/commands/golden_dataset_agent_eval.json'
+filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'myapp', 'management', 'commands', 'golden_dataset_agent_eval.json')
 with open(filepath, 'w', encoding='utf-8') as f:
     json.dump(output, f, ensure_ascii=False, indent=2)
 
