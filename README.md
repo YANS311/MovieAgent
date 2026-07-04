@@ -201,6 +201,57 @@ python manage.py benchmark_latency         # 延迟基准
 python manage.py load_test                 # 负载测试
 ```
 
+## Agent v2 Debug & Evaluation
+
+MovieAgent 内置了完整的推理链追踪和离线评估框架。
+
+### Trace Replay
+
+记录 Agent 每一步推理的完整上下文快照，支持保存、加载、回放和对比：
+
+```python
+from myapp.agent.trace_replay import AgentTrace, TraceStore
+
+# 推理过程中自动记录
+trace = AgentTrace(session_id="user_123", user_input="推荐科幻电影")
+trace.record_step("intent", context)
+trace.record_step("recall", context)
+trace.record_final(context)
+
+# 持久化与回放
+trace.save("traces/user_123.json")
+loaded = AgentTrace.load("traces/user_123.json")
+steps = loaded.replay()  # 重放每一步的上下文快照
+
+# 对比两次推理的差异
+diff = trace1.diff(trace2)
+```
+
+### Agent Benchmark
+
+30 题标准评估集，覆盖 7 种意图类型：
+
+```python
+from myapp.agent.benchmark import AgentBenchmark
+
+benchmark = AgentBenchmark(agent)
+report = benchmark.run()
+benchmark.print_report(report)
+benchmark.save_report(report, "benchmark_report.json")
+```
+
+评估指标：Intent Accuracy / Tool Selection Accuracy / Recall Hit@K / Reasoning Success / Latency P50/P95 / Fallback Rate。
+
+详见 [docs/benchmark.md](docs/benchmark.md)。
+
+### 完整闭环
+
+```
+SkillContext → SkillRouter → Skill → SkillMetrics → AgentTrace → AgentBenchmark → Agent Score
+```
+
+详见 [docs/agent_v2.md](docs/agent_v2.md)。
+
 ## 项目结构
 
 ```
@@ -215,6 +266,12 @@ MovieAgent/
 │   ├── agent_views.py           Agent 视图
 │   ├── agent/                   ReAct Agent 引擎
 │   │   ├── movie_agent.py       MovieAgent 核心
+│   │   ├── context.py           SkillContext 统一上下文
+│   │   ├── router.py            SkillRouter 路由器
+│   │   ├── metrics.py           SkillMetrics 调用指标
+│   │   ├── trace_replay.py      AgentTrace 推理链追踪
+│   │   ├── benchmark.py         AgentBenchmark 离线评估
+│   │   └── skills/              Skill 抽象层
 │   │   └── memory.py            对话记忆管理
 │   ├── recommender/             推荐管线
 │   │   ├── recall.py            五路并行召回

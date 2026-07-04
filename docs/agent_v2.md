@@ -32,8 +32,41 @@ SkillMetrics.record()     ← v2 新增：调用指标
   ↓
 SkillContext 更新          ← v2 新增：统一数据流
   ↓
+AgentTrace.record_step()   ← v2 新增：推理链追踪
+  ↓
 MovieAgent 输出            ← 现有输出格式，不变
+  ↓
+AgentBenchmark.run()       ← v2 新增：离线评估
+  ↓
+Agent Score                ← 量化输出
 ```
+
+## 完整闭环
+
+Agent v2 的核心设计是形成一条完整的数据闭环：
+
+```
+SkillContext              数据流载体，贯穿推理全程
+    ↓
+SkillRouter               根据 Intent 选择 Skill 链
+    ↓
+Skill                     执行能力（召回/精排/解释）
+    ↓
+SkillMetrics              记录每次调用的耗时、成功率、降级
+    ↓
+AgentTrace                记录每一步的上下文快照
+    ↓
+AgentBenchmark            30 题离线评估，输出 Agent Score
+    ↓
+优化决策                   基于评估结果调整 Skill 参数/路由策略
+```
+
+**为什么这个闭环重要：**
+
+- **可调试** — AgentTrace 记录完整推理过程，出问题时可以回溯每一步的状态
+- **可量化** — AgentBenchmark 用 30 题评估集给出 Agent Score，不再是"感觉还行"
+- **可对比** — AgentTrace.diff() 可以对比两次推理的差异，用于回归测试
+- **可优化** — SkillMetrics 的统计数据为路由策略优化提供数据基础
 
 ## 为什么引入这些组件
 
@@ -146,6 +179,8 @@ myapp/agent/
 ├── context.py              SkillContext 统一上下文
 ├── router.py               SkillRouter 轻量路由器
 ├── metrics.py              SkillMetrics 调用指标
+├── trace_replay.py         AgentTrace 推理链追踪与回放
+├── benchmark.py            AgentBenchmark 离线评估框架
 ├── skills/
 │   ├── __init__.py         统一导出
 │   ├── base.py             BaseSkill 抽象基类（含 Metadata）
@@ -160,7 +195,8 @@ myapp/agent/
 
 docs/
 ├── agent_skills.md         Skill 层说明
-└── agent_v2.md             v2 架构演进文档（本文件）
+├── agent_v2.md             v2 架构演进文档（本文件）
+└── benchmark.md            评估框架说明
 ```
 
 ## 未来扩展路线图
