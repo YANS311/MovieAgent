@@ -93,7 +93,36 @@ Docker Compose 自动编排 5 个服务：
 
 entrypoint.sh 会自动等待 MySQL 就绪、执行数据库迁移、收集静态文件、启动 Uvicorn（默认 8 Worker）。
 
-### 本地开发
+### Conda 环境
+
+```bash
+# 1. 创建 conda 环境
+conda env create -f environment.yml
+conda activate MovieAgent
+
+# 2. 配置环境变量
+cp .env.example .env
+# 编辑 .env
+
+# 3. 确保以下服务已启动：
+#    - MySQL 8.0
+#    - Redis 7
+#    - Neo4j 5
+#    - Ollama（已拉取 qwen3:4b-instruct 模型）
+
+# 4. 数据库迁移
+python manage.py migrate
+
+# 5. 导入数据（可选）
+python manage.py import_movielens
+python manage.py build_kg
+python manage.py build_rag_index
+
+# 6. 启动开发服务器
+python manage.py runserver
+```
+
+### pip + venv
 
 ```bash
 # 1. 创建虚拟环境

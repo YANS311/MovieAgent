@@ -1,0 +1,51 @@
+name: MovieAgent
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+
+  # PyTorch (CUDA 12.1)
+  - pytorch>=2.0
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=12.1
+
+  # 系统 / 基础库
+  - numpy
+  - pandas
+  - scikit-learn
+  - pillow
+  - tqdm
+  - jieba
+  - requests
+
+  # 数据库客户端
+  - mysqlclient
+  - neo4j-python-driver
+
+  # NLP / 向量检索
+  - faiss-gpu
+  - transformers
+  - sentence-transformers
+
+  # Web 框架
+  - django>=5.2
+  - bleach
+  - markdown
+  - python-dotenv
+
+  # pip 独占包（conda 无源或版本滞后）
+  - pip:
+      - deepctr-torch
+      - py2neo
+      - langchain
+      - langchain-core
+      - langchain-community
+      - langchain-huggingface
+      - langchain-neo4j
+      - langchain-ollama
+      - deep-translator
