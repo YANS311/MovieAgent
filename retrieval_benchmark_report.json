@@ -1,0 +1,126 @@
+{
+  "faiss": {
+    "mode_name": "Baseline (Pure FAISS)",
+    "Hit@5": 0.3714,
+    "Hit@10": 0.4286,
+    "Hit@20": 0.4571,
+    "MRR@10": 0.3307,
+    "NDCG@10": 0.2961,
+    "Avg_Latency_ms": 2.72,
+    "category_breakdown": {
+      "Exact Match": {
+        "Hit@10": 0.625,
+        "NDCG@10": 0.625
+      },
+      "Entity Match": {
+        "Hit@10": 0.3333,
+        "NDCG@10": 0.1721
+      },
+      "Attribute Query": {
+        "Hit@10": 0.1667,
+        "NDCG@10": 0.0226
+      },
+      "Implicit Plot": {
+        "Hit@10": 0.75,
+        "NDCG@10": 0.4755
+      },
+      "Similarity Search": {
+        "Hit@10": 0.1429,
+        "NDCG@10": 0.0562
+      }
+    }
+  },
+  "bm25": {
+    "mode_name": "BM25 Text Only",
+    "Hit@5": 0.4,
+    "Hit@10": 0.4571,
+    "Hit@20": 0.4857,
+    "MRR@10": 0.3202,
+    "NDCG@10": 0.3044,
+    "Avg_Latency_ms": 7.52,
+    "category_breakdown": {
+      "Exact Match": {
+        "Hit@10": 0.625,
+        "NDCG@10": 0.625
+      },
+      "Entity Match": {
+        "Hit@10": 0.8333,
+        "NDCG@10": 0.2979
+      },
+      "Attribute Query": {
+        "Hit@10": 0.0,
+        "NDCG@10": 0.0
+      },
+      "Implicit Plot": {
+        "Hit@10": 0.625,
+        "NDCG@10": 0.4491
+      },
+      "Similarity Search": {
+        "Hit@10": 0.1429,
+        "NDCG@10": 0.0393
+      }
+    }
+  },
+  "hybrid_rule": {
+    "mode_name": "Hybrid (Rule Rewrite + BM25/FAISS + RRF)",
+    "Hit@5": 0.4571,
+    "Hit@10": 0.5143,
+    "Hit@20": 0.5714,
+    "MRR@10": 0.41,
+    "NDCG@10": 0.3443,
+    "Avg_Latency_ms": 19.9,
+    "category_breakdown": {
+      "Exact Match": {
+        "Hit@10": 0.625,
+        "NDCG@10": 0.625
+      },
+      "Entity Match": {
+        "Hit@10": 0.6667,
+        "NDCG@10": 0.2459
+      },
+      "Attribute Query": {
+        "Hit@10": 0.3333,
+        "NDCG@10": 0.1078
+      },
+      "Implicit Plot": {
+        "Hit@10": 0.625,
+        "NDCG@10": 0.5481
+      },
+      "Similarity Search": {
+        "Hit@10": 0.2857,
+        "NDCG@10": 0.0775
+      }
+    }
+  },
+  "hybrid_llm": {
+    "mode_name": "Hybrid (LLM Rewrite + BM25/FAISS + RRF)",
+    "Hit@5": 0.4571,
+    "Hit@10": 0.5143,
+    "Hit@20": 0.5714,
+    "MRR@10": 0.41,
+    "NDCG@10": 0.3443,
+    "Avg_Latency_ms": 20.0,
+    "category_breakdown": {
+      "Exact Match": {
+        "Hit@10": 0.625,
+        "NDCG@10": 0.625
+      },
+      "Entity Match": {
+        "Hit@10": 0.6667,
+        "NDCG@10": 0.2459
+      },
+      "Attribute Query": {
+        "Hit@10": 0.3333,
+        "NDCG@10": 0.1078
+      },
+      "Implicit Plot": {
+        "Hit@10": 0.625,
+        "NDCG@10": 0.5481
+      },
+      "Similarity Search": {
+        "Hit@10": 0.2857,
+        "NDCG@10": 0.0775
+      }
+    }
+  }
+}

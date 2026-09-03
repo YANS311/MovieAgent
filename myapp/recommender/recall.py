@@ -95,6 +95,30 @@ def vector_recall(query_text, excluded_ids=None, k=60, rag_resources=None):
 
 
 # =============================================================
+# 路径 A+: 混合 RAG 召回 (Hybrid RAG Recall: Query Rewrite + BM25/FAISS + RRF)
+# =============================================================
+def hybrid_recall(query_text, excluded_ids=None, k=60, rag_resources=None):
+    """
+    Query Rewrite + BM25/FAISS + RRF 融合召回入口
+    """
+    from myapp.recommender.hybrid_retriever import get_hybrid_retriever
+    try:
+        retriever = get_hybrid_retriever()
+        results = retriever.retrieve(
+            query=query_text,
+            top_k=k,
+            excluded_ids=excluded_ids,
+            rag_resources=rag_resources,
+            enable_rewrite=True
+        )
+        return results
+    except Exception as e:
+        print(f"[Recall/Hybrid] 异常: {e}，降级回纯向量召回")
+        return vector_recall(query_text, excluded_ids=excluded_ids, k=k, rag_resources=rag_resources)
+
+
+
+# =============================================================
 # 路径 B: 内容特征召回 (Content-Based Recall)
 # =============================================================
 def content_recall(user, excluded_ids=None, k=60):

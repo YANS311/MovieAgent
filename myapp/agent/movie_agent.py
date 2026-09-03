@@ -566,6 +566,942 @@ class QueryComplexityRouter:
 
 
 # =============================================================
+# Agent v3: Planner / ExecutionController / Verifier
+# =============================================================
+
+import dataclasses
+
+
+@dataclasses.dataclass
+class ExecutionPlan:
+    """
+    Planner 的输出：结构化执行计划。
+    Agent 的所有后续行为都基于这个计划。
+    """
+    intent: str                             # 意图标签
+    constraints: dict                       # 提取的约束条件
+    strategy: str                           # 执行策略: hybrid/vector/kg/hot/chat/clarify
+    expected_tools: list                    # 预期工具链
+    missing_info: list = dataclasses.field(default_factory=list)   # 缺失信息
+    clarification: dict = None              # 追问内容
+    confidence: float = 1.0                 # 计划置信度 0-1
+    reasoning: str = ""                     # 推理过程文本
+
+
+class Planner:
+    """
+    Agent v3 核心：Planner 负责分析用户输入 + 记忆状态，输出 ExecutionPlan。
+
+    职责：
+      1. 意图分类（整合 IntentClassifier）
+      2. 约束提取（整合 _micro_think + SLOT_PATTERNS + 记忆融合）
+      3. 完整性评估（整合 VaguenessDetector + MultiIntentDetector）
+      4. 策略选择（整合 QueryComplexityRouter）
+      5. 记忆读写（从 memory_slots 读取历史约束，将新约束写回）
+
+    设计原则：规则优先，LLM 兜底。
+    """
+
+    # 意图到默认工具链的映射
+    INTENT_TOOL_MAP = {
+        'QUERY_MOVIE': ['search_vector', 'maan_rerank', 'rerank'],
+        'QUERY_COMPARISON': ['search_vector', 'maan_rerank', 'rerank'],
+        'QUERY_PROFILE_REC': ['recall_hybrid', 'maan_rerank', 'rerank'],
+        'QUERY_RANK': ['search_vector', 'maan_rerank'],
+        'QUERY_NEW': ['search_vector', 'maan_rerank'],
+        'QUERY_VISUAL': ['search_vector'],
+        'QUERY_SELF': [],
+        'CHAT': [],
+    }
+
+    @classmethod
+    def plan(cls, user_input, memory_slots=None, llm_func=None):
+        """
+        核心入口：分析用户输入，输出 ExecutionPlan。
+
+        Args:
+            user_input: 用户输入文本
+            memory_slots: 当前记忆槽位 dict
+            llm_func: 可选的 LLM 调用函数（仅在规则不确定时使用）
+
+        Returns:
+            ExecutionPlan
+        """
+        memory_slots = memory_slots or {}
+        reasoning_parts = []
+
+        # Step 1: 意图分类
+        intent = IntentClassifier.classify(user_input)
+        reasoning_parts.append(f"意图={intent}")
+
+        # Step 2: 多意图分支检测
+        has_multi, multi_branches = MultiIntentDetector.detect(user_input)
+        if has_multi and intent in ('QUERY_MOVIE', 'QUERY_COMPARISON') and multi_branches:
+            options = [b['label'] for b in multi_branches]
+            return ExecutionPlan(
+                intent=intent,
+                constraints={},
+                strategy='clarify',
+                expected_tools=[],
+                missing_info=['multi_intent'],
+                clarification={
+                    'type': 'multi_intent',
+                    'message': '您的需求涉及多个方向，请告诉我您更想专注哪一边：',
+                    'options': [[b['label'], b['query']] for b in multi_branches],
+                },
+                confidence=0.9,
+                reasoning=f"意图={intent}，检测到多意图分支: {options}",
+            )
+
+        # Step 3: 约束提取（规则优先）
+        constraints = cls._extract_constraints(user_input, memory_slots)
+        has_constraints = any([
+            constraints.get('genre'),
+            constraints.get('director'),
+            constraints.get('actor'),
+            constraints.get('min_rating'),
+        ])
+        constraint_summary = [f"{k}={v}" for k, v in constraints.items() if v]
+        reasoning_parts.append(f"约束=[{', '.join(constraint_summary)}]" if constraint_summary else "约束=[]")
+
+        # Step 4: 模糊性评估
+        is_vague, vague_reason = VaguenessDetector.is_vague(user_input)
+        if is_vague and intent in ('QUERY_MOVIE', 'CHAT') and not has_constraints:
+            options = VaguenessDetector.generate_clarification_options(user_input, memory_slots)
+            return ExecutionPlan(
+                intent=intent,
+                constraints=constraints,
+                strategy='clarify',
+                expected_tools=[],
+                missing_info=['genre_or_preference'],
+                clarification={
+                    'type': 'vague',
+                    'message': '您的需求我还需要进一步确认，请告诉我您更想看哪种类型的电影：',
+                    'options': [[opt['label'], opt.get('query', opt['label'])] for opt in options],
+                    'hot_fallback': True,
+                },
+                confidence=0.3,
+                reasoning=f"意图={intent}，查询模糊({vague_reason})，需要追问",
+            )
+
+        # Step 5: 记忆融合 — 将新约束写回记忆
+        cls._update_memory(memory_slots, constraints)
+
+        # Step 6: 策略选择 + 动态工具链
+        strategy = cls._select_strategy(intent, constraints, has_constraints)
+        expected_tools = cls._build_tool_chain(intent, constraints, has_rag=True)
+        reasoning_parts.append(f"策略={strategy}")
+        reasoning_parts.append(f"工具链={expected_tools}")
+
+        # Step 7: 计算置信度
+        confidence = cls._compute_confidence(intent, constraints, has_constraints)
+
+        return ExecutionPlan(
+            intent=intent,
+            constraints=constraints,
+            strategy=strategy,
+            expected_tools=expected_tools,
+            confidence=confidence,
+            reasoning='，'.join(reasoning_parts),
+        )
+
+    @classmethod
+    def _extract_constraints(cls, user_input, memory_slots):
+        """
+        从用户输入中提取结构化约束（整合 _micro_think 逻辑）。
+        纯规则，零 LLM 开销。
+        """
+        constraints = {
+            'genre': None, 'min_rating': None, 'vibe': None,
+            'year_filter': None, 'director': None, 'actor': None,
+            'exclusions': [], 'sort_by': None,
+        }
+
+        # 类型归一化
+        genre_alias = {
+            '烧脑': '悬疑', '悬疑推理': '悬疑', '推理': '悬疑',
+            '热血': '动作', '打斗': '动作', '追车': '动作',
+            '催泪': '剧情', '感人': '剧情', '深度': '剧情',
+            '治愈': '动画', '温馨': '剧情', '温暖': '剧情',
+            '搞笑': '喜剧', '幽默': '喜剧', '轻松': '喜剧',
+            '浪漫': '爱情', '甜蜜': '爱情',
+            '惊悚': '恐怖', '吓人': '恐怖',
+            '科幻大片': '科幻', '奇幻大片': '奇幻',
+        }
+        for alias, norm_genre in genre_alias.items():
+            if alias in user_input:
+                constraints['genre'] = norm_genre
+                break
+        if not constraints['genre']:
+            m = re.search(r'(科幻|悬疑|恐怖|喜剧|动作|爱情|剧情|动画|战争|犯罪|奇幻|冒险|文艺|纪录)', user_input)
+            if m:
+                constraints['genre'] = m.group(1)
+
+        # 评分约束
+        rating_patterns = [
+            (r'评分\s*(\d(?:\.\d)?)\s*分?\s*[以之上]', lambda m: float(m.group(1))),
+            (r'(\d(?:\.\d)?)\s*分\s*[以之上]', lambda m: float(m.group(1))),
+            (r'高分', lambda m: 8.0),
+            (r'经典', lambda m: 7.5),
+        ]
+        for pattern, extractor in rating_patterns:
+            m = re.search(pattern, user_input)
+            if m:
+                constraints['min_rating'] = extractor(m)
+                break
+
+        # 情感氛围
+        vibe_patterns = [
+            (r'(轻松|愉快|欢快|温馨|治愈|开心|快乐)', '轻松'),
+            (r'(刺激|紧张|惊悚|恐怖)', '紧张'),
+            (r'(感人|催泪|温暖|感动)', '感人'),
+            (r'(烧脑|悬疑|反转)', '烧脑'),
+            (r'(热血|燃|激昂)', '热血'),
+            (r'(压抑|沉重|黑暗|悲伤)', '压抑'),
+        ]
+        for pattern, vibe in vibe_patterns:
+            if re.search(pattern, user_input):
+                constraints['vibe'] = vibe
+                break
+
+        # 年份约束
+        year_patterns = [
+            (r'近\s*(\d{1,2})\s*年', None),
+            (r'最近\s*(\d{1,2})\s*年', None),
+            (r'(近五年|最近五年|近5年|最近5年)', '2021'),
+            (r'(近三年|最近三年|近3年|最近3年)', '2023'),
+            (r'(近两年|最近两年|近2年|最近2年)', '2024'),
+            (r'(近十年|近10年)', '2016'),
+            (r'(2[0-9]{3})年?[以之]后', None),
+            (r'(2[0-9]{3})年?[以之]上', None),
+            (r'(新|最近|最新)', '2020'),
+            (r'(不要太老)', '2015'),
+        ]
+        for pattern, fixed in year_patterns:
+            m = re.search(pattern, user_input)
+            if m:
+                if fixed:
+                    constraints['year_filter'] = {'min_year': int(fixed)}
+                elif m.group(1).isdigit():
+                    n = int(m.group(1))
+                    if n > 1900:
+                        constraints['year_filter'] = {'min_year': n}
+                    else:
+                        constraints['year_filter'] = {'min_year': 2026 - n}
+                break
+
+        # 导演提取
+        director_match = re.search(r'([一-鿿]{2,4})\s*(?:导演|执导)', user_input)
+        if director_match:
+            constraints['director'] = director_match.group(1)
+        else:
+            known_directors = {
+                '诺兰': '克里斯托弗·诺兰', '宫崎骏': '宫崎骏',
+                '昆汀': '昆汀·塔伦蒂诺', '斯皮尔伯格': '史蒂文·斯皮尔伯格',
+                '周星驰': '周星驰', '王家卫': '王家卫', '李安': '李安',
+                '张艺谋': '张艺谋', '姜文': '姜文', '陈凯歌': '陈凯歌',
+                '芬奇': '大卫·芬奇', '卡梅隆': '詹姆斯·卡梅隆',
+            }
+            for short, full in known_directors.items():
+                if short in user_input:
+                    constraints['director'] = full
+                    break
+
+        # 演员提取
+        actor_match = re.search(r'([一-鿿]{2,4})\s*(?:主演|出演|演的)', user_input)
+        if actor_match:
+            constraints['actor'] = actor_match.group(1)
+
+        # 排除项
+        exclusions = []
+        for m in re.finditer(r'不要\s*([一-鿿]{2,6})', user_input):
+            exclusions.append(m.group(1))
+        for m in re.finditer(r'不想\s*看?\s*([一-鿿]{2,6})', user_input):
+            exclusions.append(m.group(1))
+        for m in re.finditer(r'排除\s*([一-鿿]{2,6})', user_input):
+            exclusions.append(m.group(1))
+        for m in re.finditer(r'不要\s*([一-鿿]{2,4})题材', user_input):
+            exclusions.append(m.group(1))
+        for m in re.finditer(r'不要\s*([一-鿿]{2,4})的', user_input):
+            exclusions.append(m.group(1))
+        unique = list(dict.fromkeys(exclusions))
+        cleaned = [t for t in unique if not any(s != t and s in t for s in unique)]
+        constraints['exclusions'] = cleaned
+
+        # 冲突检测
+        if constraints['genre'] and constraints['exclusions']:
+            genre = constraints['genre']
+            if any(genre in ex or ex in genre for ex in constraints['exclusions']):
+                constraints['genre'] = None
+
+        # 排序偏好
+        sort_map = {
+            '评分': 'rating', '高分': 'rating', '最好': 'rating',
+            '最新': 'release_date', '最近': 'release_date', '新出': 'release_date',
+            '热门': 'hot', '最火': 'hot', '流行': 'hot',
+        }
+        for kw, sort_by in sort_map.items():
+            if kw in user_input:
+                constraints['sort_by'] = sort_by
+                break
+
+        # 记忆融合 — 历史约束补充
+        if not constraints['genre'] and memory_slots.get('genre'):
+            constraints['genre'] = memory_slots['genre']
+        if not constraints['director'] and memory_slots.get('director'):
+            constraints['director'] = memory_slots['director']
+        if not constraints['actor'] and memory_slots.get('actor'):
+            constraints['actor'] = memory_slots['actor']
+        if not constraints['min_rating'] and memory_slots.get('score_min'):
+            try:
+                constraints['min_rating'] = float(memory_slots['score_min'])
+            except (ValueError, TypeError):
+                pass
+
+        return constraints
+
+    @classmethod
+    def _update_memory(cls, memory_slots, constraints):
+        """将新约束写回记忆槽位。"""
+        if constraints.get('genre'):
+            memory_slots['genre'] = constraints['genre']
+        if constraints.get('director'):
+            memory_slots['director'] = constraints['director']
+        if constraints.get('actor'):
+            memory_slots['actor'] = constraints['actor']
+        if constraints.get('min_rating'):
+            memory_slots['score_min'] = str(constraints['min_rating'])
+        if constraints.get('year_filter') and constraints['year_filter'].get('min_year'):
+            memory_slots['year_min'] = str(constraints['year_filter']['min_year'])
+
+    @classmethod
+    def _select_strategy(cls, intent, constraints, has_constraints):
+        """根据意图+约束选择执行策略。"""
+        if intent in ('CHAT',):
+            return 'chat'
+        if intent == 'QUERY_SELF':
+            return 'profile_analysis'
+        if intent == 'QUERY_KG':
+            return 'kg'
+        if has_constraints:
+            return 'hybrid'
+        return 'vector'
+
+    @classmethod
+    def _build_tool_chain(cls, intent, constraints, has_rag=True):
+        """
+        根据意图和约束动态构建工具链。
+
+        核心改进：有约束时用 recall_hybrid（多路召回），无约束时用 search_vector（语义召回）。
+        """
+        # 基础工具链（按意图）
+        if intent == 'QUERY_PROFILE_REC':
+            # 画像推荐 → 多路召回
+            chain = ['recall_hybrid', 'maan_rerank', 'rerank']
+        elif intent in ('QUERY_MOVIE', 'QUERY_COMPARISON'):
+            if has_rag:
+                chain = ['recall_hybrid', 'maan_rerank', 'rerank']
+            else:
+                chain = ['search_database', 'maan_rerank', 'rerank']
+        elif intent == 'QUERY_RANK':
+            chain = ['search_vector', 'maan_rerank'] if has_rag else ['search_database', 'maan_rerank']
+        elif intent == 'QUERY_NEW':
+            chain = ['search_vector', 'maan_rerank'] if has_rag else ['search_database', 'maan_rerank']
+        elif intent == 'QUERY_VISUAL':
+            chain = ['search_vector'] if has_rag else ['search_database']
+        else:
+            chain = []
+
+        # RAG 不可用时降级
+        if not has_rag:
+            chain = ['search_database' if t in ('search_vector', 'recall_hybrid') else t for t in chain]
+
+        return chain
+
+    @classmethod
+    def _compute_confidence(cls, intent, constraints, has_constraints):
+        """计算计划置信度。"""
+        if intent == 'CHAT':
+            return 1.0
+        if has_constraints:
+            # 约束越多，置信度越高
+            count = sum(1 for k in ('genre', 'director', 'actor', 'min_rating')
+                       if constraints.get(k))
+            return min(1.0, 0.6 + count * 0.1)
+        return 0.5
+
+
+class ExecutionController:
+    """
+    执行控制器：根据 ExecutionPlan 逐步执行工具链。
+
+    职责：
+      1. 按计划执行工具链
+      2. 空结果时自动 fallback
+      3. 低质量结果时自动重试
+      4. 记录每步执行日志
+    """
+
+    FALLBACK_CHAIN = {
+        'recall_hybrid': 'search_vector',
+        'search_vector': 'recall_hybrid',
+        'kg_query': 'search_vector',
+    }
+
+    @classmethod
+    def execute(cls, plan, user_input, agent, t_start):
+        """
+        执行计划，返回完整结果 dict。
+
+        Args:
+            plan: ExecutionPlan
+            user_input: 用户原始输入
+            agent: MovieAgent 实例
+            t_start: 开始时间
+
+        Returns:
+            dict: 与 run() 返回格式一致
+        """
+        # 追问类型 — 直接返回
+        if plan.strategy == 'clarify':
+            return cls._handle_clarification(plan, user_input, t_start)
+
+        # 闲聊/画像分析 — 不走工具链
+        if plan.strategy in ('chat', 'profile_analysis'):
+            return cls._handle_no_tool(plan, user_input, agent, t_start)
+
+        # 正常推荐流程
+        return cls._handle_recommendation(plan, user_input, agent, t_start)
+
+    @classmethod
+    def _handle_clarification(cls, plan, user_input, t_start):
+        """处理追问场景。"""
+        t_total = int((time.time() - t_start) * 1000)
+        clarification = plan.clarification or {}
+
+        # 构建追问文本
+        message = clarification.get('message', '请告诉我您更想看哪种类型的电影：')
+        options = clarification.get('options', [])
+        option_lines = [f"  {i+1}. {opt[0]}" for i, opt in enumerate(options)]
+        clarification_text = f"🤔 {message}\n" + "\n".join(option_lines)
+
+        # 如果有热门兜底
+        hot_ids = []
+        if clarification.get('hot_fallback'):
+            hot_ids, hot_lines = cls._get_hot_fallback()
+            if hot_lines:
+                clarification_text += "\n\n🔥 先为您推荐几部热门高分电影：\n" + "\n".join(hot_lines)
+
+        trace_steps = [{
+            'step': 0, 'type': 'planner', 'content': plan.reasoning,
+        }, {
+            'step': 1, 'type': 'clarification', 'content': clarification.get('type', 'unknown'),
+        }]
+
+        return {
+            'intent': plan.intent,
+            'thought': plan.reasoning,
+            'actions': [{'tool': 'hot_recall', 'input': 'vague_fallback'}] if hot_ids else [],
+            'observations': [{'tool': 'hot_recall', 'output': hot_ids, 'count': len(hot_ids)}] if hot_ids else [],
+            'final_answer': clarification_text,
+            'recommended_ids': hot_ids,
+            'explanations': {},
+            'latency_ms': t_total,
+            'need_clarification': True,
+            'clarification_options': options,
+            'trace_steps': trace_steps,
+        }
+
+    @classmethod
+    def _handle_no_tool(cls, plan, user_input, agent, t_start):
+        """处理不走工具链的场景（闲聊/画像分析）。"""
+        t_total = int((time.time() - t_start) * 1000)
+
+        if plan.strategy == 'chat':
+            thought = f"【意图】{plan.intent}。用户在闲聊，直接回复。"
+            final_answer = "你好！我是 MovieAgent，一个智能电影推荐助手。请告诉我你想看什么类型的电影，我来为你推荐！"
+        else:
+            thought = f"【意图】{plan.intent}。分析用户画像。"
+            final_answer = agent._analyze_user_profile() if hasattr(agent, '_analyze_user_profile') else "抱歉，画像分析功能暂时不可用。"
+
+        trace_steps = [
+            {'step': 0, 'type': 'planner', 'content': plan.reasoning},
+            {'step': 1, 'type': 'thought', 'content': thought},
+        ]
+
+        return {
+            'intent': plan.intent,
+            'thought': thought,
+            'actions': [],
+            'observations': [],
+            'final_answer': final_answer,
+            'recommended_ids': [],
+            'explanations': {},
+            'latency_ms': t_total,
+            'need_clarification': False,
+            'clarification_options': [],
+            'trace_steps': trace_steps,
+        }
+
+    @classmethod
+    def _handle_recommendation(cls, plan, user_input, agent, t_start):
+        """处理推荐流程：工具链执行 + 纠偏 + 解释。"""
+        trace_steps = [{'step': 0, 'type': 'planner', 'content': plan.reasoning}]
+        actions = []
+        observations = []
+        candidates = []
+        step_counter = 1
+
+        # 构建 Thought（推理链，不是约束罗列）
+        thought = cls._build_thought(user_input, plan, agent)
+        trace_steps.append({'step': step_counter, 'type': 'thought', 'content': thought})
+        step_counter += 1
+
+        # 工具链执行（Planner 已根据约束构建好工具链）
+        tool_chain = list(plan.expected_tools)
+
+        year_filter = plan.constraints.get('year_filter')
+
+        # 用 Planner 约束构建增强查询（不修改原始输入，只用于向量搜索）
+        enhanced_query = cls._build_enhanced_query(user_input, plan.constraints)
+
+        for tool_name in tool_chain:
+            # 召回工具使用增强查询，其他工具使用原始输入
+            query_for_tool = enhanced_query if tool_name in ('search_vector', 'recall_hybrid') else user_input
+            action, observation = agent._act(tool_name, query_for_tool, candidates, constraints=plan.constraints)
+            actions.append(action)
+            observations.append(observation)
+
+            trace_steps.append({
+                'step': step_counter, 'type': 'action',
+                'content': f"调用 {tool_name}", 'tool': tool_name,
+            })
+            step_counter += 1
+            trace_steps.append({
+                'step': step_counter, 'type': 'observation',
+                'content': f"{tool_name} 返回 {observation.get('count', 0)} 条",
+                'tool': tool_name, 'count': observation.get('count', 0),
+            })
+            step_counter += 1
+
+            # 合并候选
+            if tool_name in ('search_vector', 'recall_hybrid', 'kg_query', 'search_database'):
+                raw = observation.get('output', [])
+                if isinstance(raw, list) and raw:
+                    existing_ids = {c.get('movie_id', c.get('id')) for c in candidates if isinstance(c, dict)}
+                    for item in raw:
+                        if isinstance(item, dict):
+                            mid = item.get('movie_id', item.get('id'))
+                            if mid and mid not in existing_ids:
+                                candidates.append(item)
+                                existing_ids.add(mid)
+                    if len(candidates) > 200:
+                        candidates = candidates[:200]
+
+                # 空结果 fallback
+                if not candidates and tool_name in cls.FALLBACK_CHAIN:
+                    fb_tool = cls.FALLBACK_CHAIN[tool_name]
+                    logger.info(f"[Agent] {tool_name} 空结果，fallback → {fb_tool}")
+                    trace_steps.append({
+                        'step': step_counter, 'type': 'thought',
+                        'content': f"[纠偏] {tool_name} 空结果，切换至 {fb_tool}",
+                        'is_retry': True,
+                    })
+                    step_counter += 1
+
+                    fb_action, fb_obs = agent._act(fb_tool, user_input, candidates, constraints=plan.constraints)
+                    actions.append(fb_action)
+                    observations.append(fb_obs)
+                    fb_raw = fb_obs.get('output', [])
+                    if isinstance(fb_raw, list):
+                        candidates = fb_raw
+                    trace_steps.append({
+                        'step': step_counter, 'type': 'observation',
+                        'content': f"[纠偏] {fb_tool} 返回 {len(candidates)} 条",
+                        'is_retry': True,
+                    })
+                    step_counter += 1
+
+                # 年份过滤
+                if year_filter and candidates:
+                    candidates = agent._filter_by_year(candidates, year_filter)
+
+            elif tool_name in ('rerank', 'maan_rerank'):
+                candidates = observation.get('output', [])
+                if year_filter and candidates:
+                    candidates = agent._filter_by_year(candidates, year_filter)
+
+        # 约束后过滤（Genre + Director 补回被 MAAN 排除的约束匹配电影）
+        detected_genre = agent._extract_genre_from_query(user_input)
+        detected_director = agent._extract_director_from_query(user_input)
+        if (detected_genre or detected_director) and candidates:
+            from myapp.models import Movie
+            try:
+                existing_ids = {c.get('movie_id') for c in candidates if c.get('movie_id')}
+                refill_qs = Movie.objects.all()
+                if detected_director:
+                    refill_qs = refill_qs.filter(directors__name__icontains=detected_director)
+                if detected_genre:
+                    refill_qs = refill_qs.filter(genres__name__icontains=detected_genre)
+                refill_ids = list(refill_qs.order_by('-score', '-vote_count').values_list('id', flat=True)[:20])
+                for mid in refill_ids:
+                    if mid not in existing_ids:
+                        candidates.append({'movie_id': mid, 'score': 0, 'source': 'constraint_refill'})
+                        existing_ids.add(mid)
+            except Exception:
+                pass
+
+        # 提取推荐 ID
+        recommended_ids = [c.get('movie_id', c.get('id')) for c in candidates[:10] if c.get('movie_id') or c.get('id')]
+        recommended_ids = list(dict.fromkeys(recommended_ids))[:10]
+
+        # 生成推荐理由（多样化维度）
+        explanations = {}
+        if recommended_ids and agent.user:
+            # 为每部电影生成不同维度的理由，避免模板化
+            reason_dims = ['导演风格', '类型匹配', '情感共鸣', '叙事特色', '知识图谱']
+            for i, mid in enumerate(recommended_ids[:5]):
+                try:
+                    explain_result = agent.tools['explain'].execute(user=agent.user, movie_id=mid)
+                    base_reason = explain_result.get('output', '')
+                    # 用 Planner 的约束增强理由，替换模板化文本
+                    enhanced = cls._enhance_explanation(base_reason, mid, plan.constraints, agent, i)
+                    explanations[mid] = enhanced
+                except Exception:
+                    explanations[mid] = ''
+
+        # 生成最终回复
+        t_total = int((time.time() - t_start) * 1000)
+        final_answer = agent._generate_final_answer(
+            user_input, plan.intent, recommended_ids, explanations, thought
+        )
+
+        return {
+            'intent': plan.intent,
+            'thought': thought,
+            'actions': actions,
+            'observations': observations,
+            'final_answer': final_answer,
+            'recommended_ids': recommended_ids,
+            'explanations': explanations,
+            'latency_ms': t_total,
+            'need_clarification': False,
+            'clarification_options': [],
+            'trace_steps': trace_steps,
+        }
+
+    @classmethod
+    def _build_enhanced_query(cls, user_input, constraints):
+        """
+        用 Planner 约束增强搜索查询，提升向量召回质量。
+
+        例如：
+          原始: "推荐烧脑悬疑片"
+          增强: "推荐烧脑悬疑片 悬疑 烧脑 高分 精彩"
+        """
+        parts = [user_input]
+        genre = constraints.get('genre')
+        vibe = constraints.get('vibe')
+        director = constraints.get('director')
+        min_rating = constraints.get('min_rating')
+
+        if genre and genre not in user_input:
+            parts.append(genre)
+        if vibe and vibe not in user_input:
+            parts.append(vibe)
+        if director and director not in user_input:
+            parts.append(director)
+        if min_rating and min_rating >= 8.0:
+            parts.append('高分')
+
+        return ' '.join(parts)
+
+    @classmethod
+    def _build_thought(cls, user_input, plan, agent):
+        """
+        构建推理链 Thought — 不是约束罗列，而是人话推理过程。
+
+        例如：
+          "用户要求'烧脑悬疑片'。烧脑意味着叙事复杂、有反转，悬疑是核心类型。
+           结合用户画像（对M*A*S*H评分高→偏好黑色幽默/反讽叙事），
+           应优先召回叙事精巧的悬疑片，而非纯惊悚恐怖。
+           策略：向量语义召回 → MAAN深度精排 → 业务规则重排。"
+        """
+        c = plan.constraints
+        lines = []
+
+        # 意图理解
+        genre = c.get('genre')
+        vibe = c.get('vibe')
+        director = c.get('director')
+        actor = c.get('actor')
+        min_rating = c.get('min_rating')
+        year_filter = c.get('year_filter')
+        exclusions = c.get('exclusions')
+
+        # 第一层：理解用户需求
+        need_parts = []
+        if genre:
+            need_parts.append(f"类型偏好={genre}")
+        if vibe:
+            need_parts.append(f"情感氛围={vibe}")
+        if director:
+            need_parts.append(f"导演={director}")
+        if actor:
+            need_parts.append(f"演员={actor}")
+        if min_rating:
+            need_parts.append(f"评分要求≥{min_rating}")
+        if year_filter:
+            need_parts.append(f"年份={year_filter}")
+        if exclusions:
+            need_parts.append(f"排除={exclusions}")
+
+        if need_parts:
+            lines.append(f"【需求理解】{', '.join(need_parts)}")
+        else:
+            lines.append("【需求理解】无明确约束，需基于用户画像推荐")
+
+        # 第二层：推理 — 为什么选这个策略
+        reasoning_parts = []
+        if genre == '悬疑':
+            reasoning_parts.append("悬疑类型→优先召回叙事精巧、有反转的影片，而非纯恐怖惊悚")
+        elif genre == '科幻':
+            reasoning_parts.append("科幻类型→优先召回硬科幻或概念性强的影片")
+        elif genre == '喜剧':
+            reasoning_parts.append("喜剧类型→优先召回高口碑喜剧，避免低俗搞笑")
+        elif genre:
+            reasoning_parts.append(f"{genre}类型→召回该类型高评分影片")
+
+        if vibe == '烧脑':
+            reasoning_parts.append("烧脑氛围→偏好叙事复杂、需要思考的影片")
+        elif vibe == '轻松':
+            reasoning_parts.append("轻松氛围→排除压抑沉重的影片")
+        elif vibe == '感人':
+            reasoning_parts.append("感人氛围→偏好情感细腻、剧情节奏好的影片")
+
+        if director:
+            reasoning_parts.append(f"指定导演{director}→精确匹配该导演作品")
+
+        if reasoning_parts:
+            lines.append(f"【推理】{' → '.join(reasoning_parts)}")
+
+        # 第三层：用户画像融合
+        profile_reasoning = cls._reason_about_profile(agent, genre, vibe)
+        if profile_reasoning:
+            lines.append(f"【画像融合】{profile_reasoning}")
+
+        # 第四层：执行策略
+        strategy_desc = {
+            'hybrid': '多路混合召回（向量语义+内容特征+深度模型+知识图谱+热门兜底）→ MAAN深度精排 → 业务规则重排',
+            'vector': '向量语义召回 → MAAN精排 → 业务重排',
+            'kg': '知识图谱关系推理',
+            'chat': '直接回复',
+            'profile_analysis': '用户画像分析',
+            'clarify': '追问澄清',
+        }
+        lines.append(f"【执行策略】{strategy_desc.get(plan.strategy, plan.strategy)}")
+
+        return '\n'.join(lines)
+
+    @classmethod
+    def _enhance_explanation(cls, base_reason, movie_id, constraints, agent, rank_idx):
+        """
+        用 Planner 约束增强推荐理由，每部电影侧重不同维度。
+
+        rank_idx=0 → 侧重"最佳匹配"
+        rank_idx=1 → 侧重"类型/风格"
+        rank_idx=2 → 侧重"导演/叙事"
+        rank_idx=3 → 侧重"情感/氛围"
+        rank_idx=4 → 侧重"知识图谱/发现"
+        """
+        try:
+            from myapp.models import Movie
+            movie = Movie.objects.filter(id=movie_id).prefetch_related('genres', 'directors').first()
+            if not movie:
+                return base_reason
+
+            movie_title = movie.title
+            movie_genres = [g.name for g in movie.genres.all()[:3]]
+            movie_directors = [d.name for d in movie.directors.all()[:1]]
+            genre_str = '/'.join(movie_genres) if movie_genres else ""
+            director_str = movie_directors[0] if movie_directors else ""
+            score = movie.score or 0
+            year = movie.date.year if movie.date else ""
+
+            genre = constraints.get('genre', '')
+            vibe = constraints.get('vibe', '')
+            director = constraints.get('director', '')
+
+            # 根据排名位置选择不同理由维度
+            if rank_idx == 0:
+                # 最佳匹配：强调综合匹配度
+                if genre and genre in genre_str:
+                    return f"《{movie_title}》({year})是{genre}类型中的高分佳作(⭐{score})，与您的需求高度匹配。{base_reason.split('。')[0] if base_reason else ''}"
+                elif director and director in director_str:
+                    return f"《{movie_title}》({year})由{director_str}执导，正是您指定的导演，评分⭐{score}。"
+                else:
+                    return f"《{movie_title}》({year})在{genre_str}类别中评分⭐{score}，是综合匹配度最高的推荐。"
+
+            elif rank_idx == 1:
+                # 类型/风格匹配
+                if genre:
+                    return f"《{movie_title}》属于{genre_str}类型，与您要求的{genre}类型精准匹配。该片评分⭐{score}，值得一看。"
+                elif vibe:
+                    return f"《{movie_title}》的{genre_str}风格契合您'{vibe}'的氛围偏好，评分⭐{score}。"
+                else:
+                    return f"《{movie_title}》({year})是{genre_str}类型中的优秀作品，评分⭐{score}。"
+
+            elif rank_idx == 2:
+                # 导演/叙事特色
+                if director_str:
+                    return f"《{movie_title}》由{director_str}执导，该导演以独特的叙事风格著称。评分⭐{score}，{genre_str}类型。"
+                else:
+                    return f"《{movie_title}》({year})在叙事结构上有独到之处，{genre_str}类型，评分⭐{score}。"
+
+            elif rank_idx == 3:
+                # 情感/氛围
+                if vibe:
+                    return f"《{movie_title}》的{genre_str}风格营造出'{vibe}'的观影体验，评分⭐{score}。"
+                else:
+                    return f"《{movie_title}》({year})是一部情感细腻的{genre_str}佳作，评分⭐{score}，适合细细品味。"
+
+            else:
+                # 发现/图谱
+                if base_reason and '知识图谱归因' in base_reason:
+                    # 保留知识图谱归因部分
+                    kg_part = base_reason.split('【知识图谱归因】')[-1] if '【知识图谱归因】' in base_reason else ''
+                    if kg_part:
+                        return f"《{movie_title}》({year})通过知识图谱发现：{kg_part}"
+                return f"《{movie_title}》({year})是一部{genre_str}类型的隐藏佳作，评分⭐{score}，为您带来新的观影发现。"
+
+        except Exception:
+            return base_reason
+
+    @classmethod
+    def _reason_about_profile(cls, agent, genre, vibe):
+        """基于用户画像生成推理文本。"""
+        try:
+            slots = agent.memory.get_slots() if hasattr(agent, 'memory') and agent.memory else {}
+            # 查找用户最近高评分的电影
+            from myapp.models import UserRating
+            user = getattr(agent, 'user', None)
+            if not user:
+                return ""
+            recent_high = UserRating.objects.filter(
+                user=user, score__gte=8.0
+            ).select_related('movie').order_by('-score')[:1]
+            if recent_high.exists():
+                r = recent_high.first()
+                movie_title = r.movie.title if r.movie else "未知"
+                movie_genres = list(r.movie.genres.values_list('name', flat=True)[:2]) if r.movie else []
+                genre_str = '/'.join(movie_genres) if movie_genres else ""
+
+                parts = [f"用户近期高分评价《{movie_title}》({r.score}分)"]
+                if genre_str:
+                    parts.append(f"属于{genre_str}类型")
+                if genre and genre_str and genre not in genre_str:
+                    parts.append(f"当前需求为{genre}，需跨类型推荐")
+                elif genre and genre_str and genre in genre_str:
+                    parts.append(f"与当前{genre}需求一致，可复用偏好模式")
+                return '，'.join(parts)
+        except Exception:
+            pass
+        return ""
+
+    @classmethod
+    def _get_hot_fallback(cls):
+        """获取热门电影作为兜底。"""
+        hot_movies = []
+        hot_ids = []
+        try:
+            from myapp.models import Movie
+            qs = Movie.objects.order_by('-vote_count', '-score').exclude(
+                vote_count__isnull=True
+            ).exclude(score__isnull=True)[:5]
+            for m in qs:
+                genres = "、".join(g.name for g in m.genres.all()[:2])
+                directors = "、".join(d.name for d in m.directors.all()[:1])
+                score_str = str(m.score) if m.score else "暂无"
+                year_str = f"({m.date.year})" if m.date else ""
+                line = f"  《{m.title}》{year_str} | ⭐{score_str}"
+                if genres:
+                    line += f" | {genres}"
+                if directors:
+                    line += f" | 🎬{directors}"
+                hot_movies.append(line)
+                hot_ids.append(m.id)
+        except Exception:
+            pass
+        return hot_ids, hot_movies
+
+
+class Verifier:
+    """
+    推荐结果验证器：检查推荐是否满足 Planner 的约束。
+
+    只做规则检查，不调 LLM。
+    """
+
+    @classmethod
+    def verify(cls, plan, recommended_ids, explanations=None):
+        """
+        验证推荐结果是否满足计划约束。
+
+        Returns:
+            (passed: bool, reason: str)
+        """
+        if not recommended_ids:
+            return False, "无推荐结果"
+
+        if plan.intent in ('CHAT', 'QUERY_SELF'):
+            return True, "非推荐类意图，跳过验证"
+
+        c = plan.constraints
+
+        # 如果没有约束，只要有结果就算通过
+        if not any([c.get('genre'), c.get('director'), c.get('min_rating')]):
+            return True, "无硬性约束"
+
+        # 检查类型约束
+        if c.get('genre') and recommended_ids:
+            passed = cls._check_genre(recommended_ids, c['genre'])
+            if not passed:
+                return False, f"推荐结果中缺少类型 '{c['genre']}' 的电影"
+
+        # 检查导演约束
+        if c.get('director') and recommended_ids:
+            passed = cls._check_director(recommended_ids, c['director'])
+            if not passed:
+                return False, f"推荐结果中缺少导演 '{c['director']}' 的电影"
+
+        return True, "验证通过"
+
+    @classmethod
+    def _check_genre(cls, movie_ids, genre):
+        """检查推荐列表中是否有指定类型的电影。"""
+        try:
+            from myapp.models import Movie
+            count = Movie.objects.filter(
+                id__in=movie_ids, genres__name__icontains=genre
+            ).count()
+            return count > 0
+        except Exception:
+            return True  # 验证失败时放行
+
+    @classmethod
+    def _check_director(cls, movie_ids, director):
+        """检查推荐列表中是否有指定导演的电影。"""
+        try:
+            from myapp.models import Movie
+            count = Movie.objects.filter(
+                id__in=movie_ids, directors__name__icontains=director
+            ).count()
+            return count > 0
+        except Exception:
+            return True
+
+
+# =============================================================
 # Agent 工具集
 # =============================================================
 
@@ -579,17 +1515,17 @@ class AgentTool:
 
 
 class SearchVectorTool(AgentTool):
-    """向量语义搜索工具（含热门兜底）"""
+    """Query Rewrite + BM25/FAISS + RRF 升级版搜索工具（含热门兜底）"""
     name = "search_vector"
-    description = "基于语义相似度搜索电影"
+    description = "基于语义与关键词融合(Query Rewrite + BM25/FAISS + RRF)搜索电影"
     
     def __init__(self, rag_resources=None):
         self.rag_resources = rag_resources
     
     def execute(self, query="", k=10, **kwargs):
-        from myapp.recommender.recall import vector_recall, hot_recall
-        results = vector_recall(query, k=k, rag_resources=self.rag_resources)
-        # 向量召回为空时走热门兜底
+        from myapp.recommender.recall import hybrid_recall, hot_recall
+        results = hybrid_recall(query, k=k, rag_resources=self.rag_resources)
+        # 召回为空时走热门兜底
         if not results:
             results = hot_recall(k=k)
         return {
@@ -598,6 +1534,7 @@ class SearchVectorTool(AgentTool):
             'output': results,
             'count': len(results),
         }
+
 
 
 class RecallHybridTool(AgentTool):
@@ -1583,12 +2520,12 @@ class MovieAgent:
     
     def run(self, user_input, is_thinking_mode=False):
         """
-        执行Agent推理主流程。
-        
+        执行Agent推理主流程（Agent v3: Planner → ExecutionController → Verifier）。
+
         Args:
             user_input: 用户输入文本
             is_thinking_mode: 是否启用深度思考模式
-        
+
         Returns:
             Dict: {
                 'intent': str,              # 意图分类
@@ -1605,520 +2542,55 @@ class MovieAgent:
             }
         """
         t_start = time.time()
-        
+
         # ── Step 0: 更新记忆槽位 ──
         self.memory.update_slots(user_input)
-        
-        # ── Step 0.3: 多意图分支检测（Claude-style branching）──
-        has_multi, multi_branches = MultiIntentDetector.detect(user_input)
-        intent = IntentClassifier.classify(user_input)
-        
-        # 只有推荐类意图才需要检测多意图
-        if has_multi and intent in ('QUERY_MOVIE', 'QUERY_COMPARISON') and multi_branches:
-            multi_thought = (
-                f"识别用户意图: {intent}。用户需求涉及多个方向，"
-                f"需要进一步澄清以精准推荐。\n"
-                f"用户原始输入: '{user_input}'"
-            )
-            option_lines = []
-            clarification_options = []
-            for i, branch in enumerate(multi_branches, 1):
-                option_lines.append(f"  {i}. {branch['label']}")
-                clarification_options.append([branch['label'], branch['query']])
-            
-            clarification_text = (
-                "🤔 您的需求涉及多个方向，请告诉我您更想专注哪一边：\n"
-                + "\n".join(option_lines)
-            )
-            
-            t_total = int((time.time() - t_start) * 1000)
-            trace_steps = [{
-                'step': 0, 'type': 'thought', 'content': multi_thought,
-            }, {
-                'step': 1, 'type': 'clarification',
-                'content': '检测到多意图并列，发起分支追问',
-            }]
-            
-            return {
-                'intent': intent,
-                'thought': multi_thought,
-                'actions': [],
-                'observations': [],
-                'final_answer': clarification_text,
-                'recommended_ids': [],
-                'explanations': {},
-                'latency_ms': t_total,
-                'need_clarification': True,
-                'clarification_options': clarification_options,
-                'trace_steps': trace_steps,
-            }
-        
-        # ── Step 0.5: 模糊查询检测（追问 + 热门推荐混合机制）──
-        is_vague, vague_reason = VaguenessDetector.is_vague(user_input)
 
-        # 只有推荐类意图才需要检测模糊性
-        if is_vague and intent in ('QUERY_MOVIE', 'CHAT'):
-            options = VaguenessDetector.generate_clarification_options(
-                user_input, self.memory.get_slots()
-            )
-            clarification_thought = (
-                f"识别用户意图: {intent}。用户查询较为模糊（原因: {vague_reason}），"
-                f"先提供热门推荐作为兜底，同时追问以获取更精准需求。\n"
-                f"用户原始输入: '{user_input}'\n"
-                f"记忆状态:\n{self.memory.get_memory_summary()}"
-            )
+        # ── Step 1: Planner — 生成结构化执行计划 ──
+        plan = Planner.plan(
+            user_input,
+            memory_slots=self.memory.get_slots(),
+            llm_func=self._call_llm if self.llm_config.get('model_name') else None,
+        )
+        logger.info(f"[Agent] Planner: intent={plan.intent}, strategy={plan.strategy}, "
+                     f"confidence={plan.confidence}, tools={plan.expected_tools}")
 
-            t_total = int((time.time() - t_start) * 1000)
+        # ── Step 2: ExecutionController — 按计划执行 ──
+        result = ExecutionController.execute(plan, user_input, self, t_start)
 
-            # 生成追问选项
-            option_lines = []
-            for i, opt in enumerate(options, 1):
-                option_lines.append(f"  {i}. {opt['label']}")
-
-            # 同时获取热门电影推荐作为兜底
-            hot_movies = []
-            hot_ids = []
-            try:
-                from myapp.models import Movie
-                hot_qs = Movie.objects.order_by('-vote_count', '-score').exclude(
-                    vote_count__isnull=True
-                ).exclude(score__isnull=True)[:5]
-                for m in hot_qs:
-                    genres = "、".join(g.name for g in m.genres.all()[:2])
-                    directors = "、".join(d.name for d in m.directors.all()[:1])
-                    score_str = str(m.score) if m.score else "暂无"
-                    movie_year = m.date.year if m.date else None
-                    year_str = f"({movie_year})" if movie_year else ""
-                    line = f"  《{m.title}》{year_str} | ⭐{score_str}"
-                    if genres:
-                        line += f" | {genres}"
-                    if directors:
-                        line += f" | 🎬{directors}"
-                    hot_movies.append(line)
-                    hot_ids.append(m.id)
-            except Exception:
-                pass
-
-            # 拼接完整响应：追问选项 + 热门推荐
-            clarification_text = "🤔 您的需求我还需要进一步确认，请告诉我您更想看哪种类型的电影：\n"
-            clarification_text += "\n".join(option_lines)
-            if hot_movies:
-                clarification_text += "\n\n🔥 先为您推荐几部热门高分电影：\n"
-                clarification_text += "\n".join(hot_movies)
-
-            # 构建完整的trace步骤（含追问 + 热门推荐）
-            trace_steps = [{
-                'step': 0,
-                'type': 'thought',
-                'content': clarification_thought,
-            }, {
-                'step': 1,
-                'type': 'clarification',
-                'content': '检测到模糊查询，提供热门推荐兜底并追问',
-                'reason': vague_reason,
-            }]
-            if hot_ids:
-                trace_steps.append({
-                    'step': 2,
-                    'type': 'action',
-                    'content': '获取热门电影推荐作为兜底',
-                    'tool': 'hot_recall',
-                    'count': len(hot_ids),
+        # ── Step 3: Verifier — 验证推荐结果 ──
+        if result.get('recommended_ids') and plan.strategy not in ('clarify', 'chat', 'profile_analysis'):
+            passed, reason = Verifier.verify(plan, result['recommended_ids'])
+            if not passed:
+                logger.warning(f"[Agent] Verifier 未通过: {reason}，但不阻断返回")
+                result['trace_steps'].append({
+                    'step': len(result['trace_steps']),
+                    'type': 'verifier',
+                    'content': f"验证未通过: {reason}",
+                    'passed': False,
+                })
+            else:
+                result['trace_steps'].append({
+                    'step': len(result['trace_steps']),
+                    'type': 'verifier',
+                    'content': f"验证通过: {reason}",
+                    'passed': True,
                 })
 
-            return {
-                'intent': intent,
-                'thought': clarification_thought,
-                'actions': [{'tool': 'hot_recall', 'input': 'vague_fallback'}] if hot_ids else [],
-                'observations': [{'tool': 'hot_recall', 'output': hot_ids, 'count': len(hot_ids)}] if hot_ids else [],
-                'final_answer': clarification_text,
-                'recommended_ids': hot_ids,
-                'explanations': {},
-                'latency_ms': t_total,
-                'need_clarification': True,
-                'clarification_options': options,
-                'trace_steps': trace_steps,
-            }
-
-        # ── Step 0.5b: LLM 意图解析（LLM + 规则互补）──
-        llm_parsed = {}
-        if self.llm_config.get('model_name'):
-            llm_parsed = LLMIntentParser.parse(user_input, self._call_llm)
-            if llm_parsed.get('tags'):
-                logger.info(f"[Agent] LLM 意图解析: tags={llm_parsed['tags']}, sort_by={llm_parsed.get('sort_by')}")
-
-        # ── Step 1: 意图分类（融合记忆上下文）──
-        is_followup = self.memory.is_followup(user_input)
-
-        # ── Step 1.5: 检测锚点电影（用于动态工具链路由）──
-        anchor_movie = self._detect_anchor_movie(user_input)
-
-        # ── Step 1.8: 查询复杂度路由 ──
-        complexity = QueryComplexityRouter.classify(user_input, intent, is_followup, anchor_movie)
-
-        # 消融实验: 禁用 ReAct 时强制走快速通道
-        if getattr(self, '_force_fast_path', False):
-            return self._run_fast_path(user_input, intent, t_start, llm_parsed=llm_parsed)
-
-        if complexity == 'simple':
-            return self._run_fast_path(user_input, intent, t_start, llm_parsed=llm_parsed)
-
-        # ── Step 1.9: LLM 意图解析结果存入记忆 ──
-        if llm_parsed.get('tags'):
-            self.memory.update_slots({'llm_tags': llm_parsed['tags']})
-            # 若记忆中无类型槽位，用 LLM 第一个标签填充（供 _micro_think 融合）
-            if llm_parsed['tags'] and not self.memory.get_slots().get('genre'):
-                self.memory.update_slots({'genre': llm_parsed['tags'][0]})
-
-        # ── Step 2: Thought（思考阶段，融入记忆上下文）──
-        thought = self._think(user_input, intent, is_followup, anchor_movie)
-        
-        # ── Step 3: 提取年份过滤条件 ──
-        year_filter = self._extract_year_filter(user_input)
-        if year_filter:
-            logger.info(f"[Agent] 检测到年份过滤条件: {year_filter}")
-        
-        # ── Step 4: 动态构建工具链 ──
-        # KAG设计变更：kg_query 不再参与召回（会引入噪声候选），
-        # 改为在 Step 6 解释阶段用于增强可解释性（知识图谱路径归因）
-        tool_chain = list(self.INTENT_TOOL_MAP.get(intent, []))
-
-        # 消融适配: RAG 不可用时，用数据库查询替代向量搜索
-        has_rag = bool(self.rag_resources and self.rag_resources.get('vectorstore'))
-        if not has_rag:
-            tool_chain = [
-                'search_database' if t in ('search_vector', 'recall_hybrid') else t
-                for t in tool_chain
-            ]
-        
-        # ── Step 5: Action → Observation 循环（含自反馈纠偏）──
-        actions = []
-        observations = []
-        candidates = []
-        recommended_ids = []
-        explanations = {}
-        
-        # trace_steps: 完整的推理链步骤记录
-        trace_steps = [{
-            'step': 0,
-            'type': 'thought',
-            'content': thought,
-        }]
-        trace_step_counter = 1
-        
-        for tool_name in tool_chain:
-            # Action
-            action, observation = self._act(tool_name, user_input, candidates)
-            actions.append(action)
-            observations.append(observation)
-            
-            # 记录trace步骤
-            trace_steps.append({
-                'step': trace_step_counter,
-                'type': 'action',
-                'content': f"调用工具 {tool_name}",
-                'tool': tool_name,
-                'input': action.get('input', ''),
-            })
-            trace_step_counter += 1
-            
-            obs_count = observation.get('count', 0)
-            trace_steps.append({
-                'step': trace_step_counter,
-                'type': 'observation',
-                'content': f"工具 {tool_name} 返回 {obs_count} 条结果",
-                'tool': tool_name,
-                'count': obs_count,
-            })
-            trace_step_counter += 1
-            
-            # 【Bug2修复】合并候选集而非覆盖
-            if tool_name in ('search_vector', 'recall_hybrid', 'kg_query', 'search_database'):
-                raw = observation.get('output', [])
-                if isinstance(raw, list) and raw:
-                    existing_ids = {c.get('movie_id', c.get('id')) for c in candidates if isinstance(c, dict)}
-                    
-                    if tool_name == 'kg_query':
-                        # kg_query返回三元组字符串，需要提取电影ID
-                        for item in raw:
-                            if isinstance(item, dict):
-                                mid = item.get('movie_id', item.get('id'))
-                                if mid and mid not in existing_ids:
-                                    candidates.append(item)
-                                    existing_ids.add(mid)
-                            elif isinstance(item, str):
-                                # 从三元组"《盗梦空间》(ID:456)--[导演:...]-->《星际穿越》"中提取ID
-                                id_match = re.search(r'ID[：:](\d+)', item)
-                                if id_match:
-                                    mid = int(id_match.group(1))
-                                    if mid not in existing_ids:
-                                        title_match = re.search(r'《([^》]+)》', item)
-                                        title = title_match.group(1) if title_match else ''
-                                        candidates.append({'movie_id': mid, 'title': title})
-                                        existing_ids.add(mid)
-                    else:
-                        # search_vector / recall_hybrid 返回标准字典
-                        for item in raw:
-                            if isinstance(item, dict):
-                                mid = item.get('movie_id', item.get('id'))
-                                if mid and mid not in existing_ids:
-                                    candidates.append(item)
-                                    existing_ids.add(mid)
-                    
-                    # 候选池上限保护
-                    if len(candidates) > 200:
-                        candidates = candidates[:200]
-                
-                # ── 自反馈纠偏机制：空结果重试 ──
-                # 当召回工具返回空结果时，自动切换到备用路径
-                if not candidates and tool_name in self.FALLBACK_CHAIN:
-                    fallback_tool = self.FALLBACK_CHAIN[tool_name]
-                    retry_thought = (
-                        f"[自反馈纠偏] 工具 {tool_name} 返回空结果，"
-                        f"自动切换至备用工具 {fallback_tool} 进行重试"
-                    )
-                    logger.info(f"[Agent] {retry_thought}")
-                    
-                    # 记录纠偏Thought到trace
-                    trace_steps.append({
-                        'step': trace_step_counter,
-                        'type': 'thought',
-                        'content': retry_thought,
-                        'is_retry': True,
-                        'original_tool': tool_name,
-                        'fallback_tool': fallback_tool,
-                    })
-                    trace_step_counter += 1
-                    
-                    # 执行备用工具
-                    retry_action, retry_observation = self._act(
-                        fallback_tool, user_input, candidates
-                    )
-                    actions.append(retry_action)
-                    observations.append(retry_observation)
-                    
-                    retry_obs_count = retry_observation.get('count', 0)
-                    trace_steps.append({
-                        'step': trace_step_counter,
-                        'type': 'action',
-                        'content': f"[纠偏重试] 调用备用工具 {fallback_tool}",
-                        'tool': fallback_tool,
-                        'input': retry_action.get('input', ''),
-                        'is_retry': True,
-                    })
-                    trace_step_counter += 1
-                    
-                    trace_steps.append({
-                        'step': trace_step_counter,
-                        'type': 'observation',
-                        'content': f"[纠偏重试] 备用工具 {fallback_tool} 返回 {retry_obs_count} 条结果",
-                        'tool': fallback_tool,
-                        'count': retry_obs_count,
-                        'is_retry': True,
-                    })
-                    trace_step_counter += 1
-                    
-                    retry_raw = retry_observation.get('output', [])
-                    candidates = retry_raw if isinstance(retry_raw, list) else []
-                    
-                    if candidates:
-                        trace_steps.append({
-                            'step': trace_step_counter,
-                            'type': 'thought',
-                            'content': f"[纠偏成功] 通过 {fallback_tool} 获得 {len(candidates)} 条候选",
-                            'is_retry': True,
-                        })
-                        trace_step_counter += 1
-                
-                # ── 低质量结果纠偏机制 ──
-                # 当召回结果与查询语义相似度过低时，增大召回范围重试
-                if candidates and tool_name in ('search_vector', 'recall_hybrid'):
-                    top1 = candidates[0]
-                    top1_title = top1.get('title', '') if isinstance(top1, dict) else ''
-                    if top1_title:
-                        enhanced_q = self._build_enhanced_query(user_input)
-                        sim = self._compute_query_result_similarity(enhanced_q, top1_title)
-                        if sim < self.LOW_QUALITY_SIM_THRESHOLD:
-                            aug_top_k = 100
-                            lq_thought = (
-                                f"[低质量纠偏] Top-1《{top1_title}》与查询语义相似度 {sim:.3f} "
-                                f"< {self.LOW_QUALITY_SIM_THRESHOLD}，增大召回至 {aug_top_k} 重试"
-                            )
-                            logger.info(f"[Agent] {lq_thought}")
-                            trace_steps.append({
-                                'step': trace_step_counter,
-                                'type': 'thought',
-                                'content': lq_thought,
-                                'is_retry': True,
-                                'original_tool': tool_name,
-                                'similarity': round(sim, 4),
-                            })
-                            trace_step_counter += 1
-
-                            retry_action_lq, retry_obs_lq = self._act(
-                                tool_name, user_input, candidates,
-                                override_top_k=aug_top_k
-                            )
-                            actions.append(retry_action_lq)
-                            observations.append(retry_obs_lq)
-
-                            retry_raw_lq = retry_obs_lq.get('output', [])
-                            if retry_raw_lq:
-                                existing_ids_lq = {c.get('movie_id', c.get('id')) for c in candidates if isinstance(c, dict)}
-                                new_count = 0
-                                for item in retry_raw_lq:
-                                    if isinstance(item, dict):
-                                        mid = item.get('movie_id', item.get('id'))
-                                        if mid and mid not in existing_ids_lq:
-                                            candidates.append(item)
-                                            existing_ids_lq.add(mid)
-                                            new_count += 1
-                                trace_steps.append({
-                                    'step': trace_step_counter,
-                                    'type': 'observation',
-                                    'content': f"[低质量纠偏] 增量召回新增 {new_count} 条候选",
-                                    'tool': tool_name,
-                                    'is_retry': True,
-                                })
-                                trace_step_counter += 1
-
-                # 在召回后立即应用年份过滤
-                if year_filter and candidates:
-                    candidates = self._filter_by_year(candidates, year_filter)
-                    
-            elif tool_name in ('rerank', 'maan_rerank'):
-                candidates = observation.get('output', [])
-                # 精排后再次确认年份过滤
-                if year_filter and candidates:
-                    candidates = self._filter_by_year(candidates, year_filter)
-        
-        # ── Step 5: 约束后过滤 (Genre + Director) + 提取最终推荐ID ──
-        detected_genre = self._extract_genre_from_query(user_input)
-        detected_director = self._extract_director_from_query(user_input)
-        if (detected_genre or detected_director) and candidates:
-            from myapp.models import Movie
-            try:
-                existing_ids = {c.get('movie_id') for c in candidates if c.get('movie_id')}
-                # 从数据库补回被 MAAN 排除的约束匹配电影
-                refill_qs = Movie.objects.all()
-                if detected_director:
-                    refill_qs = refill_qs.filter(directors__name__icontains=detected_director)
-                if detected_genre:
-                    refill_qs = refill_qs.filter(genres__name__icontains=detected_genre)
-                refill_ids = list(refill_qs.order_by('-score', '-vote_count').values_list('id', flat=True)[:20])
-                for mid in refill_ids:
-                    if mid not in existing_ids:
-                        candidates.append({'movie_id': mid, 'score': 0, 'source': 'constraint_refill'})
-                        existing_ids.add(mid)
-
-                # 分离约束匹配和不匹配的候选
-                attr_map = {}
-                cids = [c.get('movie_id') for c in candidates if c.get('movie_id')]
-                if cids:
-                    for m in Movie.objects.filter(id__in=cids).prefetch_related('genres', 'directors'):
-                        attr_map[m.id] = {
-                            'genres': [g.name for g in m.genres.all()],
-                            'directors': [d.name for d in m.directors.all()],
-                        }
-                    matching = []
-                    non_matching = []
-                    for c in candidates:
-                        mid = c.get('movie_id')
-                        attrs = attr_map.get(mid, {})
-                        is_match = True
-                        if detected_genre:
-                            movie_genres = attrs.get('genres', [])
-                            if not any(detected_genre in g or g in detected_genre for g in movie_genres):
-                                is_match = False
-                        if detected_director:
-                            movie_directors = attrs.get('directors', [])
-                            if not any(detected_director in d or d in detected_director for d in movie_directors):
-                                is_match = False
-                        if is_match:
-                            matching.append(c)
-                        else:
-                            non_matching.append(c)
-                    candidates = matching + non_matching
-            except Exception:
-                pass
-
-        # 评分质量底线：无显式评分约束时，过滤掉低评分和无评分电影
-        if candidates:
-            mc = self._micro_think(user_input)
-            if not mc.get('min_rating'):
-                RATING_FLOOR = 6.5
-                try:
-                    from myapp.models import Movie
-                    cids = [c.get('movie_id') for c in candidates if c.get('movie_id')]
-                    score_map = dict(Movie.objects.filter(id__in=cids).values_list('id', 'score'))
-                    high_quality = [c for c in candidates if score_map.get(c.get('movie_id')) is not None and float(score_map[c.get('movie_id')] or 0) >= RATING_FLOOR]
-                    if len(high_quality) >= 5:
-                        candidates = high_quality
-                    else:
-                        # 即使不足5部，也排除无评分电影
-                        has_score = [c for c in candidates if score_map.get(c.get('movie_id')) is not None]
-                        if len(has_score) >= len(candidates) * 0.5:
-                            candidates = has_score
-                except Exception:
-                    pass
-
-        for item in candidates:
-            mid = item.get('movie_id') if isinstance(item, dict) else None
-            if mid:
-                recommended_ids.append(mid)
-        
-        # ── Step 6: 生成推荐理由 ──
-        if recommended_ids and self.user:
-            for mid in recommended_ids[:5]:
-                try:
-                    explain_result = self.tools['explain'].execute(
-                        user=self.user, movie_id=mid
-                    )
-                    explanations[mid] = explain_result.get('output', '')
-                except Exception as e:
-                    # Explain 模块异常不影响推荐结果
-                    explanations[mid] = ''
-        
-        # ── Step 6.5: Faithfulness Self-Check（已禁用，MAAN 精排已保证推荐质量）──
-
-        # ── Step 7: Final Answer ──
-        final_answer = self._generate_final_answer(
-            user_input, intent, recommended_ids, explanations, thought
-        )
-
-        # 处理空结果追问
-        need_clarification = False
-        clarification_options = []
-        if final_answer == "__NEED_CLARIFICATION__":
-            need_clarification = True
-            clarification_options = VaguenessDetector.generate_clarification_options(
-                user_input,
-                memory_slots=self.memory.get_slots() if hasattr(self, 'memory') and self.memory else None
+        # ── Step 4: 持久化 ──
+        try:
+            ChatHistory.objects.create(
+                user=self.user,
+                session_id=self.session_id,
+                user_message=user_input,
+                agent_response=result.get('final_answer', ''),
+                intent=result.get('intent', ''),
+                latency_ms=result.get('latency_ms', 0),
             )
-            final_answer = "抱歉，暂时没有找到完全匹配的电影。您可以换个关键词试试，或者从下面选择一个方向："
+        except Exception:
+            pass
 
-        # 记录Final Answer到trace
-        trace_steps.append({
-            'step': trace_step_counter,
-            'type': 'final_answer',
-            'content': final_answer,
-        })
-
-        t_total = int((time.time() - t_start) * 1000)
-
-        return {
-            'intent': intent,
-            'thought': thought,
-            'actions': actions,
-            'observations': observations,
-            'final_answer': final_answer,
-            'recommended_ids': recommended_ids,
-            'explanations': explanations,
-            'latency_ms': t_total,
-            'need_clarification': need_clarification,
-            'clarification_options': clarification_options,
-            'trace_steps': trace_steps,
-        }
+        return result
 
     def _micro_think(self, user_input):
         """
@@ -2815,13 +3287,14 @@ class MovieAgent:
             logger.warning(f"[Agent] BGE 相似度计算失败: {e}")
             return 0.0
 
-    def _act(self, tool_name, user_input, current_candidates, override_top_k=None):
+    def _act(self, tool_name, user_input, current_candidates, override_top_k=None, constraints=None):
         """
         Action阶段：执行工具调用
         🔥 核心改进：追问时融合记忆槽位构建增强查询
 
         Args:
             override_top_k: 覆盖默认召回数量（用于低质量结果纠偏重试）
+            constraints: Planner 提取的约束 dict（可选，用于增强查询）
         """
         tool = self.tools.get(tool_name)
         if not tool:
@@ -2829,7 +3302,7 @@ class MovieAgent:
 
         try:
             # 🔥 构建增强查询：将记忆槽位合并到用户输入中
-            enhanced_query = self._build_enhanced_query(user_input)
+            enhanced_query = self._build_enhanced_query(user_input, constraints)
 
             # 【Bug3修复】增大召回数量，确保精排有足够候选池
             if tool_name == 'search_vector':
@@ -3065,11 +3538,12 @@ class MovieAgent:
 
         return ""
     
-    def _build_enhanced_query(self, user_input):
+    def _build_enhanced_query(self, user_input, constraints=None):
         """
         构建语义查询：从用户输入中提取核心语义关键词，
         去除模糊的高频词（推荐、电影、片子等），保留能区分主题的词。
         🔥 核心改进：始终融合记忆槽位，而非仅追问时
+        🔥 v3 改进：融合 Planner 约束，提升召回质量
         """
         # 1. 清洗：去除高频模糊词，保留语义关键词
         stop_words = [
@@ -3137,6 +3611,26 @@ class MovieAgent:
             keywords.append(slots['keyword'])
         if slots.get('actor') and slots['actor'] not in ' '.join(keywords):
             keywords.append(slots['actor'])
+
+        # 3.5 融合 Planner 约束（v3 新增）
+        if constraints:
+            kw_str = ' '.join(keywords)
+            genre = constraints.get('genre')
+            vibe = constraints.get('vibe')
+            director = constraints.get('director')
+            actor = constraints.get('actor')
+            if genre and genre not in kw_str:
+                keywords.insert(0, genre)
+            if vibe and vibe not in kw_str:
+                keywords.append(vibe)
+            if director and director not in kw_str:
+                keywords.append(director)
+            if actor and actor not in kw_str:
+                keywords.append(actor)
+            # 高评分约束 → 添加"高分"关键词提升召回质量
+            if constraints.get('min_rating') and constraints['min_rating'] >= 8.0:
+                if '高分' not in kw_str:
+                    keywords.append('高分')
 
         # 4. 拼接查询
         if keywords:
