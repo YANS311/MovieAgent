@@ -240,7 +240,12 @@ $(document).ready(function() {
     });
 
     window.clearHistory = function() {
-        if(confirm("确认清空聊天记录？")) location.href = "{% url 'chat_clear_history' %}";
+        if(confirm("确认清空聊天记录？")) {
+            $.post("{% url 'chat_clear_history' %}", {
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            }).done(function() { location.reload(); })
+              .fail(function() { alert("清空失败，请刷新页面后重试。"); });
+        }
     };
 
     var history = {{ chat_history_json|safe }};

@@ -18,6 +18,8 @@ import json
 import logging
 import traceback
 from collections import Counter
+from myapp.utils.cache_keys import intent_cache_key
+from myapp.utils.cache_access import business_cache_get, business_cache_set
 
 logger = logging.getLogger('movie_agent')
 
@@ -436,10 +438,10 @@ Output: {"user_id":"anonymous","query_text":"有什么好玩的 喜剧 电影吗
             return fallback
 
         # Redis 缓存：相同查询复用意图解析结果（TTL 10 分钟）
-        cache_key = f"intent:{hash(user_input.strip())}"
+        cache_key = intent_cache_key(user_input)
         try:
             from django.core.cache import cache
-            cached = cache.get(cache_key)
+            cached = business_cache_get(cache, cache_key)
             if cached is not None:
                 return cached
         except Exception:
@@ -478,7 +480,7 @@ Output: {"user_id":"anonymous","query_text":"有什么好玩的 喜剧 电影吗
 
             # 写入缓存（TTL 10 分钟）
             try:
-                cache.set(cache_key, result, timeout=600)
+                business_cache_set(cache, cache_key, result, 600)
             except Exception:
                 pass
 
@@ -1835,9 +1837,10 @@ class RerankTool(AgentTool):
     name = "rerank"
     description = "对候选电影进行多样性重排"
     
-    def execute(self, candidates=None, user=None, top_k=10, **kwargs):
+    def execute(self, candidates=None, user=None, top_k=10, memory_slots=None, **kwargs):
         from myapp.recommender.rerank import final_rerank
-        results, stats = final_rerank(candidates or [], user=user, top_k=top_k)
+        results, stats = final_rerank(candidates or [], user=user, top_k=top_k,
+                                     memory_slots=memory_slots)
         return {
             'tool': self.name,
             'input': f"{len(candidates or [])} candidates",
@@ -2515,7 +2518,7 @@ class MovieAgent:
         from myapp.agent.memory import MemoryManager
         self.memory = MemoryManager(
             user=user,
-            session_id=session_id or f"user_{getattr(user, 'id', 'anon')}"
+            session_id=session_id
         )
     
     def run(self, user_input, is_thinking_mode=False):
@@ -3324,7 +3327,9 @@ class MovieAgent:
                 slots = self.memory.get_slots() if hasattr(self, 'memory') and self.memory else None
                 result = tool.execute(candidates=current_candidates, user=self.user, top_k=15, memory_slots=slots)
             elif tool_name == 'rerank':
-                result = tool.execute(candidates=current_candidates, user=self.user, top_k=15)
+                slots = self.memory.get_slots() if hasattr(self, 'memory') and self.memory else None
+                result = tool.execute(candidates=current_candidates, user=self.user, top_k=15,
+                                      memory_slots=slots)
             elif tool_name == 'explain':
                 result = tool.execute(user=self.user)
             else:

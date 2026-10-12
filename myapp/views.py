@@ -19,6 +19,7 @@ def _safe_cuda_available():
 
 import hashlib
 import json
+import math
 import pickle
 import re
 import threading
@@ -46,6 +47,16 @@ from django.conf import settings
 from urllib.parse import quote
 from django.contrib.auth.forms import SetPasswordForm, UserCreationForm
 from django.core.cache import cache
+from myapp.services.cache_mutations import (
+    recommendation_write_view, schedule_user_invalidation, schedule_catalog_invalidation,
+    partial_commit_response,
+)
+from myapp.utils.cache_keys import (
+    kg_subgraph_cache_key, hybrid_recommendation_cache_key,
+    invalidate_recommendation_cache,
+    RecommendationCacheInvalidationError, user_business_cache_key, catalog_business_cache_key,
+)
+from myapp.utils.cache_access import business_cache_get, business_cache_set, business_cache_delete
 from django.core.management import call_command
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
@@ -797,12 +808,14 @@ def update_recommendations(user, top_k=15):
                     best_idx = i
         final_rec_indices.append(best_idx)
 
-    Rec.objects.filter(user=user).delete()
     rec_objs = [
         Rec(user=user, movie_id=cand_100_raw[idx], rating=float(cand_100_preds[idx]))
         for idx in final_rec_indices
     ]
-    Rec.objects.bulk_create(rec_objs)
+    with transaction.atomic():
+        Rec.objects.filter(user=user).delete()
+        Rec.objects.bulk_create(rec_objs)
+        schedule_user_invalidation(user.id)
     return len(rec_objs)
 
 
@@ -984,6 +997,67 @@ def rrf_merge(ranked_lists, k_rrf=60, weights=None):
     return merged  # [(movie_id, rrf_score), ...]
 
 
+_HYBRID_CACHE_SCHEMA = 'hybrid_rec_payload_v1'
+
+
+def _restore_hybrid_cache_payload(payload):
+    """Validate a lightweight cache value and hydrate movies in one query.
+
+    Return None for an obsolete/malformed payload or when any cached movie has
+    been deleted. Database errors intentionally propagate to the caller.
+    """
+    if not isinstance(payload, dict) or payload.get('schema') != _HYBRID_CACHE_SCHEMA:
+        return None
+    items = payload.get('items')
+    profile_text = payload.get('profile_text')
+    source_stats = payload.get('source_stats')
+    if not isinstance(items, list) or not isinstance(profile_text, str) or not isinstance(source_stats, dict):
+        return None
+    if any(type(source_stats.get(name)) is not int or source_stats[name] < 0
+           for name in ('vector', 'content', 'model')):
+        return None
+
+    movie_ids = []
+    scores = {}
+    for item in items:
+        if not isinstance(item, dict):
+            return None
+        movie_id = item.get('movie_id')
+        score = item.get('rrf_score')
+        if (not isinstance(movie_id, int) or isinstance(movie_id, bool)
+                or movie_id in scores or not isinstance(score, (int, float))
+                or isinstance(score, bool)):
+            return None
+        try:
+            numeric_score = float(score)
+        except (OverflowError, ValueError):
+            return None
+        if not math.isfinite(numeric_score):
+            return None
+        movie_ids.append(movie_id)
+        scores[movie_id] = numeric_score
+
+    if not movie_ids:
+        restored_stats = dict(source_stats)
+        restored_stats['profile_text'] = profile_text
+        return ([], profile_text, restored_stats)
+
+    movies = list(
+        Movie.objects.filter(id__in=movie_ids)
+        .prefetch_related('genres', 'actors', 'directors')
+    )
+    by_id = {movie.id: movie for movie in movies}
+    if len(by_id) != len(movie_ids) or any(movie_id not in by_id for movie_id in movie_ids):
+        return None
+
+    ordered_movies = [by_id[movie_id] for movie_id in movie_ids]
+    for movie in ordered_movies:
+        movie.rrf_score = round(float(scores[movie.id]), 4)
+    restored_stats = dict(source_stats)
+    restored_stats['profile_text'] = profile_text
+    return ordered_movies, profile_text, restored_stats
+
+
 def hybrid_recall_recommend(user, top_k=30, force_refresh=False):
     """
     混合检索主函数：
@@ -992,11 +1066,14 @@ def hybrid_recall_recommend(user, top_k=30, force_refresh=False):
     3. RRF 融合 & 取 top_k
     4. 返回 (Movie QuerySet, profile_text, source_stats)
     """
-    cache_key = f"hybrid_rec_{user.id}"
-    if not force_refresh:
-        cached = cache.get(cache_key)
-        if cached:
-            return cached
+    cache_key = hybrid_recommendation_cache_key(cache, user.id, top_k)
+    if cache_key is not None and not force_refresh:
+        cached = business_cache_get(cache, cache_key)
+        if cached is not None:
+            restored = _restore_hybrid_cache_payload(cached)
+            if restored is not None:
+                return restored
+            business_cache_delete(cache, cache_key)
 
     profile_text, liked_ids = build_user_profile_text(user)
     liked_set = set(liked_ids)
@@ -1048,7 +1125,19 @@ def hybrid_recall_recommend(user, top_k=30, force_refresh=False):
         m.rrf_score = round(id_score.get(m.id, 0.0), 4)
 
     result = (movies_qs, profile_text, source_stats)
-    cache.set(cache_key, result, 1800)  # 缓存 30 分钟
+    if cache_key is not None:
+        compact_stats = dict(source_stats)
+        compact_stats.pop('profile_text', None)
+        payload = {
+            'schema': _HYBRID_CACHE_SCHEMA,
+            'items': [
+                {'movie_id': movie.id, 'rrf_score': movie.rrf_score}
+                for movie in movies_qs
+            ],
+            'profile_text': profile_text,
+            'source_stats': compact_stats,
+        }
+        business_cache_set(cache, cache_key, payload, 1800)  # 缓存 30 分钟
     return result
 
 
@@ -1073,6 +1162,8 @@ def recommend(request):
         try:
             # 🚀 实时调用 KAG 模型预测！
             update_recommendations(user, top_k=40)
+        except RecommendationCacheInvalidationError as exc:
+            return partial_commit_response(exc)
         except Exception as e:
             logger.error(f"模型推理失败: {e}")
 
@@ -1107,8 +1198,8 @@ def recommend(request):
     total_liked_count = len(liked_ids)
 
     # 🔥 优化二：引入缓存。如果用户只是在翻页，直接从缓存拿兜底数据，避免重算
-    cache_key = f"cb_recs_{user.id}"
-    cached_cb_data = cache.get(cache_key) if not force_refresh else None
+    cache_key = user_business_cache_key(cache, user.id, 'cb_recs')
+    cached_cb_data = business_cache_get(cache, cache_key) if not force_refresh else None
 
     if cached_cb_data:
         rec_source = cached_cb_data['source']
@@ -1149,7 +1240,7 @@ def recommend(request):
                     'genres', 'actors').order_by('-vote_count', '-score')[:50])
 
         # 写入缓存，保留 1 小时
-        cache.set(cache_key, {'source': rec_source, 'list': final_rec_list}, 3600)
+        business_cache_set(cache, cache_key, {'source': rec_source, 'list': final_rec_list}, 3600)
 
     cb_paginator = Pagination(
         request,
@@ -1191,6 +1282,7 @@ def recommend(request):
 
 
 @login_required
+@recommendation_write_view
 def score_movie(request):
     """
     处理用户在电影详情页提交的打分与评论
@@ -1216,6 +1308,7 @@ def score_movie(request):
                             'discussion': discussion_val if discussion_val else None
                         }
                     )
+                    schedule_user_invalidation(request.user.id)
                     messages.success(request, "评价提交成功！系统将根据您的最新反馈调整推荐。")
             except ValueError:
                 messages.error(request, "无效的评分格式。")
@@ -1226,6 +1319,7 @@ def score_movie(request):
     return redirect('movie_detail', pk=movie_id)
 
 @never_cache  # (这个我们之前加过，防止缓存)
+@recommendation_write_view
 def movie_detail(request, pk):
     # 🔥 优化：使用 prefetch_related 预加载所有 M2M 字段 (含 directors)
     # 这样在模板里循环时，不会产生几十条 SQL 查询
@@ -1256,6 +1350,7 @@ def movie_detail(request, pk):
                     'discussion': rating_form.cleaned_data['discussion']
                 }
             )
+            schedule_user_invalidation(request.user.id)
             messages.success(request, "评论发表成功！")
             return redirect('movie_detail', pk=pk)
 
@@ -1279,6 +1374,8 @@ def movie_detail(request, pk):
 
 
 @login_required  # 2. 确保只有登录用户才能调用
+@require_POST
+@recommendation_write_view
 def add_collect(request, pk):
     # 获取电影, 如果不存在则 404
     movie = get_object_or_404(Movie, pk=pk)
@@ -1290,11 +1387,15 @@ def add_collect(request, pk):
         movie=movie  # 当前电影
     )
 
+    schedule_user_invalidation(request.user.id)
+
     # 4. 操作完成后, 重定向回电影详情页
     return redirect('movie_detail', pk=pk)
 
 
 @login_required  # 2. 确保只有登录用户才能调用
+@require_POST
+@recommendation_write_view
 def remove_collect(request, pk):
     movie = get_object_or_404(Movie, pk=pk)
 
@@ -1304,6 +1405,8 @@ def remove_collect(request, pk):
         movie=movie  # 当前电影
     ).delete()
 
+    schedule_user_invalidation(request.user.id)
+
     # 4. 操作完成后, 重定向回电影详情页
     return redirect('movie_detail', pk=pk)
 
@@ -1311,6 +1414,7 @@ def remove_collect(request, pk):
 # --- ↓↓↓ 新增 "收藏" 视图 ↓↓↓ ---
 @login_required
 @require_POST
+@recommendation_write_view
 def ajax_collect(request):
     movie_id = request.POST.get('movie_id')
     if not movie_id:
@@ -1324,8 +1428,10 @@ def ajax_collect(request):
         if not created:
             # 如果已经存在 (created=False)，说明是"取消收藏"操作
             collect_obj.delete()
+            schedule_user_invalidation(request.user.id)
             return JsonResponse({'status': 'success', 'action': 'uncollected', 'msg': '已取消收藏'})
         else:
+            schedule_user_invalidation(request.user.id)
             # 如果是新建 (created=True)，说明是"收藏"操作
             return JsonResponse({'status': 'success', 'action': 'collected', 'msg': '收藏成功'})
 
@@ -2898,10 +3004,10 @@ def get_kg_subgraph(topic_keyword, user_history_mids=None, max_triples=12):
     if not topic_keyword:
         return ""
 
-    _key_hash = hashlib.md5(topic_keyword.encode("utf-8")).hexdigest()
-    hist_hash = hashlib.md5(str(user_history_mids).encode()).hexdigest()[:8]
-    cache_key = f"kg_subgraph_v3_{_key_hash}_{hist_hash}"
-    cached = cache.get(cache_key)
+    cache_key = catalog_business_cache_key(
+        cache, kg_subgraph_cache_key(topic_keyword, user_history_mids, max_triples)
+    )
+    cached = business_cache_get(cache, cache_key)
     if cached is not None:
         return cached
 
@@ -3004,7 +3110,7 @@ def get_kg_subgraph(topic_keyword, user_history_mids=None, max_triples=12):
                 )
 
         result = "\n".join(triples[:max_triples]) if triples else ""
-        cache.set(cache_key, result, 60 * 30)  # 缓存 30 分钟
+        business_cache_set(cache, cache_key, result, 60 * 30)  # 缓存 30 分钟
         return result
 
     except Exception as e:
@@ -3482,8 +3588,9 @@ def ajax_explain_rec(request):
     # 🔥 [工程优化] 推荐解释缓存：避免同一用户对同一电影重复调用 LLM
     # 【性能收益】：缓存命中时响应时间从 2-5s 降低到 <10ms
     force_refresh = request.GET.get('refresh') == 'true'
+    explain_cache_key = user_business_cache_key(cache, request.user.id, 'explain', int(movie_id))
     if not force_refresh:
-        cached_result = get_cached_explain(request.user.id, int(movie_id))
+        cached_result = get_cached_explain(request.user.id, int(movie_id), cache_key=explain_cache_key)
         if cached_result:
             logger.info(f"[ExplainCache] 缓存命中 user={request.user.id} movie={movie_id}")
             return JsonResponse(cached_result)
@@ -3811,7 +3918,7 @@ def ajax_explain_rec(request):
 
         # 🔥 [工程优化] 缓存解释结果，避免同一用户对同一电影重复调用 LLM
         # 【论文可写点】：推荐解释缓存策略，TTL=10分钟
-        set_cached_explain(request.user.id, int(movie_id), response_data, ttl=600)
+        set_cached_explain(request.user.id, int(movie_id), response_data, ttl=600, cache_key=explain_cache_key)
 
         # 【论文可写点】：AgentTracer 记录推理完成，输出结构化 trace
         trace_log_simple(
@@ -3835,9 +3942,9 @@ def extract_concepts_jieba(movie_title, summary):
     import jieba.analyse
 
     # 1. 缓存检查（🔥 同样使用 md5 避免中文标题直接进入 cache key）
-    _title_hash = hashlib.md5(movie_title.encode("utf-8")).hexdigest()
-    cache_key = f"movie_concepts_jieba_{_title_hash}"
-    cached_data = cache.get(cache_key)
+    _title_hash = hashlib.sha256(json.dumps([movie_title, summary or ""], ensure_ascii=False).encode("utf-8")).hexdigest()
+    cache_key = catalog_business_cache_key(cache, f"movie_concepts_jieba_{_title_hash}")
+    cached_data = business_cache_get(cache, cache_key)
     if cached_data: return cached_data
 
     # 2. 文本清洗与预处理
@@ -3859,7 +3966,7 @@ def extract_concepts_jieba(movie_title, summary):
             concepts = list(jieba.cut(movie_title))[:2]
 
         # 5. 写入缓存 (1天)
-        cache.set(cache_key, concepts, 60 * 60 * 24)
+        business_cache_set(cache, cache_key, concepts, 60 * 60 * 24)
         return concepts
 
     except Exception as e:
@@ -4349,6 +4456,7 @@ def search_results(request):
 
 
 @login_required
+@recommendation_write_view
 def center(request):
     """
     个人中心视图 (V4 - 双表单版)
@@ -4384,6 +4492,7 @@ def center(request):
 
             if profile_form.is_valid():
                 profile_form.save()
+                schedule_user_invalidation(request.user.id)
                 messages.success(request, "📝 个人资料已更新！")
                 # 更新 Session 中的用户信息 (防止页面显示旧数据)
                 update_session_auth_hash(request, request.user)
@@ -4464,6 +4573,7 @@ def admin_movie_list(request):
 
 
 @admin_required
+@recommendation_write_view
 def admin_movie_add(request):
     """
     后台：添加电影 (文本输入版)
@@ -4480,6 +4590,7 @@ def admin_movie_add(request):
             _process_m2m_text(movie, form.cleaned_data['genres'], Genre, 'genres')
             _process_m2m_text(movie, form.cleaned_data['directors'], Actor, 'directors')
 
+            schedule_catalog_invalidation()
             messages.success(request, f"电影《{movie.title}》添加成功！")
             return redirect('admin_movie_list')
     else:
@@ -4492,6 +4603,7 @@ def admin_movie_add(request):
 
 
 @admin_required
+@recommendation_write_view
 def admin_movie_edit(request, pk):
     """
     后台：编辑电影 (文本输入版)
@@ -4510,6 +4622,7 @@ def admin_movie_edit(request, pk):
             _process_m2m_text(movie, form.cleaned_data['genres'], Genre, 'genres')
             _process_m2m_text(movie, form.cleaned_data['directors'], Actor, 'directors')
 
+            schedule_catalog_invalidation()
             messages.success(request, f"电影《{movie.title}》更新成功！")
             return redirect('admin_movie_list')
     else:
@@ -4533,12 +4646,14 @@ def admin_movie_edit(request, pk):
 
 
 @admin_required
+@recommendation_write_view
 def admin_movie_delete(request, pk):
     movie_obj = get_object_or_404(Movie, pk=pk)
 
     if request.method == 'POST':
         # (POST 请求) 确认删除
         movie_obj.delete()
+        schedule_catalog_invalidation()
         messages.success(request, "电影删除成功。")
         return redirect('admin_movie_list')
 
@@ -4566,6 +4681,7 @@ def admin_user_list(request):
 # --- ↓↓↓ 在这里添加 3 个新视图 ↓↓↓ ---
 
 @admin_required
+@recommendation_write_view
 def admin_user_add(request):
     """
     C - 创建新用户 (管理员)
@@ -4574,6 +4690,7 @@ def admin_user_add(request):
         form = AdminUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()  # UserCreationForm 会自动哈希密码
+            schedule_user_invalidation(user.id)
             messages.success(request, f"用户 {user.username} 创建成功！")
             return redirect('admin_user_list')
     else:
@@ -4583,6 +4700,7 @@ def admin_user_add(request):
 
 
 @admin_required
+@recommendation_write_view
 def admin_user_edit(request, pk):
     """
     U - 编辑用户信息 (管理员)
@@ -4593,6 +4711,7 @@ def admin_user_edit(request, pk):
         form = AdminUserChangeForm(request.POST, instance=user_obj)
         if form.is_valid():
             form.save()
+            schedule_user_invalidation(user_obj.id)
             messages.success(request, f"用户 {user_obj.username} 信息更新成功！")
             return redirect('admin_user_list')
     else:
@@ -4624,6 +4743,7 @@ def admin_user_reset_password(request, pk):
 
 
 @admin_required
+@recommendation_write_view
 def admin_user_delete(request, pk):
     user_obj = get_object_or_404(UserInfo, pk=pk)
 
@@ -4633,7 +4753,9 @@ def admin_user_delete(request, pk):
         return redirect('admin_user_list')
 
     if request.method == 'POST':
+        affected_user_id = user_obj.id
         user_obj.delete()
+        schedule_user_invalidation(affected_user_id)
         messages.success(request, f"用户 {user_obj.username} 删除成功。")
         return redirect('admin_user_list')
 
@@ -4679,6 +4801,8 @@ def admin_comments(request):
 
 
 @login_required
+@require_POST
+@recommendation_write_view
 def admin_comment_delete(request, rating_id):
     """
     后台：删除评论
@@ -4687,7 +4811,9 @@ def admin_comment_delete(request, rating_id):
         return redirect('front_index')
 
     # 获取并删除
+    affected_user_id = get_object_or_404(UserRating, id=rating_id).user_id
     UserRating.objects.filter(id=rating_id).delete()
+    schedule_user_invalidation(affected_user_id)
 
     # 提示并跳回列表
     messages.success(request, "评论/评分已删除。")
@@ -4744,6 +4870,7 @@ def admin_director_list(request):
 
 
 @admin_required
+@recommendation_write_view
 def admin_actor_add(request):
     """
     后台：添加演员
@@ -4752,6 +4879,7 @@ def admin_actor_add(request):
         form = ActorModelForm(request.POST)
         if form.is_valid():
             form.save()
+            schedule_catalog_invalidation()
             messages.success(request, "演员添加成功！")
             return redirect('admin_actor_list')
     else:
@@ -4764,6 +4892,7 @@ def admin_actor_add(request):
 
 
 @admin_required
+@recommendation_write_view
 def admin_actor_edit(request, pk):
     """
     后台：编辑演员
@@ -4774,6 +4903,7 @@ def admin_actor_edit(request, pk):
         form = ActorModelForm(request.POST, instance=actor_obj)
         if form.is_valid():
             form.save()
+            schedule_catalog_invalidation()
             messages.success(request, f"演员 {actor_obj.name} 更新成功！")
             return redirect('admin_actor_list')
     else:
@@ -4786,6 +4916,7 @@ def admin_actor_edit(request, pk):
 
 
 @admin_required
+@recommendation_write_view
 def admin_actor_delete(request, pk):
     """
     后台：删除演员
@@ -4794,6 +4925,7 @@ def admin_actor_delete(request, pk):
 
     if request.method == 'POST':
         actor_obj.delete()
+        schedule_catalog_invalidation()
         messages.success(request, "演员已删除。")
         return redirect('admin_actor_list')
 
@@ -4839,22 +4971,12 @@ def admin_trigger_train(request):
 
 @admin_required
 def admin_clear_cache(request):
-    """
-    [接口] 清除系统缓存 (Redis/LocalMem)
-    """
+    """全局清理已禁用；保留 Session 和模型缓存。"""
     if request.method == 'POST':
-        try:
-            cache.clear()
-            # 同时也清除模型缓存，强制下次推理时重新加载新权重
-            global MODEL_CACHE
-            MODEL_CACHE = {
-                'model': None,
-                'feature_columns': None,
-                'encoders': {},
-            }
-            return JsonResponse({'status': 'success', 'msg': '🧹 系统缓存 & 模型权重缓存已清除！'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'msg': str(e)})
+        return JsonResponse({
+            'status': 'error', 'code': 'cache_clear_disabled',
+            'msg': '全局缓存清理已禁用：业务缓存与 Session 共用后端。请待独立缓存隔离后再启用。',
+        }, status=409)
     return JsonResponse({'status': 'error', 'msg': '不支持的请求方式'})
 
 
@@ -4911,10 +5033,7 @@ def chat_view(request):
 # ==========================================
 # 2. 聊天 API 接口 (POST) - ajax_chat 异步重构版本
 # ==========================================
-# ⚠️  注意：此函数绝对不能加 @require_POST / @csrf_exempt 装饰器！
-# 原因：两者都会生成同步 wrapper，导致 Django 的 iscoroutinefunction() 检测失败，
-#      Django 会以同步方式调用本视图，拿到 coroutine 而非 HttpResponse，抛出 ValueError。
-# 解决方案：在函数体内手动处理 POST 校验，csrf_exempt 用属性方式设置（见函数结尾）。
+# 保留协程形态及函数内 POST 校验；由 CsrfViewMiddleware 校验 CSRF。
 async def ajax_chat(request):
     """
     智能观影助手 V108 - 异步重构版
@@ -5336,15 +5455,15 @@ async def ajax_chat(request):
         return JsonResponse({'response': "智能观影助手的大脑正在飞速运转（可能算力超载），请稍后刷新重试。"})
 
 
-# ✅ 用属性方式设置 CSRF 豁免，等价于 @csrf_exempt，但不包裹任何 wrapper，
-# CSRF 中间件检测的是 view_func.csrf_exempt 属性，不要求必须是装饰器形式。
-ajax_chat.csrf_exempt = True
+# 显式保持 CSRF 校验，不增加同步 wrapper，保留 async 视图形态。
+ajax_chat.csrf_exempt = False
 
 
 # ==========================================
 # 3. 清除历史
 # ==========================================
 @login_required
+@require_POST
 def chat_clear_history(request):
     """
     清空当前用户的聊天记录
@@ -5402,8 +5521,9 @@ def get_excluded_movie_ids(user):
     return list(excluded)
 
 
-@csrf_exempt
 @login_required
+@require_POST
+@recommendation_write_view
 def ajax_exclude_add(request):
     """
     将电影加入"不喜欢"排除列表
@@ -5423,20 +5543,21 @@ def ajax_exclude_add(request):
     except Movie.DoesNotExist:
         return JsonResponse({'status': 'error', 'msg': '电影不存在'})
 
-    # 先移除已有的 dislike 记录（如有），再创建（防重复）
-    UserFeedback.objects.filter(
-        user=request.user, movie=movie, feedback_type='dislike'
-    ).delete()
-    UserFeedback.objects.create(
-        user=request.user, movie=movie,
-        feedback_type='dislike', source=request.POST.get('source', 'recommend_page')
-    )
-
-    # 清除推荐缓存，确保下次推荐时排除生效
-    cache_key = f"hybrid_rec_{request.user.id}"
-    cache.delete(cache_key)
-    cache_key2 = f"cb_recs_{request.user.id}"
-    cache.delete(cache_key2)
+    try:
+        with transaction.atomic():
+            # 创建失败时，已有 dislike 的删除也会回滚。
+            UserFeedback.objects.filter(
+                user=request.user, movie=movie, feedback_type='dislike'
+            ).delete()
+            UserFeedback.objects.create(
+                user=request.user, movie=movie,
+                feedback_type='dislike', source=request.POST.get('source', 'recommend_page')
+            )
+            transaction.on_commit(
+                lambda user_id=request.user.id: invalidate_recommendation_cache(cache, user_id)
+            )
+    except RecommendationCacheInvalidationError as exc:
+        return partial_commit_response(exc)
 
     # ★ 查找候补电影：从 Rec 表中排除所有已显示+已不喜欢的电影，取下一个
     excluded_ids = set(get_excluded_movie_ids(request.user))
@@ -5484,8 +5605,9 @@ def ajax_exclude_add(request):
     return JsonResponse(response_data)
 
 
-@csrf_exempt
 @login_required
+@require_POST
+@recommendation_write_view
 def ajax_exclude_remove(request):
     """
     将电影从"不喜欢"排除列表中移除（恢复推荐）
@@ -5505,15 +5627,16 @@ def ajax_exclude_remove(request):
     except Movie.DoesNotExist:
         return JsonResponse({'status': 'error', 'msg': '电影不存在'})
 
-    deleted, _ = UserFeedback.objects.filter(
-        user=request.user, movie=movie, feedback_type='dislike'
-    ).delete()
-
-    # 清除推荐缓存
-    cache_key = f"hybrid_rec_{request.user.id}"
-    cache.delete(cache_key)
-    cache_key2 = f"cb_recs_{request.user.id}"
-    cache.delete(cache_key2)
+    try:
+        with transaction.atomic():
+            deleted, _ = UserFeedback.objects.filter(
+                user=request.user, movie=movie, feedback_type='dislike'
+            ).delete()
+            transaction.on_commit(
+                lambda user_id=request.user.id: invalidate_recommendation_cache(cache, user_id)
+            )
+    except RecommendationCacheInvalidationError as exc:
+        return partial_commit_response(exc)
 
     return JsonResponse({
         'status': 'ok',

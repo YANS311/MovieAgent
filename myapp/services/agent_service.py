@@ -16,6 +16,10 @@ import time
 from typing import Optional, Tuple
 
 from django.core.cache import cache
+from myapp.utils.cache_keys import user_business_cache_key
+from myapp.utils.cache_access import business_cache_get, business_cache_set
+
+_AUTO_KEY = object()
 
 logger = logging.getLogger('agent_service')
 
@@ -64,7 +68,7 @@ def safe_neo4j_query(graph, cypher: str, params: dict = None, timeout_ms: int = 
         return []
 
 
-def get_cached_explain(user_id: int, movie_id: int) -> Optional[dict]:
+def get_cached_explain(user_id: int, movie_id: int, cache_key=_AUTO_KEY) -> Optional[dict]:
     """
     获取缓存的推荐解释结果
     
@@ -74,29 +78,31 @@ def get_cached_explain(user_id: int, movie_id: int) -> Optional[dict]:
     【修改原因】：ajax_explain_rec 每次都要调用 LLM，对热门电影造成大量重复计算。
     【性能收益】：缓存命中时响应时间从 2-5s 降低到 <10ms。
     """
-    cache_key = f"explain_v1_{user_id}_{movie_id}"
-    return cache.get(cache_key)
+    if cache_key is _AUTO_KEY:
+        cache_key = user_business_cache_key(cache, user_id, 'explain', movie_id)
+    return business_cache_get(cache, cache_key)
 
 
-def set_cached_explain(user_id: int, movie_id: int, data: dict, ttl: int = 600):
+def set_cached_explain(user_id: int, movie_id: int, data: dict, ttl: int = 600, cache_key=_AUTO_KEY):
     """
     缓存推荐解释结果（默认 TTL=10 分钟）
     
     【修改原因】：热门推荐电影（如首页推荐）会被大量用户反复查看，
                 缓存可显著降低 LLM 调用次数。
     """
-    cache_key = f"explain_v1_{user_id}_{movie_id}"
-    cache.set(cache_key, data, ttl)
+    if cache_key is _AUTO_KEY:
+        cache_key = user_business_cache_key(cache, user_id, 'explain', movie_id)
+    business_cache_set(cache, cache_key, data, ttl)
     logger.debug(f"[Cache] 写入解释缓存 key={cache_key} ttl={ttl}s")
 
 
 def get_cached_agent_recall(user_id: int) -> Optional[list]:
     """获取缓存的 Agent 召回结果"""
-    cache_key = f"agent_recall_{user_id}"
-    return cache.get(cache_key)
+    cache_key = user_business_cache_key(cache, user_id, 'agent_recall')
+    return business_cache_get(cache, cache_key)
 
 
 def set_cached_agent_recall(user_id: int, data: list, ttl: int = 1800):
     """缓存 Agent 召回结果（默认 TTL=30 分钟）"""
-    cache_key = f"agent_recall_{user_id}"
-    cache.set(cache_key, data, ttl)
+    cache_key = user_business_cache_key(cache, user_id, 'agent_recall')
+    business_cache_set(cache, cache_key, data, ttl)

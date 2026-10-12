@@ -14,6 +14,8 @@ Query Rewrite 模块 (Query Rewriter Module)
 import re
 import logging
 from django.core.cache import cache
+from myapp.utils.cache_access import business_cache_get, business_cache_set
+from myapp.utils.cache_keys import query_rewrite_cache_key
 
 logger = logging.getLogger('movie_agent')
 
@@ -77,9 +79,9 @@ class QueryRewriter:
         query_clean = query.strip()
 
         # 1. 尝试缓存命中
-        cache_key = f"query_rewrite_{hash(query_clean)}"
-        cached_result = cache.get(cache_key)
-        if cached_result:
+        cache_key = query_rewrite_cache_key(query_clean)
+        cached_result = business_cache_get(cache, cache_key)
+        if cached_result is not None:
             return cached_result
 
         rewritten = ""
@@ -109,7 +111,7 @@ class QueryRewriter:
             rewritten = self._rule_based_rewrite(query_clean)
 
         # 4. 写入缓存 (1小时)
-        cache.set(cache_key, rewritten, 3600)
+        business_cache_set(cache, cache_key, rewritten, 3600)
         return rewritten
 
     def _rule_based_rewrite(self, query: str) -> str:

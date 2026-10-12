@@ -29,6 +29,10 @@ import time
 import logging
 from collections import defaultdict
 from django.core.cache import cache
+from django.db import transaction
+from myapp.services.cache_mutations import schedule_user_invalidation
+from myapp.utils.cache_access import memory_cache_operation, MemoryCacheUnavailable
+from myapp.utils.cache_keys import memory_cache_key
 
 logger = logging.getLogger('movie_agent')
 
@@ -130,8 +134,9 @@ class MemoryManager:
             session_id: 会话ID（用于匿名用户或缓存键）
         """
         self.user = user
-        self.session_id = session_id or 'default'
-        self._cache_key = f"agent_memory_{self.session_id}"
+        self.session_id = session_id
+        self._cache_key = memory_cache_key(session_id, getattr(user, 'id', None))
+        self._slots = {}
     
     def get_slots(self):
         """
@@ -140,9 +145,11 @@ class MemoryManager:
         Returns:
             Dict: 当前槽位字典
         """
-        cached = cache.get(self._cache_key)
+        if self._cache_key is None:
+            return dict(self._slots)
+        cached = memory_cache_operation(cache, 'get', self._cache_key)
         if cached and isinstance(cached, dict):
-            return cached
+            return dict(cached)
         return {}
     
     def update_slots(self, user_input):
@@ -156,6 +163,13 @@ class MemoryManager:
             Dict: 更新后的槽位字典
         """
         slots = self.get_slots()
+        # 支持直接传入 dict 更新槽位（如 LLM 解析结果）
+        if isinstance(user_input, dict):
+            for key, value in user_input.items():
+                if value is not None and value != '':
+                    slots[key] = value
+            self._save_slots(slots)
+            return slots
         newly_extracted = self.extract_slots(user_input)
         
         # 合并槽位（新值覆盖旧值，空值不覆盖）
@@ -170,12 +184,19 @@ class MemoryManager:
                     slots.pop(key, None)
         
         # 保存到缓存
-        cache.set(self._cache_key, slots, self.SLOT_TTL)
+        self._save_slots(slots)
         return slots
     
+    def _save_slots(self, slots):
+        if self._cache_key is not None:
+            memory_cache_operation(cache, 'set', self._cache_key, slots, self.SLOT_TTL)
+        self._slots = dict(slots)
+
     def clear_slots(self):
         """清除当前会话的所有槽位"""
-        cache.delete(self._cache_key)
+        if self._cache_key is not None:
+            memory_cache_operation(cache, 'delete', self._cache_key)
+        self._slots = {}
     
     def extract_slots(self, text):
         """
@@ -319,39 +340,42 @@ class MemoryManager:
             return
         
         try:
-            from myapp.models_upgrade import UserProfile
-            slots = self.get_slots()
-            
-            profile, created = UserProfile.objects.get_or_create(user=self.user)
-            
-            # 合并类型偏好到 genre_preferences (dict格式: {"科幻": 0.85, ...})
-            genre_prefs = profile.genre_preferences or {}
-            new_genre = slots.get('genre', '')
-            if new_genre:
-                genre_prefs[new_genre] = genre_prefs.get(new_genre, 0) + 1.0
-                profile.genre_preferences = genre_prefs
-            
-            # 合并导演偏好
-            director_prefs = profile.director_preferences or {}
-            new_director = slots.get('director', '')
-            if new_director:
-                director_prefs[new_director] = director_prefs.get(new_director, 0) + 1.0
-                profile.director_preferences = director_prefs
-            
-            # 更新画像文本（包含槽位摘要）
-            slots_text = ", ".join(f"{k}={v}" for k, v in slots.items() if v)
-            if slots_text:
-                profile_text = profile.profile_text or ''
-                if slots_text not in profile_text:
-                    profile.profile_text = f"{profile_text}\n最近偏好: {slots_text}".strip()
-            
-            # 标记非冷启动
-            if slots:
-                profile.is_cold_start = False
-            
-            profile.save()
+            with transaction.atomic():
+                from myapp.models_upgrade import UserProfile
+                slots = self.get_slots()
+
+                profile, created = UserProfile.objects.get_or_create(user=self.user)
+
+                # 合并类型偏好到 genre_preferences (dict格式: {"科幻": 0.85, ...})
+                genre_prefs = profile.genre_preferences or {}
+                new_genre = slots.get('genre', '')
+                if new_genre:
+                    genre_prefs[new_genre] = genre_prefs.get(new_genre, 0) + 1.0
+                    profile.genre_preferences = genre_prefs
+
+                # 合并导演偏好
+                director_prefs = profile.director_preferences or {}
+                new_director = slots.get('director', '')
+                if new_director:
+                    director_prefs[new_director] = director_prefs.get(new_director, 0) + 1.0
+                    profile.director_preferences = director_prefs
+
+                # 更新画像文本（包含槽位摘要）
+                slots_text = ", ".join(f"{k}={v}" for k, v in slots.items() if v)
+                if slots_text:
+                    profile_text = profile.profile_text or ''
+                    if slots_text not in profile_text:
+                        profile.profile_text = f"{profile_text}\n最近偏好: {slots_text}".strip()
+
+                # 标记非冷启动
+                if slots:
+                    profile.is_cold_start = False
+
+                profile.save()
+                schedule_user_invalidation(self.user.id)
         except Exception as e:
-            logger.error(f"[Memory] 持久化失败: {e}")
+            logger.error(f"[Memory] 画像操作未完整完成 error_type={type(e).__name__}")
+            raise
     
     # ===========================================================
     # 会话总结与画像补充（类似 Gemini/ChatGPT 记忆机制）
@@ -522,69 +546,71 @@ class MemoryManager:
           - profile_text: 文本摘要
         """
         try:
-            from myapp.models_upgrade import UserProfile
+            with transaction.atomic():
+                from myapp.models_upgrade import UserProfile
+
+                profile, created = UserProfile.objects.get_or_create(user=self.user)
+
+                # ── 合并类型偏好 ──
+                genre_prefs = profile.genre_preferences or {}
+                for genre in preferences.get('genres', []):
+                    if genre and genre not in preferences.get('exclude_genres', []):
+                        genre_prefs[genre] = genre_prefs.get(genre, 0) + 1.0
+                # 排除类型降低权重而非删除
+                for genre in preferences.get('exclude_genres', []):
+                    if genre in genre_prefs:
+                        genre_prefs[genre] = max(0, genre_prefs[genre] - 0.5)
+                profile.genre_preferences = genre_prefs
             
-            profile, created = UserProfile.objects.get_or_create(user=self.user)
+                # ── 合并导演偏好 ──
+                director_prefs = profile.director_preferences or {}
+                for director in preferences.get('directors', []):
+                    if director:
+                        director_prefs[director] = director_prefs.get(director, 0) + 1.0
+                profile.director_preferences = director_prefs
             
-            # ── 合并类型偏好 ──
-            genre_prefs = profile.genre_preferences or {}
-            for genre in preferences.get('genres', []):
-                if genre and genre not in preferences.get('exclude_genres', []):
-                    genre_prefs[genre] = genre_prefs.get(genre, 0) + 1.0
-            # 排除类型降低权重而非删除
-            for genre in preferences.get('exclude_genres', []):
-                if genre in genre_prefs:
-                    genre_prefs[genre] = max(0, genre_prefs[genre] - 0.5)
-            profile.genre_preferences = genre_prefs
-            
-            # ── 合并导演偏好 ──
-            director_prefs = profile.director_preferences or {}
-            for director in preferences.get('directors', []):
-                if director:
-                    director_prefs[director] = director_prefs.get(director, 0) + 1.0
-            profile.director_preferences = director_prefs
-            
-            # ── 合并演员偏好 ──
-            actor_prefs = profile.actor_preferences or {}
-            for actor in preferences.get('actors', []):
-                if actor:
-                    actor_prefs[actor] = actor_prefs.get(actor, 0) + 1.0
-            profile.actor_preferences = actor_prefs
-            
-            # ── 更新画像文本（含锚点电影、情感偏好）──
-            summary_parts = []
-            if preferences.get('anchor_movies'):
-                summary_parts.append(f"参考电影: {'、'.join(preferences['anchor_movies'])}")
-            if preferences.get('sentiment'):
-                summary_parts.append(f"情感偏好: {'、'.join(preferences['sentiment'])}")
-            if preferences.get('score_min'):
-                summary_parts.append(f"最低评分: {preferences['score_min']}")
-            
-            if summary_parts:
-                new_summary = "; ".join(summary_parts)
-                existing_text = profile.profile_text or ''
-                if new_summary not in existing_text:
-                    profile.profile_text = f"{existing_text}\n{new_summary}".strip()
-            
-            # 标记非冷启动
-            profile.is_cold_start = False
-            profile.save()
-            
-            # 准备返回值
-            all_genres = sorted(genre_prefs.keys(), key=lambda g: genre_prefs[g], reverse=True)
-            all_directors = sorted(director_prefs.keys(), key=lambda d: director_prefs[d], reverse=True)
-            
-            return {
-                'genres': all_genres,
-                'directors': all_directors,
-                'anchor_movies': preferences.get('anchor_movies', []),
-                'sentiment': preferences.get('sentiment', []),
-                'exclude_genres': preferences.get('exclude_genres', []),
-                'score_min': preferences.get('score_min'),
-            }
+                # ── 合并演员偏好 ──
+                actor_prefs = profile.actor_preferences or {}
+                for actor in preferences.get('actors', []):
+                    if actor:
+                        actor_prefs[actor] = actor_prefs.get(actor, 0) + 1.0
+                profile.actor_preferences = actor_prefs
+
+                # ── 更新画像文本（含锚点电影、情感偏好）──
+                summary_parts = []
+                if preferences.get('anchor_movies'):
+                    summary_parts.append(f"参考电影: {'、'.join(preferences['anchor_movies'])}")
+                if preferences.get('sentiment'):
+                    summary_parts.append(f"情感偏好: {'、'.join(preferences['sentiment'])}")
+                if preferences.get('score_min'):
+                    summary_parts.append(f"最低评分: {preferences['score_min']}")
+
+                if summary_parts:
+                    new_summary = "; ".join(summary_parts)
+                    existing_text = profile.profile_text or ''
+                    if new_summary not in existing_text:
+                        profile.profile_text = f"{existing_text}\n{new_summary}".strip()
+
+                # 标记非冷启动
+                profile.is_cold_start = False
+                profile.save()
+                schedule_user_invalidation(self.user.id)
+
+                # 准备返回值
+                all_genres = sorted(genre_prefs.keys(), key=lambda g: genre_prefs[g], reverse=True)
+                all_directors = sorted(director_prefs.keys(), key=lambda d: director_prefs[d], reverse=True)
+
+                return {
+                    'genres': all_genres,
+                    'directors': all_directors,
+                    'anchor_movies': preferences.get('anchor_movies', []),
+                    'sentiment': preferences.get('sentiment', []),
+                    'exclude_genres': preferences.get('exclude_genres', []),
+                    'score_min': preferences.get('score_min'),
+                }
         except Exception as e:
-            logger.error(f"[Memory] 画像合并失败: {e}")
-            return {}
+            logger.error(f"[Memory] 画像操作未完整完成 error_type={type(e).__name__}")
+            raise
     
     def get_profile_summary(self):
         """

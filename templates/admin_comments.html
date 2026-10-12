@@ -76,11 +76,13 @@
                         </td>
                         <td>{{ rating.comment_time|date:"Y-m-d H:i" }}</td>
                         <td>
-                            <a href="{% url 'admin_comment_delete' rating.id %}" 
-                               class="btn btn-danger btn-xs"
-                               onclick="return confirm('确定要删除这条评论吗？');">
-                                <i class="fa fa-trash"></i> 删除
-                            </a>
+                            <form method="post" action="{% url 'admin_comment_delete' rating.id %}"
+                                  onsubmit="return confirm('确定要删除这条评论吗？');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-xs">
+                                    <i class="fa fa-trash"></i> 删除
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     {% empty %}

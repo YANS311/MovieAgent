@@ -97,6 +97,7 @@ urlpatterns = [
 
     # 推荐反馈收集
     path('agent/feedback/', agent_views.recommend_feedback_view, name='recommend_feedback'),
+    path('agent/cache/retry/', agent_views.retry_cache_invalidation, name='retry_cache_invalidation'),
 
     # Agent推理链展示
     path('agent/trace/', agent_views.agent_trace_view, name='agent_trace_list'),

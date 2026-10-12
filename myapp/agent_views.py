@@ -30,7 +30,18 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.contrib import messages
+from django.core.cache import cache
+from myapp.services.cache_mutations import (
+    recommendation_write_view, schedule_user_invalidation, schedule_catalog_invalidation,
+    partial_commit_response,
+    invalidation_recovery_requests,
+)
+from django.db import transaction
 from django.db.models import Q
+from myapp.utils.cache_keys import (
+    invalidate_recommendation_cache, invalidate_recommendation_caches,
+    invalidate_catalog_cache, RecommendationCacheInvalidationError,
+)
 
 from myapp.models import Movie, UserRating, ChatHistory, Genre, Region
 
@@ -46,8 +57,12 @@ def _sanitize_input(raw_input):
 
 
 def _get_session_key(request):
-    """获取会话标识"""
-    return request.session.session_key or 'default'
+    """获取真实会话标识；Session 后端故障向上报告。"""
+    if not request.session.session_key:
+        request.session.create()
+    if not request.session.session_key:
+        raise RuntimeError("Session backend did not create a session key")
+    return request.session.session_key
 
 
 def _admin_required_api(view_func):
@@ -102,8 +117,8 @@ def chat_recommend_view(request):
 # 视图 2: Agent API 接口 (JSON POST)
 # ★ 已重构：使用 AgentChatService 服务层
 # =============================================================
-@csrf_exempt
 @login_required
+@require_POST
 def agent_api_view(request):
     """
     Agent 推荐 API 接口（JSON 响应）
@@ -163,8 +178,8 @@ def agent_api_view(request):
 # 视图 2a: Agent SSE 流式接口（打字机效果）
 # ★ 新增：Server-Sent Events 实时推送
 # =============================================================
-@csrf_exempt
 @login_required
+@require_POST
 def agent_stream_view(request):
     """
     Agent SSE 流式接口（打字机效果）
@@ -212,11 +227,15 @@ def agent_stream_view(request):
             headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'}
         )
     
+    # SessionMiddleware sees the new session before processing the response.
+    # Never create a session while consuming streaming_content.
+    session_key = _get_session_key(request)
+
     def event_stream():
         try:
             from myapp.services.agent_chat_service import AgentChatService
             
-            service = AgentChatService(request.user, _get_session_key(request))
+            service = AgentChatService(request.user, session_key)
             is_thinking = request.POST.get('is_thinking') == 'true'
             
             for chunk in service.stream_chat(user_input, is_thinking):
@@ -277,9 +296,9 @@ def movie_explain_view(request, pk):
 # =============================================================
 # 视图 4: 推荐反馈收集 API
 # =============================================================
-@csrf_exempt
 @login_required
 @require_POST
+@recommendation_write_view
 def recommend_feedback_view(request):
     """推荐反馈收集接口"""
     movie_id = request.POST.get('movie_id')
@@ -293,18 +312,24 @@ def recommend_feedback_view(request):
         from myapp.models_upgrade import UserFeedback
         movie = get_object_or_404(Movie, pk=movie_id)
         
-        UserFeedback.objects.create(
-            user=request.user,
-            movie=movie,
-            feedback_type=feedback_type,
-            source=source,
-        )
+        with transaction.atomic():
+            UserFeedback.objects.create(
+                user=request.user,
+                movie=movie,
+                feedback_type=feedback_type,
+                source=source,
+            )
+            transaction.on_commit(
+                lambda user_id=request.user.id: invalidate_recommendation_cache(cache, user_id)
+            )
         
         return JsonResponse({
             'status': 'success',
             'msg': '感谢您的反馈！',
             'feedback_type': feedback_type,
         })
+    except RecommendationCacheInvalidationError as exc:
+        return partial_commit_response(exc)
     except Exception as e:
         logger.error(f"[Feedback] 保存失败: {e}")
         return JsonResponse({'status': 'error', 'msg': str(e)})
@@ -314,8 +339,54 @@ def recommend_feedback_view(request):
 # 视图 5: 对话管理 API
 # =============================================================
 
-@csrf_exempt
 @login_required
+@require_POST
+def retry_cache_invalidation(request):
+    """Retry invalidation only; never re-run a committed database mutation."""
+    scope = request.POST.get('scope', 'user')
+    if scope not in ('user', 'users', 'catalog'):
+        return JsonResponse({'status': 'error', 'msg': '无效缓存范围'}, status=400)
+    if scope == 'users':
+        if not request.user.is_staff:
+            return JsonResponse({'status': 'error', 'msg': '批量恢复仅限管理员'}, status=403)
+        try:
+            user_ids = json.loads(request.POST.get('user_ids', '[]'))
+        except (ValueError, TypeError):
+            return JsonResponse({'status': 'error', 'msg': 'user_ids 必须为 JSON 整数数组'}, status=400)
+        if (not isinstance(user_ids, list) or not 1 <= len(user_ids) <= 100
+                or any(type(user_id) is not int or user_id <= 0 for user_id in user_ids)):
+            return JsonResponse({'status': 'error', 'msg': '每批必须包含 1 至 100 个有效用户 ID'}, status=400)
+        user_ids = sorted(set(user_ids))
+    else:
+        user_ids = None
+    try:
+        user_id = int(request.POST.get('user_id', request.user.id)) if scope == 'user' else None
+    except (TypeError, ValueError):
+        return JsonResponse({'status': 'error', 'msg': '无效用户标识'}, status=400)
+    if scope == 'user' and user_id <= 0:
+        return JsonResponse({'status': 'error', 'msg': '无效用户标识'}, status=400)
+    if scope == 'catalog' or user_id != request.user.id:
+        if not request.user.is_staff:
+            return JsonResponse({'status': 'error', 'msg': '无权失效其他用户或目录缓存'}, status=403)
+    try:
+        if scope == 'catalog':
+            invalidate_catalog_cache(cache)
+        elif scope == 'users':
+            invalidate_recommendation_caches(cache, user_ids)
+        else:
+            invalidate_recommendation_cache(cache, user_id)
+    except RecommendationCacheInvalidationError as exc:
+        return JsonResponse({
+            'status': 'error', 'database_mutation': False, 'retry_mutation': False,
+            'retry_cache_invalidation': True, 'cache_invalidated': False,
+            'failed_scopes': exc.failures,
+            'retry_requests': invalidation_recovery_requests(exc.failures),
+            'msg': '缓存失效重试未完成；未重复写入用户数据。',
+        }, status=503)
+    return JsonResponse({'status': 'ok', 'database_mutation': False, 'cache_invalidated': True})
+
+@login_required
+@require_POST
 def ajax_clear_chat(request):
     """清除对话历史 + 重置记忆槽位"""
     if request.method != 'POST':
@@ -335,8 +406,9 @@ def ajax_clear_chat(request):
         return JsonResponse({'status': 'error', 'msg': str(e)})
 
 
-@csrf_exempt
 @login_required
+@require_POST
+@recommendation_write_view
 def ajax_new_chat(request):
     """新建对话：总结当前会话 → 补充画像 → 清除历史"""
     if request.method != 'POST':
@@ -361,8 +433,8 @@ def ajax_new_chat(request):
         return JsonResponse({'status': 'error', 'msg': str(e)})
 
 
-@csrf_exempt
 @login_required
+@require_POST
 def ajax_edit_last(request):
     """编辑最近一条用户消息"""
     if request.method != 'POST':
@@ -433,8 +505,9 @@ def ajax_chat_history(request):
         return JsonResponse({'status': 'error', 'msg': str(e)})
 
 
-@csrf_exempt
 @login_required
+@require_POST
+@recommendation_write_view
 def ajax_summarize_profile(request):
     """手动触发会话总结 → 画像补充"""
     if request.method != 'POST':
@@ -481,6 +554,7 @@ def admin_user_profile_list(request):
 
 @login_required
 @_admin_required_view
+@recommendation_write_view
 def admin_user_profile_edit(request, pk):
     from myapp.models_upgrade import UserProfile
     profile = get_object_or_404(UserProfile, pk=pk)
@@ -488,7 +562,9 @@ def admin_user_profile_edit(request, pk):
     if request.method == 'POST':
         profile.profile_text = request.POST.get('profile_text', '')
         profile.is_cold_start = request.POST.get('is_cold_start') == 'on'
+        affected_user_id = profile.user_id
         profile.save()
+        schedule_user_invalidation(affected_user_id)
         messages.success(request, f"用户 {profile.user.username} 的画像已更新")
         return redirect('admin_user_profile_list')
 
@@ -497,13 +573,16 @@ def admin_user_profile_edit(request, pk):
 
 @login_required
 @_admin_required_view
+@recommendation_write_view
 def admin_user_profile_delete(request, pk):
     from myapp.models_upgrade import UserProfile
     profile = get_object_or_404(UserProfile, pk=pk)
 
     if request.method == 'POST':
         username = profile.user.username
+        affected_user_id = profile.user_id
         profile.delete()
+        schedule_user_invalidation(affected_user_id)
         messages.success(request, f"用户 {username} 的画像已删除")
         return redirect('admin_user_profile_list')
 
@@ -588,12 +667,15 @@ def admin_user_feedback_list(request):
 
 @login_required
 @_admin_required_view
+@recommendation_write_view
 def admin_user_feedback_delete(request, pk):
     from myapp.models_upgrade import UserFeedback
     feedback = get_object_or_404(UserFeedback, pk=pk)
 
     if request.method == 'POST':
+        affected_user_id = feedback.user_id
         feedback.delete()
+        schedule_user_invalidation(affected_user_id)
         messages.success(request, "反馈记录已删除")
         return redirect('admin_user_feedback_list')
 
@@ -787,9 +869,9 @@ def ajax_system_health(request):
 # =============================================================
 # 视图 11: Agent Debug 模式 API
 # =============================================================
-@csrf_exempt
 @login_required
 @_admin_required_api
+@require_POST
 def ajax_agent_debug(request):
     """
     Agent Debug API — 返回详细的推理诊断信息

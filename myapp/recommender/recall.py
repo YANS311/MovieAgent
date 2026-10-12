@@ -20,6 +20,8 @@ import numpy as np
 from collections import Counter
 from django.core.cache import cache
 from django.db.models import Q, Count, Max
+from myapp.utils.cache_access import business_cache_get, business_cache_set
+from myapp.utils.cache_keys import multi_recall_cache_key
 
 from myapp.models import Movie, UserRating, Collect, Genre, Actor, Rec
 
@@ -315,11 +317,13 @@ def multi_channel_recall(user, query_text=None, top_k=30,
     """
     t_start = time.time()
 
-    # 缓存
-    cache_key = f"multi_recall_{user.id}_{hash(query_text or '')}"
-    if not force_refresh:
-        cached = cache.get(cache_key)
-        if cached:
+    # Cache only the recomputable result. User/catalog generations invalidate
+    # this family alongside other recommendation entries; parameters are part
+    # of the stable digest so top_k/weights cannot reuse an incompatible value.
+    cache_key = multi_recall_cache_key(cache, user.id, query_text, top_k, weights)
+    if cache_key is not None and not force_refresh:
+        cached = business_cache_get(cache, cache_key)
+        if cached is not None:
             return cached
 
     # 排除已看过的电影
@@ -369,7 +373,7 @@ def multi_channel_recall(user, query_text=None, top_k=30,
     stats['latency_ms'] = int((time.time() - t_start) * 1000)
 
     result = (final_results, stats)
-    cache.set(cache_key, result, 1800)  # 缓存30分钟
+    business_cache_set(cache, cache_key, result, 1800)  # 缓存30分钟
     return result
 
 

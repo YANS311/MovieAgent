@@ -1,11 +1,13 @@
 # 文件: myapp/admin.py
 
 from django.contrib import admin
+from myapp.services.cache_mutations import RecommendationCacheAdminMixin
 from .models import UserInfo, Movie, Genre, Actor, Region, UserRating, Collect, Rec, ChatHistory
 
 
 # 1. 注册 UserInfo (修复版)
-class UserInfoAdmin(admin.ModelAdmin):
+class UserInfoAdmin(RecommendationCacheAdminMixin, admin.ModelAdmin):
+    cache_owner_field = 'pk'
     # --- ↓↓↓ 关键修复 ↓↓↓ ---
     # 原来的 user_type -> 改为 is_staff (是否管理员)
     # 原来的 user_status -> 改为 is_active (是否有效)
@@ -23,7 +25,8 @@ admin.site.register(UserInfo, UserInfoAdmin)
 
 
 # 2. 注册 Movie
-class MovieAdmin(admin.ModelAdmin):
+class MovieAdmin(RecommendationCacheAdminMixin, admin.ModelAdmin):
+    cache_scope = 'catalog'
     # 确保这里没有引用不存在的字段
     list_display = ('id', 'title', 'score', 'vote_count', 'date')
     search_fields = ('title',)
@@ -34,7 +37,7 @@ admin.site.register(Movie, MovieAdmin)
 
 
 # 3. 注册 UserRating
-class UserRatingAdmin(admin.ModelAdmin):
+class UserRatingAdmin(RecommendationCacheAdminMixin, admin.ModelAdmin):
     list_display = ('id', 'user', 'movie', 'score', 'discussion', 'comment_time')
     search_fields = ('user__username', 'movie__title', 'discussion')
     list_filter = ('score', 'comment_time')
@@ -44,7 +47,7 @@ admin.site.register(UserRating, UserRatingAdmin)
 
 
 # 4. 注册 Collect
-class CollectAdmin(admin.ModelAdmin):
+class CollectAdmin(RecommendationCacheAdminMixin, admin.ModelAdmin):
     list_display = ('id', 'user', 'movie', 'collect_time')
     search_fields = ('user__username', 'movie__title')
 
@@ -53,7 +56,7 @@ admin.site.register(Collect, CollectAdmin)
 
 
 # 5. 注册 Rec (推荐结果)
-class RecAdmin(admin.ModelAdmin):
+class RecAdmin(RecommendationCacheAdminMixin, admin.ModelAdmin):
     list_display = ('id', 'user', 'movie', 'rating')
     search_fields = ('user__username', 'movie__title')
 
@@ -61,9 +64,13 @@ class RecAdmin(admin.ModelAdmin):
 admin.site.register(Rec, RecAdmin)
 
 # 6. 注册其他基础表
-admin.site.register(Genre)
-admin.site.register(Actor)
-admin.site.register(Region)
+class CatalogAdmin(RecommendationCacheAdminMixin, admin.ModelAdmin):
+    cache_scope = 'catalog'
+
+
+admin.site.register(Genre, CatalogAdmin)
+admin.site.register(Actor, CatalogAdmin)
+admin.site.register(Region, CatalogAdmin)
 admin.site.register(ChatHistory)
 
 
@@ -84,14 +91,14 @@ class ConversationHistoryAdmin(admin.ModelAdmin):
 
 
 @admin.register(UserProfile)
-class UserProfileAdmin(admin.ModelAdmin):
+class UserProfileAdmin(RecommendationCacheAdminMixin, admin.ModelAdmin):
     list_display = ('user', 'total_ratings', 'avg_score', 'total_collections', 'is_cold_start', 'updated_at')
     search_fields = ('user__username',)
     list_filter = ('is_cold_start',)
 
 
 @admin.register(RecommendLog)
-class RecommendLogAdmin(admin.ModelAdmin):
+class RecommendLogAdmin(RecommendationCacheAdminMixin, admin.ModelAdmin):
     list_display = ('id', 'user', 'strategy', 'latency_ms', 'created_at')
     search_fields = ('user__username', 'query_text')
     list_filter = ('strategy', 'created_at')
@@ -105,7 +112,7 @@ class AgentTraceAdmin(admin.ModelAdmin):
 
 
 @admin.register(UserFeedback)
-class UserFeedbackAdmin(admin.ModelAdmin):
+class UserFeedbackAdmin(RecommendationCacheAdminMixin, admin.ModelAdmin):
     list_display = ('id', 'user', 'movie', 'feedback_type', 'source', 'created_at')
     search_fields = ('user__username', 'movie__title')
     list_filter = ('feedback_type', 'source', 'created_at')

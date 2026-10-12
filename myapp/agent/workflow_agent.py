@@ -51,7 +51,7 @@ class WorkflowAgent:
         self.user = user
         self.neo_graph = neo_graph
         self.rag_resources = rag_resources
-        self.session_id = session_id or f"workflow_{int(time.time())}"
+        self.session_id = session_id
 
         self._tools = None
 
@@ -125,7 +125,8 @@ class WorkflowAgent:
                 elif tool_name == 'maan_rerank':
                     result = tool.execute(candidates=candidates, user=self.user, top_k=15)
                 elif tool_name == 'rerank':
-                    result = tool.execute(candidates=candidates, user=self.user, top_k=15)
+                    result = tool.execute(candidates=candidates, user=self.user, top_k=15,
+                                          memory_slots=self.memory.get_slots())
                 else:
                     result = {'tool': tool_name, 'output': [], 'count': 0}
 

@@ -37,9 +37,10 @@ class AgentChatService:
     5. 排除"不喜欢"电影
     """
     
-    def __init__(self, user, session_key: str = 'default'):
+    def __init__(self, user, session_key: Optional[str] = None):
         self.user = user
-        self.session_id = f"user_{user.id}_{session_key}"
+        self.session_id = (f"user_{user.id}_{session_key}"
+                           if session_key and session_key != 'default' else None)
         self._agent = None
     
     def _get_agent(self):
@@ -343,7 +344,7 @@ class AgentChatService:
             logger.error(f"[Service] 保存 AgentTrace 失败: {e}")
 
 
-def process_agent_request(user, user_input: str, session_key: str = 'default', is_thinking: bool = False) -> Dict:
+def process_agent_request(user, user_input: str, session_key: Optional[str] = None, is_thinking: bool = False) -> Dict:
     """
     便捷函数：一步完成 Agent 聊天处理。
     适用于不想实例化 Service 的场景。

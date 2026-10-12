@@ -21,7 +21,8 @@ from myapp.recommender.recall import _get_user_liked_ids
 logger = logging.getLogger('movie_agent')
 
 
-def business_filter(candidates, user=None, exclude_sensitive=True, exclude_ids=None):
+def business_filter(candidates, user=None, exclude_sensitive=True, exclude_ids=None,
+                    memory_slots=None):
     """
     业务规则过滤：
       1. 排除已推荐过的电影（去重）
@@ -36,6 +37,7 @@ def business_filter(candidates, user=None, exclude_sensitive=True, exclude_ids=N
         user: 用户对象
         exclude_sensitive: 是否排除敏感内容
         exclude_ids: 额外排除的ID集合
+        memory_slots: 调用方提供的当前会话槽位；缺省时不读取其他会话
     
     Returns:
         List[Dict] 过滤后的候选列表（自动补充安全内容）
@@ -98,15 +100,9 @@ def business_filter(candidates, user=None, exclude_sensitive=True, exclude_ids=N
             
             # 获取用户偏好类型（优先匹配）
             user_genres = []
-            try:
-                from myapp.agent.memory import MemoryManager
-                session_id = f"user_{getattr(user, 'id', 'anon')}"
-                memory = MemoryManager(user=user, session_id=session_id)
-                slots = memory.get_slots()
-                if slots.get('genre'):
-                    user_genres.append(slots['genre'])
-            except Exception:
-                pass
+            slots = memory_slots if isinstance(memory_slots, dict) else {}
+            if slots.get('genre'):
+                user_genres.append(slots['genre'])
             
             # 优先从用户偏好类型中补充
             safe_qs = Movie.objects.filter(is_sensitive=False).exclude(id__in=existing_ids)
@@ -205,7 +201,7 @@ def diversity_guarantee(candidates, min_genre_diversity=3, top_k=15):
 
 
 def final_rerank(candidates, user=None, top_k=15,
-                  exclude_sensitive=True, ensure_diversity=True):
+                  exclude_sensitive=True, ensure_diversity=True, memory_slots=None):
     """
     重排主函数。
     
@@ -215,6 +211,7 @@ def final_rerank(candidates, user=None, top_k=15,
         top_k: 最终返回数量
         exclude_sensitive: 是否过滤敏感内容
         ensure_diversity: 是否保障多样性
+        memory_slots: 当前会话的槽位快照
     
     Returns:
         Tuple[List[Dict], Dict] - (最终推荐列表, 统计信息)
@@ -224,7 +221,7 @@ def final_rerank(candidates, user=None, top_k=15,
     # 1. 业务过滤
     filtered = business_filter(
         candidates, user=user,
-        exclude_sensitive=exclude_sensitive
+        exclude_sensitive=exclude_sensitive, memory_slots=memory_slots
     )
     
     # 2. 多样性保障

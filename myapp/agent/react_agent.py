@@ -50,7 +50,7 @@ class ReActAgent:
         self.user = user
         self.neo_graph = neo_graph
         self.rag_resources = rag_resources
-        self.session_id = session_id or f"react_{int(time.time())}"
+        self.session_id = session_id
         self.trace_enabled = trace_enabled
 
         # 懒加载工具
@@ -352,7 +352,8 @@ class ReActAgent:
             elif tool_name == 'maan_rerank':
                 result = tool.execute(candidates=current_candidates, user=self.user, top_k=15)
             elif tool_name == 'rerank':
-                result = tool.execute(candidates=current_candidates, user=self.user, top_k=15)
+                result = tool.execute(candidates=current_candidates, user=self.user, top_k=15,
+                                      memory_slots=self.memory.get_slots())
             elif tool_name == 'explain':
                 result = tool.execute(user=self.user)
             else:
