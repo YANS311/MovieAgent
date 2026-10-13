@@ -1,0 +1,207 @@
+{
+  "kind": "CPU-only synthetic microbenchmark; NOT Redis/MySQL/production",
+  "baseline_commit": "ccbc04d9e2e3208c906a32fba7da8dd4c7b24d25",
+  "python": "3.13.5",
+  "platform": "Linux x86_64",
+  "serializer": "pickle protocol 5; synthetic blobs only",
+  "iterations": 80,
+  "warmup": 5,
+  "sample_pacing_seconds": 0.002,
+  "wall_budget_seconds": 20,
+  "source_sha256": "e7bc72588d9d9ab85cdccf64e2c992886a5a013ad063a277e72f2071b6456aa0",
+  "wall_seconds": 4.814,
+  "cpu_seconds": 0.685,
+  "sizes": [
+    {
+      "movies": 30,
+      "A_bytes": 34664,
+      "B_and_C_bytes": 1331,
+      "snapshot_equivalent": true,
+      "timings": {
+        "A_object_snapshot_build": {
+          "p50_us": 3.447,
+          "p95_us": 9.63,
+          "p99_us": 10.416,
+          "samples": 80
+        },
+        "A_object_snapshot_serialize": {
+          "p50_us": 110.359,
+          "p95_us": 155.355,
+          "p99_us": 192.43,
+          "samples": 80
+        },
+        "A_object_snapshot_deserialize": {
+          "p50_us": 113.928,
+          "p95_us": 146.538,
+          "p99_us": 187.174,
+          "samples": 80
+        },
+        "B_light_payload_build": {
+          "p50_us": 13.514,
+          "p95_us": 31.77,
+          "p99_us": 40.812,
+          "samples": 80
+        },
+        "B_light_payload_serialize": {
+          "p50_us": 20.889,
+          "p95_us": 35.214,
+          "p99_us": 51.589,
+          "samples": 80
+        },
+        "B_light_payload_deserialize": {
+          "p50_us": 18.526,
+          "p95_us": 38.511,
+          "p99_us": 49.752,
+          "samples": 80
+        },
+        "C_light_payload_restore_only": {
+          "p50_us": 69.94,
+          "p95_us": 91.707,
+          "p99_us": 129.419,
+          "samples": 80
+        },
+        "C_light_payload_decode_restore": {
+          "p50_us": 78.612,
+          "p95_us": 137.425,
+          "p99_us": 192.853,
+          "samples": 80
+        }
+      }
+    },
+    {
+      "movies": 100,
+      "A_bytes": 115045,
+      "B_and_C_bytes": 2661,
+      "snapshot_equivalent": true,
+      "timings": {
+        "A_object_snapshot_build": {
+          "p50_us": 3.324,
+          "p95_us": 11.955,
+          "p99_us": 12.216,
+          "samples": 80
+        },
+        "A_object_snapshot_serialize": {
+          "p50_us": 318.506,
+          "p95_us": 363.24,
+          "p99_us": 418.46,
+          "samples": 80
+        },
+        "A_object_snapshot_deserialize": {
+          "p50_us": 354.508,
+          "p95_us": 469.548,
+          "p99_us": 564.333,
+          "samples": 80
+        },
+        "B_light_payload_build": {
+          "p50_us": 24.578,
+          "p95_us": 41.199,
+          "p99_us": 53.337,
+          "samples": 80
+        },
+        "B_light_payload_serialize": {
+          "p50_us": 35.388,
+          "p95_us": 53.098,
+          "p99_us": 93.685,
+          "samples": 80
+        },
+        "B_light_payload_deserialize": {
+          "p50_us": 36.649,
+          "p95_us": 50.705,
+          "p99_us": 69.717,
+          "samples": 80
+        },
+        "C_light_payload_restore_only": {
+          "p50_us": 200.227,
+          "p95_us": 294.066,
+          "p99_us": 375.741,
+          "samples": 80
+        },
+        "C_light_payload_decode_restore": {
+          "p50_us": 214.802,
+          "p95_us": 310.317,
+          "p99_us": 395.742,
+          "samples": 80
+        }
+      }
+    },
+    {
+      "movies": 500,
+      "A_bytes": 593258,
+      "B_and_C_bytes": 10509,
+      "snapshot_equivalent": true,
+      "timings": {
+        "A_object_snapshot_build": {
+          "p50_us": 6.49,
+          "p95_us": 13.327,
+          "p99_us": 20.502,
+          "samples": 80
+        },
+        "A_object_snapshot_serialize": {
+          "p50_us": 1547.113,
+          "p95_us": 1611.577,
+          "p99_us": 1789.664,
+          "samples": 80
+        },
+        "A_object_snapshot_deserialize": {
+          "p50_us": 1829.83,
+          "p95_us": 1933.006,
+          "p99_us": 2352.497,
+          "samples": 80
+        },
+        "B_light_payload_build": {
+          "p50_us": 74.832,
+          "p95_us": 91.477,
+          "p99_us": 207.904,
+          "samples": 80
+        },
+        "B_light_payload_serialize": {
+          "p50_us": 90.287,
+          "p95_us": 106.913,
+          "p99_us": 119.974,
+          "samples": 80
+        },
+        "B_light_payload_deserialize": {
+          "p50_us": 99.294,
+          "p95_us": 126.438,
+          "p99_us": 172.023,
+          "samples": 80
+        },
+        "C_light_payload_restore_only": {
+          "p50_us": 728.064,
+          "p95_us": 1325.035,
+          "p99_us": 1437.951,
+          "samples": 80
+        },
+        "C_light_payload_decode_restore": {
+          "p50_us": 867.47,
+          "p95_us": 1111.381,
+          "p99_us": 1542.425,
+          "samples": 80
+        }
+      }
+    }
+  ],
+  "generation_fake_calls_cold": {
+    "get": 4,
+    "set": 0,
+    "add": 2,
+    "delete": 0
+  },
+  "generation_fake_calls_hot": {
+    "get": 2,
+    "set": 0,
+    "add": 0,
+    "delete": 0
+  },
+  "generation_fake_timing": {
+    "p50_us": 6.725,
+    "p95_us": 20.439,
+    "p99_us": 26.389,
+    "samples": 80
+  },
+  "observation_example_events": {
+    "hybrid/miss": 1,
+    "hybrid/hit": 1,
+    "hybrid/bypass": 1
+  }
+}

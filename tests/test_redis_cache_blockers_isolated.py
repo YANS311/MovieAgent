@@ -129,7 +129,9 @@ class BlockerTests(unittest.TestCase):
                                      POST=post)
 
     def test_all_changed_production_cache_references_have_real_bindings(self):
-        paths = subprocess.check_output(['git', 'diff', '--name-only'], cwd=ROOT, text=True).splitlines()
+        paths = subprocess.check_output([
+            'git', 'diff', 'd78390dede4a0371a1e7991f06568d8d390fbdbd', '--name-only'
+        ], cwd=ROOT, text=True).splitlines()
         paths += ['myapp/utils/cache_keys.py', 'myapp/utils/cache_access.py', 'myapp/services/cache_mutations.py']
         for path in paths:
             if path.endswith('.py'):

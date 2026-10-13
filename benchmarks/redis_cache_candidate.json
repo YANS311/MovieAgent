@@ -1,0 +1,77 @@
+{
+  "kind": "paired synthetic restoration candidate; no SQL/Redis",
+  "candidate": "round(float(scores[movie.id]), 4) -> round(scores[movie.id], 4)",
+  "iterations": 80,
+  "inner_repeats": 3,
+  "warmup": 5,
+  "pacing_seconds": 0.004,
+  "before_source_sha256": "e7bc72588d9d9ab85cdccf64e2c992886a5a013ad063a277e72f2071b6456aa0",
+  "after_source_sha256": "cf32f03baa46f186c3f8c51d9f6501dc5a5d651ba37aa99ebd30cf6fdd45c46d",
+  "wall_seconds": 1.513,
+  "cpu_seconds": 0.531,
+  "cases": [
+    {
+      "movies": 30,
+      "before": {
+        "p50_us": 52.84,
+        "p95_us": 70.396,
+        "p99_us": 75.448
+      },
+      "after": {
+        "p50_us": 53.254,
+        "p95_us": 70.239,
+        "p99_us": 86.863
+      },
+      "paired_saving": {
+        "p50_us": 0.744,
+        "p95_us": 20.069,
+        "p99_us": 23.246
+      },
+      "after_faster_pairs": 41,
+      "pairs": 80,
+      "result_equivalent": true
+    },
+    {
+      "movies": 100,
+      "before": {
+        "p50_us": 159.44,
+        "p95_us": 174.907,
+        "p99_us": 251.318
+      },
+      "after": {
+        "p50_us": 156.205,
+        "p95_us": 176.015,
+        "p99_us": 214.684
+      },
+      "paired_saving": {
+        "p50_us": -0.763,
+        "p95_us": 24.231,
+        "p99_us": 69.019
+      },
+      "after_faster_pairs": 40,
+      "pairs": 80,
+      "result_equivalent": true
+    },
+    {
+      "movies": 500,
+      "before": {
+        "p50_us": 668.944,
+        "p95_us": 744.333,
+        "p99_us": 776.034
+      },
+      "after": {
+        "p50_us": 663.198,
+        "p95_us": 760.937,
+        "p99_us": 871.764
+      },
+      "paired_saving": {
+        "p50_us": 22.555,
+        "p95_us": 61.32,
+        "p99_us": 104.321
+      },
+      "after_faster_pairs": 48,
+      "pairs": 80,
+      "result_equivalent": true
+    }
+  ]
+}

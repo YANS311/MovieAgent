@@ -18,6 +18,8 @@ import unittest
 from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[1]
+# HEAD moves after a checkpoint; the pre-refactor behavior oracle must not.
+LEGACY_COMMIT = 'd78390dede4a0371a1e7991f06568d8d390fbdbd'
 spec = importlib.util.spec_from_file_location('p0_fixture', ROOT / 'tests/test_redis_cache_p0_isolated.py')
 p0 = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(p0)
@@ -299,7 +301,7 @@ class P01Tests(unittest.TestCase):
                 {'id': 4, 'score': 9, 'vote_count': 20, 'genre': '剧情', 'is_sensitive': False}]
         ns = {'Movie': types.SimpleNamespace(objects=Query(rows)), 'logger': self.logger, 'time': time}
         if legacy:
-            source = subprocess.check_output(['git', 'show', 'HEAD:myapp/recommender/rerank.py'],
+            source = subprocess.check_output(['git', 'show', f'{LEGACY_COMMIT}:myapp/recommender/rerank.py'],
                                              cwd=ROOT, text=True)
             tree = ast.parse(source)
             node = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'business_filter')
@@ -401,7 +403,7 @@ class P01Tests(unittest.TestCase):
         calls = [n for n in ast.walk(branch.body[0]) if isinstance(n, ast.Call)]
         self.assertTrue(any(k.arg == 'memory_slots' and ast.unparse(k.value) == 'self.memory.get_slots()'
                             for call in calls for k in call.keywords))
-        before = ast.parse(subprocess.check_output(['git', 'show', 'HEAD:myapp/recommender/rerank.py'],
+        before = ast.parse(subprocess.check_output(['git', 'show', f'{LEGACY_COMMIT}:myapp/recommender/rerank.py'],
                                                     cwd=ROOT, text=True))
         after = ast.parse((ROOT / 'myapp/recommender/rerank.py').read_text())
         pick = lambda t: next(n for n in t.body if isinstance(n, ast.FunctionDef) and n.name == 'diversity_guarantee')
