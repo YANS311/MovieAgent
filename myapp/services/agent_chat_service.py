@@ -20,7 +20,11 @@ import time
 import logging
 from typing import Dict, Any, Optional, Generator
 
-from django.db import transaction
+from django.db import transaction, router, DEFAULT_DB_ALIAS
+from myapp.services.agent_contracts import (
+    AgentRequestTrace, AgentExecutionError, AgentDependencyUnavailable, AgentPersistenceError,
+)
+from myapp.utils.cache_access import MemoryCacheUnavailable
 
 logger = logging.getLogger('movie_agent')
 
@@ -37,11 +41,41 @@ class AgentChatService:
     5. 排除"不喜欢"电影
     """
     
-    def __init__(self, user, session_key: Optional[str] = None):
+    def __init__(self, user, session_key: Optional[str] = None, request_id=None):
         self.user = user
         self.session_id = (f"user_{user.id}_{session_key}"
                            if session_key and session_key != 'default' else None)
         self._agent = None
+        self.request_id = request_id
+        self._request_trace = None
+
+    def _trace_request(self):
+        if self._request_trace is None:
+            self._request_trace = AgentRequestTrace(self.request_id)
+            self.request_id = self._request_trace.request_id
+        return self._request_trace
+
+    def _execute_agent(self, user_input):
+        trace = self._trace_request()
+        started = trace.clock()
+        trace.stage('agent_execution_started', started)
+        try:
+            # ATOMIC_REQUESTS/outer default transactions must not enclose inference.
+            if transaction.get_connection().in_atomic_block:
+                raise RuntimeError('Agent execution cannot run inside a database transaction')
+            agent = self._get_agent()
+            result = agent.run(user_input)
+        except AgentDependencyUnavailable:
+            trace.stage('agent_execution_finished', started, outcome='failure')
+            raise
+        except MemoryCacheUnavailable as exc:
+            trace.stage('agent_execution_finished', started, outcome='failure')
+            raise AgentDependencyUnavailable('Agent preference dependency unavailable') from exc
+        except Exception as exc:
+            trace.stage('agent_execution_finished', started, outcome='failure')
+            raise AgentExecutionError('Agent execution failed') from exc
+        trace.stage('agent_execution_finished', started)
+        return agent, result
     
     def _get_agent(self):
         """懒加载 Agent 实例，自动检测 Ollama 并注入 LLM 配置"""
@@ -99,11 +133,10 @@ class AgentChatService:
         Returns:
             dict: 完整的响应数据（可直接序列化为 JSON）
         """
-        t_start = time.time()
+        t_start = time.perf_counter()
         
         # 1. 执行 Agent ReAct 推理
-        agent = self._get_agent()
-        result = agent.run(user_input)
+        agent, result = self._execute_agent(user_input)
         
         # 2. 排除"不喜欢"的电影
         excluded_ids = self._get_excluded_ids()
@@ -119,12 +152,11 @@ class AgentChatService:
         # 4. 构建 ReAct Trace 展示
         react_display = agent.get_react_trace(result)
         
-        # 5. 持久化（异步安全：在线程池中执行）
-        self._save_history(user_input, result['final_answer'])
-        self._save_trace(user_input, result)
+        # 5. Only the three database writes belong to this short transaction.
+        self._persist_result(user_input, result)
         
         # 6. 构建响应
-        t_total = time.time() - t_start
+        t_total = time.perf_counter() - t_start
         
         return {
             'response': result['final_answer'],
@@ -163,7 +195,7 @@ class AgentChatService:
         6. chunk       → 最终答案文本（逐块输出）
         7. done        → 完成信号 + 元数据
         """
-        t_start = time.time()
+        t_start = time.perf_counter()
         
         # Phase 0: 意图分类
         yield {
@@ -172,10 +204,7 @@ class AgentChatService:
         }
         
         # Phase 1: 执行推理（获取完整 trace）
-        agent = self._get_agent()
-        
-        # 使用 MovieAgent 执行（它已经记录了完整的 trace_steps）
-        result = agent.run(user_input)
+        agent, result = self._execute_agent(user_input)
         
         # Phase 2: 逐步推送 ReAct 推理链
         trace_steps = result.get('trace_steps', [])
@@ -246,10 +275,9 @@ class AgentChatService:
         react_display = agent.get_react_trace(result)
         
         # 持久化
-        self._save_history(user_input, result['final_answer'])
-        self._save_trace(user_input, result)
+        self._persist_result(user_input, result)
         
-        t_total = int((time.time() - t_start) * 1000)
+        t_total = max(0, int((time.perf_counter() - t_start) * 1000))
         
         yield {
             'type': 'done',
@@ -312,36 +340,52 @@ class AgentChatService:
         
         return details
     
-    def _save_history(self, user_input: str, ai_response: str):
-        """保存对话历史"""
+    def _persist_result(self, user_input, result):
+        """One alias, three writes, one commit. No inference or automatic retry."""
+        trace = self._trace_request()
+        started = trace.clock()
+        trace.stage('persistence_started', started)
         try:
             from myapp.models import ChatHistory
-            ChatHistory.objects.create(user=self.user, role='user', message=user_input)
-            ChatHistory.objects.create(user=self.user, role='ai', message=ai_response)
-        except Exception as e:
-            logger.error(f"[Service] 保存对话历史失败: {e}")
-    
-    def _save_trace(self, user_input: str, result: dict):
-        """保存 Agent 推理链"""
-        try:
             from myapp.models_upgrade import AgentTrace
-            AgentTrace.objects.create(
-                user=self.user,
-                user_input=user_input,
-                intent=result['intent'],
-                thought=result['thought'],
-                actions=result['actions'],
-                observations=[
-                    {'tool': o.get('tool', ''), 'count': o.get('count', 0)}
-                    for o in result['observations']
-                ],
-                final_answer=result['final_answer'],
-                recommended_movies=result['recommended_ids'],
-                explanations=result['explanations'],
-                total_latency_ms=result['latency_ms'],
-            )
-        except Exception as e:
-            logger.error(f"[Service] 保存 AgentTrace 失败: {e}")
+            history_db = ChatHistory.objects._db or router.db_for_write(ChatHistory, instance=self.user) or DEFAULT_DB_ALIAS
+            trace_db = AgentTrace.objects._db or router.db_for_write(AgentTrace, instance=self.user) or DEFAULT_DB_ALIAS
+            if history_db != trace_db:
+                raise RuntimeError('Cross-database Agent persistence is unsupported')
+            if transaction.get_connection(history_db).in_atomic_block:
+                raise RuntimeError('Agent persistence requires an owned commit boundary')
+            with transaction.atomic(using=history_db):
+                self._save_history(user_input, result['final_answer'], using=history_db)
+                saved_trace = self._save_trace(user_input, result, using=history_db)
+        except Exception as exc:
+            trace.stage('persistence_failed', started, outcome='failure')
+            raise AgentPersistenceError('Agent persistence not confirmed') from exc
+        trace.stage('persistence_succeeded', started, trace_id=saved_trace.pk)
+
+    def _save_history(self, user_input: str, ai_response: str, using=DEFAULT_DB_ALIAS):
+        """Only called within _persist_result; failures propagate to its atomic block."""
+        from myapp.models import ChatHistory
+        ChatHistory.objects.using(using).create(user=self.user, role='user', message=user_input)
+        ChatHistory.objects.using(using).create(user=self.user, role='ai', message=ai_response)
+
+    def _save_trace(self, user_input: str, result: dict, using=DEFAULT_DB_ALIAS):
+        """Retain every business field; no request_id stuffed into trace content."""
+        from myapp.models_upgrade import AgentTrace
+        return AgentTrace.objects.using(using).create(
+            user=self.user,
+            user_input=user_input,
+            intent=result['intent'],
+            thought=result['thought'],
+            actions=result['actions'],
+            observations=[
+                {'tool': o.get('tool', ''), 'count': o.get('count', 0)}
+                for o in result['observations']
+            ],
+            final_answer=result['final_answer'],
+            recommended_movies=result['recommended_ids'],
+            explanations=result['explanations'],
+            total_latency_ms=result['latency_ms'],
+        )
 
 
 def process_agent_request(user, user_input: str, session_key: Optional[str] = None, is_thinking: bool = False) -> Dict:

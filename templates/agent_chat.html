@@ -487,12 +487,27 @@ function sendMessage() {
     var finalData = null;
     var aiDiv = null;
     var chat = document.getElementById('chatWindow');
+    var receivedDone = false;
+    var receivedError = false;
+    var terminalHandled = false;
 
-    fetch('{% url "agent_stream" %}', {
+    // EOF is transport completion; only a done event confirms business completion.
+    function failStream(message) {
+        if (terminalHandled) return;
+        terminalHandled = true;
+        removeLoading(loadingId);
+        appendBubble('ai', message);
+        updateStatus('<i class="fa fa-times-circle" style="color:#e57373;"></i> 本次请求未成功完成');
+    }
+
+    return fetch('{% url "agent_stream" %}', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': '{{ csrf_token }}' },
         body: 'msg=' + encodeURIComponent(msg) + '&is_thinking=true'
     }).then(function(resp) {
+        if (!resp.ok || !resp.body || typeof resp.body.getReader !== 'function') {
+            throw new Error('Stream response unavailable');
+        }
         var reader = resp.body.getReader();
         var decoder = new TextDecoder();
         var buffer = '';
@@ -500,8 +515,14 @@ function sendMessage() {
         function readChunk() {
             return reader.read().then(function(result) {
                 if (result.done) {
+                    if (terminalHandled || receivedError) return;
+                    if (!receivedDone) {
+                        failStream('⚠️ 响应不完整，本次请求未成功完成。请先检查会话记录，勿自动重复提交。');
+                        return;
+                    }
                     removeLoading(loadingId);
                     onStreamDone(finalData, aiDiv, aiText);
+                    terminalHandled = true;
                     return;
                 }
                 buffer += decoder.decode(result.value, { stream: true });
@@ -511,10 +532,14 @@ function sendMessage() {
                 for (var i = 0; i < lines.length; i++) {
                     var line = lines[i].trim();
                     if (line.startsWith('data: ')) {
+                        var chunk;
                         try {
-                            var chunk = JSON.parse(line.substring(6));
-                            handleStreamChunk(chunk);
-                        } catch(e) {}
+                            chunk = JSON.parse(line.substring(6));
+                        } catch(e) {
+                            failStream('⚠️ 响应格式异常，本次请求未成功完成。');
+                            continue;
+                        }
+                        handleStreamChunk(chunk);
                     }
                 }
                 return readChunk();
@@ -522,12 +547,17 @@ function sendMessage() {
         }
         return readChunk();
     }).catch(function(err) {
-        removeLoading(loadingId);
-        appendBubble('ai', '❌ 网络错误，请稍后重试。');
-        updateStatus('<i class="fa fa-times-circle" style="color:#e57373;"></i> 请求失败');
+        // Never display raw HTTP bodies, exception text or backend event content.
+        failStream('❌ 本次请求未成功完成。请先检查会话记录，勿自动重复提交。');
     }).finally(function() { setSending(false); });
 
     function handleStreamChunk(chunk) {
+        if (terminalHandled) return;
+        if (!chunk || typeof chunk !== 'object') {
+            failStream('⚠️ 响应格式异常，本次请求未成功完成。');
+            return;
+        }
+        if (receivedDone && chunk.type !== 'error') return;
         switch (chunk.type) {
             case 'thought':
             case 'action':
@@ -554,11 +584,15 @@ function sendMessage() {
                 finalData = chunk.meta || chunk.data || chunk;
                 break;
             case 'done':
+                if (receivedError) return;
+                receivedDone = true;
                 finalData = chunk.meta || chunk.data || finalData || chunk;
                 break;
             case 'error':
-                removeLoading(loadingId);
-                appendBubble('ai', chunk.content || '请求失败');
+                receivedError = true;
+                failStream(chunk.code === 'AGENT_PERSISTENCE_FAILED'
+                    ? '⚠️ 回答已生成，但保存未确认完成，本次请求未成功完成。请勿自动重试。'
+                    : '❌ 本次请求未成功完成。请先检查会话记录，勿自动重复提交。');
                 break;
         }
     }

@@ -23,6 +23,7 @@ import time
 import logging
 import traceback
 from functools import wraps
+from myapp.services.agent_contracts import AgentRequestTrace, agent_error_payload
 
 from django.http import JsonResponse, StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -128,52 +129,48 @@ def agent_api_view(request):
     POST 参数: msg, is_thinking (可选)
     返回: {response, react_trace, recommended_ids, movie_details, ...}
     """
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Method Not Allowed'}, status=405)
-    
-    raw_input = request.POST.get('msg', '').strip()
-    if not raw_input:
-        return JsonResponse({
-            'response': '您好！我是智能推荐助手，请问今天想看什么类型的电影？',
-            'react_trace': None,
-        })
-    
-    # 安全清洗
-    user_input = _sanitize_input(raw_input)
-    if user_input == "MALICIOUS_INJECTION_DETECTED":
-        return JsonResponse({
-            'response': '🛡️ 系统拦截：检测到不安全的输入内容。',
-            'react_trace': None,
-        })
-    
+    trace = AgentRequestTrace()  # Server-generated; ignore client request-id headers.
+    request.request_id = trace.request_id
+    trace.stage('request_received')
+    outcome = 'failure'
     try:
+        if request.method != 'POST':
+            outcome = 'method_not_allowed'
+            return JsonResponse({'code': 'METHOD_NOT_ALLOWED', 'message': 'Method Not Allowed',
+                                 'request_id': trace.request_id, 'retryable': False}, status=405)
+        raw_input = request.POST.get('msg', '')
+        if not isinstance(raw_input, str) or not raw_input.strip():
+            outcome = 'invalid_request'
+            return JsonResponse({
+                'response': '您好！我是智能推荐助手，请问今天想看什么类型的电影？',
+                'react_trace': None, 'code': 'INVALID_REQUEST', 'message': '请输入有效的消息。',
+                'request_id': trace.request_id, 'retryable': False,
+            }, status=400)
+        user_input = _sanitize_input(raw_input.strip())
+        if user_input == "MALICIOUS_INJECTION_DETECTED":
+            outcome = 'unsafe_input'
+            return JsonResponse({
+                'response': '🛡️ 系统拦截：检测到不安全的输入内容。',
+                'react_trace': None, 'code': 'UNSAFE_INPUT',
+                'message': '🛡️ 系统拦截：检测到不安全的输入内容。',
+                'request_id': trace.request_id, 'retryable': False,
+            }, status=400)
         from myapp.services.agent_chat_service import AgentChatService
-        
-        service = AgentChatService(request.user, _get_session_key(request))
+        service = AgentChatService(request.user, _get_session_key(request), request_id=trace.request_id)
         result = service.process_chat(
-            user_input,
-            is_thinking=request.POST.get('is_thinking') == 'true'
+            user_input, is_thinking=request.POST.get('is_thinking') == 'true'
         )
-        
-        # ★ XAI 方案一：拟人化思考流
         from myapp.utils.xai_explainer import translate_react_to_human
         result['user_friendly_trace'] = translate_react_to_human(result.get('react_trace', {}))
-        
-        logger.info(
-            f"[Agent] 用户={request.user.username} | "
-            f"意图={result.get('intent', '')} | "
-            f"耗时={result.get('latency_ms', 0)}ms"
-        )
-        
+        result['request_id'] = trace.request_id
+        outcome = 'success'
         return JsonResponse(result)
-    
-    except Exception as e:
-        logger.exception(f"[Agent] 推理异常: {e}")
-        return JsonResponse({
-            'response': '智能助手暂时遇到了问题，请稍后重试。',
-            'react_trace': None,
-            'error': str(e),
-        })
+    except Exception as exc:
+        payload, status = agent_error_payload(exc, trace.request_id)
+        outcome = payload['code']
+        return JsonResponse(payload, status=status)
+    finally:
+        trace.stage('request_finished', outcome=outcome)
 
 
 # =============================================================
@@ -196,70 +193,68 @@ def agent_stream_view(request):
     - done:     完成信号 + 元数据（react_trace, recommended_ids 等）
     - error:    错误信息
     """
+    trace = AgentRequestTrace()
+    request.request_id = trace.request_id
+    trace.stage('request_received')
+    headers = {'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no',
+               'X-Request-ID': trace.request_id}
     if request.method != 'POST':
+        trace.stage('request_finished', outcome='method_not_allowed')
         return JsonResponse({'error': 'Method Not Allowed'}, status=405)
-    
+
     raw_input = request.POST.get('msg', '').strip()
     if not raw_input:
         def empty_stream():
-            yield _sse_data({
-                'type': 'done',
-                'content': '您好！我是智能推荐助手，请问今天想看什么类型的电影？',
-            })
-        return StreamingHttpResponse(
-            empty_stream(),
-            content_type='text/event-stream',
-            headers={
-                'Cache-Control': 'no-cache',
-                'X-Accel-Buffering': 'no',  # Nginx 禁用缓冲
-            }
-        )
-    
-    # 安全清洗
+            try:
+                yield _sse_data({
+                    'type': 'done',
+                    'content': '您好！我是智能推荐助手，请问今天想看什么类型的电影？',
+                })
+            finally:
+                trace.stage('request_finished', outcome='empty_input')
+        return StreamingHttpResponse(empty_stream(), content_type='text/event-stream', headers=headers)
+
     user_input = _sanitize_input(raw_input)
     if user_input == "MALICIOUS_INJECTION_DETECTED":
         def blocked_stream():
-            yield _sse_data({
-                'type': 'error',
-                'content': '🛡️ 系统拦截：检测到不安全的输入内容。',
-            })
-        return StreamingHttpResponse(
-            blocked_stream(),
-            content_type='text/event-stream',
-            headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'}
-        )
-    
-    # SessionMiddleware sees the new session before processing the response.
-    # Never create a session while consuming streaming_content.
-    session_key = _get_session_key(request)
+            try:
+                yield _sse_data({
+                    'type': 'error',
+                    'content': '🛡️ 系统拦截：检测到不安全的输入内容。',
+                })
+            finally:
+                trace.stage('request_finished', outcome='unsafe_input')
+        return StreamingHttpResponse(blocked_stream(), content_type='text/event-stream', headers=headers)
+
+    # Preserve P0.1: session failures propagate before response construction.
+    try:
+        session_key = _get_session_key(request)
+    except Exception:
+        trace.stage('request_finished', outcome='session_failure')
+        raise
 
     def event_stream():
+        outcome = 'stream_incomplete'
         try:
             from myapp.services.agent_chat_service import AgentChatService
-            
             service = AgentChatService(request.user, session_key)
+            service.request_id = trace.request_id  # Preserve the two-argument call contract.
             is_thinking = request.POST.get('is_thinking') == 'true'
-            
             for chunk in service.stream_chat(user_input, is_thinking):
                 yield _sse_data(chunk)
-                time.sleep(0.02)  # 微延迟，避免客户端缓冲区溢出
-            
-        except Exception as e:
-            logger.exception(f"[SSE] 流式推理异常: {e}")
-            yield _sse_data({
-                'type': 'error',
-                'content': '智能助手暂时遇到了问题，请稍后重试。',
-            })
-    
-    return StreamingHttpResponse(
-        event_stream(),
-        content_type='text/event-stream',
-        headers={
-            'Cache-Control': 'no-cache',
-            'X-Accel-Buffering': 'no',
-            'Connection': 'keep-alive',
-        }
-    )
+                time.sleep(0.02)
+            outcome = 'success'
+        except Exception as exc:
+            payload, _ = agent_error_payload(exc, trace.request_id)
+            outcome = payload['code']
+            yield _sse_data({'type': 'error', 'content': payload['message'],
+                             'code': payload['code'], 'request_id': trace.request_id,
+                             'retryable': False})
+        finally:
+            trace.stage('request_finished', outcome=outcome)
+
+    return StreamingHttpResponse(event_stream(), content_type='text/event-stream',
+                                 headers={**headers, 'Connection': 'keep-alive'})
 
 
 def _sse_data(data: dict) -> str:
