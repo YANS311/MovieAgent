@@ -189,3 +189,8 @@ LOGIN_URL = 'login_user'
 # 媒体文件配置
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Auxiliary feedback statistics: off; never reuse Session/cache Redis DB.
+REDIS_ANALYTICS_ENABLED = False
+REDIS_ANALYTICS_URL = None
+REDIS_ANALYTICS_WEIGHTS = {"click": 1, "like": 3, "collect": 5, "skip": 0, "dislike": 0, "share": 2}
+REDIS_ANALYTICS_STREAM_CAPACITY = 100000

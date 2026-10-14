@@ -31,6 +31,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.core.cache import cache
+from django.conf import settings
+from myapp.services.redis_analytics import schedule_feedback_analytics
 from myapp.services.cache_mutations import (
     recommendation_write_view, schedule_user_invalidation, schedule_catalog_invalidation,
     partial_commit_response,
@@ -313,12 +315,13 @@ def recommend_feedback_view(request):
         movie = get_object_or_404(Movie, pk=movie_id)
         
         with transaction.atomic():
-            UserFeedback.objects.create(
+            feedback = UserFeedback.objects.create(
                 user=request.user,
                 movie=movie,
                 feedback_type=feedback_type,
                 source=source,
             )
+            schedule_feedback_analytics(transaction, feedback, settings)
             transaction.on_commit(
                 lambda user_id=request.user.id: invalidate_recommendation_cache(cache, user_id)
             )

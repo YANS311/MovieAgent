@@ -30,11 +30,16 @@ spec.loader.exec_module(keys)
 access_spec = importlib.util.spec_from_file_location('isolated_cache_access', ROOT / 'myapp/utils/cache_access.py')
 access = importlib.util.module_from_spec(access_spec)
 access_spec.loader.exec_module(access)
+analytics_spec = importlib.util.spec_from_file_location(
+    'isolated_redis_analytics', ROOT / 'myapp/services/redis_analytics.py')
+analytics = importlib.util.module_from_spec(analytics_spec)
+analytics_spec.loader.exec_module(analytics)
 
 
 def assert_production_cache_bindings(path, source=None):
     """Check actual production bindings before injecting any fake dependency."""
-    modules = ('myapp.utils.cache_keys', 'myapp.utils.cache_access', 'myapp.services.cache_mutations')
+    modules = ('myapp.utils.cache_keys', 'myapp.utils.cache_access', 'myapp.services.cache_mutations',
+               'myapp.services.redis_analytics')
     exports = {}
     for module in modules:
         tree = ast.parse((ROOT / (module.replace('.', '/') + '.py')).read_text())
@@ -66,6 +71,8 @@ def assert_production_cache_bindings(path, source=None):
 def extract(path, names, namespace):
     """Execute selected definitions only, without module imports/initializers."""
     assert_production_cache_bindings(path)
+    namespace.setdefault('schedule_feedback_analytics', analytics.schedule_feedback_analytics)
+    namespace.setdefault('settings', types.SimpleNamespace(REDIS_ANALYTICS_ENABLED=False))
     for name in ('business_cache_get', 'business_cache_set', 'memory_cache_operation', 'MemoryCacheUnavailable'):
         namespace.setdefault(name, getattr(access, name))
     namespace.setdefault('business_cache_delete', getattr(access, 'business_cache_delete'))
