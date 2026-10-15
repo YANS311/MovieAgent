@@ -1,0 +1,17 @@
+{
+  "baseline_commit": "e60eb5a96662f9e448df571e5e0e495bd43ba737",
+  "p4b_diff_sha256": "ebfac9f7a758fed1605af08234474a3ca35bdce7751a458d0dea101ba6d7646e",
+  "protected_files_sha256": {
+    "myapp/agent_views.py": "fab03562816a043fdd39848dae8a2a2e52ceb94b653f9059c55263db2c524212",
+    "myapp/services/agent_chat_service.py": "4cc09196b84ae13a218c8b1b66112a6ee7f7a920a9c4f75b7cb487cca293179f",
+    "myapp/services/agent_contracts.py": "6e26c3c584ba809ed41d199de999ca052719eb5af4bf0227a77c087659c913ed",
+    "tests/test_agent_sse_lifecycle_isolated.py": "f6172bf0be0cbec9b58240cd2e4c14f0ccef71245cddc4c7d7e2d50892f0164b",
+    "docs/agent_backend/P4B_LIFECYCLE_AUDIT.md": "c4b0447b690da44c08b67e44bbfa7fd72566f3ba89a63cc3f992ba93dd4f2fae",
+    "docs/agent_backend/P4B_CANCELLATION_SEMANTICS.md": "739e099acc3914441fbc21e9cfbdf56969fd4f854627cc6101a7db743fdb0f37",
+    "docs/agent_backend/P4B_SSE_CONTRACT.md": "dc8220cbae630df77e647d848f78e93fa85677140485ffeefc1c56188c9db7f8",
+    "docs/agent_backend/P4B_IMPLEMENTATION.md": "0f1feb877009c9e7680c6a9308e67e87fca8175fbee22726dd2eb47e799fcede",
+    "docs/agent_backend/P4B_TEST_REPORT.md": "46a47bd0d093a68da012f955b9f2b97580818b7175b093940bd8a271442a5262",
+    "docs/agent_backend/P4B_INTEGRATION_TEST_PLAN.md": "0ca2190d1dd133bb8a33afa59f7be02acf24c6153743ef2cea5b66f19eed7e40",
+    "docs/agent_backend/P4B_GO_NO_GO.md": "20a819c98e0fc865dfa98b40125ecf7e00cc5cdd599cdd35b47beb5d6c2278aa"
+  }
+}
