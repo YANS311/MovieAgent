@@ -196,6 +196,9 @@ class AgentChatService:
         7. done        → 完成信号 + 元数据
         """
         t_start = time.perf_counter()
+        lifecycle = getattr(self, '_sse_lifecycle', None)
+        if lifecycle is not None and not lifecycle.checkpoint():
+            return
         
         # Phase 0: 意图分类
         yield {
@@ -204,12 +207,20 @@ class AgentChatService:
         }
         
         # Phase 1: 执行推理（获取完整 trace）
+        if lifecycle is not None and not lifecycle.checkpoint('RUNNING'):
+            return
         agent, result = self._execute_agent(user_input)
+        if lifecycle is not None:
+            lifecycle.agent_succeeded()
+            if not lifecycle.checkpoint('REPLAYING'):
+                return
         
         # Phase 2: 逐步推送 ReAct 推理链
         trace_steps = result.get('trace_steps', [])
         
         for step in trace_steps:
+            if lifecycle is not None and not lifecycle.checkpoint():
+                return
             step_type = step.get('type', 'thought')
             content = step.get('content', '')
             tool_name = step.get('tool', '')
@@ -250,6 +261,8 @@ class AgentChatService:
                 # 不在这里推送，后面单独流式输出
                 pass
             
+            if lifecycle is not None and not lifecycle.checkpoint():
+                return
             time.sleep(0.05)  # 短延迟，让前端能逐步渲染
         
         # Phase 3: 流式输出最终答案（逐块效果）
@@ -257,6 +270,8 @@ class AgentChatService:
         chunk_size = 5
         
         for i in range(0, len(final_text), chunk_size):
+            if lifecycle is not None and not lifecycle.checkpoint():
+                return
             chunk = final_text[i:i + chunk_size]
             yield {
                 'type': 'chunk',
@@ -264,6 +279,8 @@ class AgentChatService:
             }
         
         # Phase 4: 完成 + 元数据
+        if lifecycle is not None and not lifecycle.checkpoint():
+            return
         excluded_ids = self._get_excluded_ids()
         if excluded_ids:
             result['recommended_ids'] = [
@@ -275,7 +292,13 @@ class AgentChatService:
         react_display = agent.get_react_trace(result)
         
         # 持久化
+        if lifecycle is not None and not lifecycle.checkpoint('PERSISTING'):
+            return
         self._persist_result(user_input, result)
+        if lifecycle is not None:
+            lifecycle.persistence_succeeded()
+            if not lifecycle.checkpoint():
+                return
         
         t_total = max(0, int((time.perf_counter() - t_start) * 1000))
         

@@ -196,65 +196,85 @@ def agent_stream_view(request):
     trace = AgentRequestTrace()
     request.request_id = trace.request_id
     trace.stage('request_received')
+    lifecycle = trace.sse_lifecycle()
     headers = {'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no',
                'X-Request-ID': trace.request_id}
+
+    def respond(factory, response_headers):
+        stream = lifecycle.wrap(factory, _sse_data)
+        try:
+            response = StreamingHttpResponse(stream, content_type='text/event-stream',
+                                             headers=response_headers)
+        except BaseException:
+            lifecycle.fail('INTERNAL_ERROR')
+            stream.close()
+            raise
+        # Internal diagnostic/cooperative hook, not a public cancellation API.
+        response.sse_lifecycle = lifecycle
+        return response
+
     if request.method != 'POST':
-        trace.stage('request_finished', outcome='method_not_allowed')
+        lifecycle.fail('SSE_ERROR')
+        lifecycle.finish()
         return JsonResponse({'error': 'Method Not Allowed'}, status=405)
 
-    raw_input = request.POST.get('msg', '').strip()
+    try:
+        raw_input = request.POST.get('msg', '').strip()
+    except Exception:
+        lifecycle.fail('INTERNAL_ERROR')
+        lifecycle.finish()
+        raise
     if not raw_input:
+        lifecycle.checkpoint('VALIDATED')
         def empty_stream():
-            try:
-                yield _sse_data({
-                    'type': 'done',
-                    'content': '您好！我是智能推荐助手，请问今天想看什么类型的电影？',
-                })
-            finally:
-                trace.stage('request_finished', outcome='empty_input')
-        return StreamingHttpResponse(empty_stream(), content_type='text/event-stream', headers=headers)
+            # Greeting-only completion retains its legacy no-persistence path.
+            yield {'type': 'done',
+                   'content': '您好！我是智能推荐助手，请问今天想看什么类型的电影？'}
+        return respond(empty_stream, headers)
 
-    user_input = _sanitize_input(raw_input)
+    try:
+        user_input = _sanitize_input(raw_input)
+    except Exception:
+        lifecycle.fail('INTERNAL_ERROR')
+        lifecycle.finish()
+        raise
     if user_input == "MALICIOUS_INJECTION_DETECTED":
         def blocked_stream():
-            try:
-                yield _sse_data({
-                    'type': 'error',
-                    'content': '🛡️ 系统拦截：检测到不安全的输入内容。',
-                })
-            finally:
-                trace.stage('request_finished', outcome='unsafe_input')
-        return StreamingHttpResponse(blocked_stream(), content_type='text/event-stream', headers=headers)
+            yield {'type': 'error', 'content': '🛡️ 系统拦截：检测到不安全的输入内容。'}
+        lifecycle.fail('SSE_ERROR')
+        return respond(blocked_stream, headers)
 
     # Preserve P0.1: session failures propagate before response construction.
     try:
         session_key = _get_session_key(request)
     except Exception:
-        trace.stage('request_finished', outcome='session_failure')
+        lifecycle.fail('INTERNAL_ERROR')
+        lifecycle.finish()
         raise
+    lifecycle.checkpoint('VALIDATED')
 
     def event_stream():
-        outcome = 'stream_incomplete'
+        producer = None
         try:
+            if not lifecycle.checkpoint():
+                return
             from myapp.services.agent_chat_service import AgentChatService
             service = AgentChatService(request.user, session_key)
             service.request_id = trace.request_id  # Preserve the two-argument call contract.
+            service._sse_lifecycle = lifecycle
             is_thinking = request.POST.get('is_thinking') == 'true'
-            for chunk in service.stream_chat(user_input, is_thinking):
-                yield _sse_data(chunk)
+            producer = service.stream_chat(user_input, is_thinking)
+            for chunk in producer:
+                if not lifecycle.checkpoint():
+                    return
+                yield chunk
+                if not lifecycle.checkpoint():
+                    return
                 time.sleep(0.02)
-            outcome = 'success'
-        except Exception as exc:
-            payload, _ = agent_error_payload(exc, trace.request_id)
-            outcome = payload['code']
-            yield _sse_data({'type': 'error', 'content': payload['message'],
-                             'code': payload['code'], 'request_id': trace.request_id,
-                             'retryable': False})
         finally:
-            trace.stage('request_finished', outcome=outcome)
+            lifecycle.close_owned(producer)
 
-    return StreamingHttpResponse(event_stream(), content_type='text/event-stream',
-                                 headers={**headers, 'Connection': 'keep-alive'})
+    return respond(event_stream, {**headers, 'Connection': 'keep-alive'})
 
 
 def _sse_data(data: dict) -> str:
