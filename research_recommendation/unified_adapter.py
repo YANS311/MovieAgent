@@ -223,6 +223,12 @@ class UnifiedRecommenderAdapter:
         adapter = self.adapters.get(model_version)
         if adapter is None:
             raise RecommendationError('REAL_MODEL_NOT_VERIFIED', 503)
+        if self.mapping_service is not None:
+            mapping = self.mapping_service
+            if (mapping.manifest.dataset != adapter.spec.dataset
+                    or mapping.manifest.identity != adapter.spec.catalogue_manifest_identity
+                    or mapping.version != adapter.spec.mapping_version):
+                raise RecommendationError('MAPPING_NOT_CONFIGURED', 503)
 
         # 3. Model Cache check
         ckpt_sha = getattr(adapter.spec, 'checkpoint_identity', '')
@@ -244,6 +250,13 @@ class UnifiedRecommenderAdapter:
             candidate_scope=candidate_scope,
         )
         if cached_result is not None:
+            if self.mapping_service is not None:
+                current = self.mapping_service.resolve_many([
+                    row['canonical_movie_id'] for row in cached_result['recommendations']])
+                fields = ('django_movie_id', 'movie_title', 'mapping_status')
+                if any(any(row.get(k) != current[row['canonical_movie_id']].get(k) for k in fields)
+                       for row in cached_result['recommendations']):
+                    raise RecommendationError('CACHED_MOVIE_MAPPING_CHANGED', 409)
             cached_result['request_id'] = rid
             cached_result['cache_status'] = cache_status
             self._record_trace(user, rid, cached_result)

@@ -1,11 +1,12 @@
 """Synthetic boundary regressions. These are NOT real-model or HTTP evidence."""
 from dataclasses import replace
 from unittest.mock import patch
+from types import SimpleNamespace
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.db import DatabaseError
 from django.test import TestCase, override_settings
-from research_recommendation.contracts import M3L, ModelSpec, PAMKAdapter, InferenceBatch, Prediction, RecommendationError
+from research_recommendation.contracts import M3L, ML1M, ModelSpec, PAMKAdapter, InferenceBatch, Prediction, RecommendationError
 from research_recommendation.models import ResearchProfile, ProfileGrant, RecommendationTrace
 from research_recommendation.model_cache import model_cache_key
 from research_recommendation.unified_adapter import UnifiedRecommenderAdapter, UserIdentityCategory
@@ -64,3 +65,18 @@ class Task85IntegrityTests(TestCase):
         with patch.object(RecommendationTrace.objects,'create',side_effect=DatabaseError('audit')):
             with self.assertRaises(RecommendationError) as e:self.rec()
         self.assertEqual(e.exception.code,'TRACE_PERSISTENCE_FAILED')
+    def mapping(self,dataset=M3L,identity='c'*64,version='v1'):
+        self.mapping_row={'django_movie_id':99,'movie_title':'Mapped movie','mapping_status':'VERIFIED_UNIQUE'}
+        return SimpleNamespace(manifest=SimpleNamespace(dataset=dataset,identity=identity),version=version,
+            resolve_many=lambda ids:{cid:dict(self.mapping_row) for cid in ids})
+    def test_wrong_mapping_identity_cannot_attach_business_movie(self):
+        for kwargs in ({'dataset':ML1M},{'identity':'d'*64},{'version':'v2'}):
+            with self.subTest(kwargs=kwargs):
+                self.facade.mapping_service=self.mapping(**kwargs)
+                with self.assertRaises(RecommendationError) as e:self.rec()
+                self.assertEqual(e.exception.code,'MAPPING_NOT_CONFIGURED')
+    def test_cached_business_link_rechecked_after_bridge_change(self):
+        self.facade.mapping_service=self.mapping();self.rec()
+        self.mapping_row.update(django_movie_id=None,movie_title=None,mapping_status='AMBIGUOUS')
+        with self.assertRaises(RecommendationError) as e:self.rec()
+        self.assertEqual(e.exception.code,'CACHED_MOVIE_MAPPING_CHANGED')

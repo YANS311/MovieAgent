@@ -455,11 +455,12 @@ class RecommenderAdapterPhase4Tests(TestCase):
 
         # Unified adapter recommend call via service
         svc = service()
-        spec_pamk = ModelSpec('PAMK-Net', M3L, PAMK_SHA, 'v1', self.train_sha, self.cat_sha)
+        mapping_service = svc.mapping_services.get('UKMAP') or MappingService(CATALOGUES[M3L], 'v1', SyntheticCatalogue())
+        spec_pamk = ModelSpec('PAMK-Net', M3L, PAMK_SHA, mapping_service.version,
+                              self.train_sha, mapping_service.manifest.identity)
         backend = SyntheticBackend(spec_pamk)
         adapter_pamk = PAMKAdapter(spec_pamk, backend)
         m3l_manifest = svc.profile_manifests.get(M3L)
-        mapping_service = svc.mapping_services.get('UKMAP') or MappingService(CATALOGUES[M3L], 'v1', SyntheticCatalogue())
         adapter = UnifiedRecommenderAdapter(
             adapters={'PAMK-Net': adapter_pamk},
             mapping_service=mapping_service,
