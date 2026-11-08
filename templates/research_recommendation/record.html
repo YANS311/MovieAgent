@@ -1,0 +1,22 @@
+{% extends 'research_recommendation/base.html' %}
+{% block title %}{{ display_model }} · 已保存推荐记录{% endblock %}
+{% block content %}
+<p class="eyebrow">{{ display_model }} · SAVED RECOMMENDATION</p><h1>{{ display_model }} 推荐记录</h1>
+<p class="state-panel">来自已保存的真实{{ display_model }}推理记录。本次只读取原始结果，不重新评分，也不替换未映射项。</p>
+<section class="provenance"><h2>推荐来源</h2><dl class="source-list">
+<dt>记录时间</dt><dd>{{ recommendation_trace.created_at|date:'Y-m-d H:i:s T' }}</dd>
+<dt>结果来源</dt><dd>{{ provenance.inference_mode }}（原记录）</dd>
+<dt>完整候选范围</dt><dd>{{ provenance.candidate_scope }}</dd>
+<dt>Checkpoint SHA256</dt><dd>{{ provenance.checkpoint_identity }}</dd>
+<dt>映射版本</dt><dd>{{ provenance.mapping_version }}</dd>
+<dt>Trace</dt><dd><a href="{% url 'research_recommendation:trace' recommendation_trace.id %}">{{ recommendation_trace.id }}</a></dd>
+</dl><p>研究画像独立授权，不代表当前登录者的真实兴趣。模型原始分数不是点击概率。</p></section>
+<h2>原始Top{{ original_count }}</h2><div class="recommend-grid" id="saved-recommendations">
+{% for item in items %}<article class="recommend-card" data-canonical="{{ item.canonical_movie_id }}" data-rank="{{ item.rank }}" data-score="{{ item.original_score_text }}">
+{% if item.poster_url %}<img class="mini-poster" src="{{ item.poster_url }}" alt="{{ item.movie_title }}海报" loading="lazy" referrerpolicy="no-referrer">{% endif %}
+<span class="rank-number">{{ item.rank }}</span><div><h3>{{ item.movie_title|default:'电影详情尚未映射' }}</h3>
+<p class="score">模型原始分数 {{ item.original_score_text }}</p><p>canonical {{ item.canonical_movie_id }} · {{ item.mapping_status }}</p>
+{% if item.detail_url %}<a class="detail-link" href="{{ item.detail_url }}">查看多模态电影详情 →</a>{% else %}<p>缺少可信业务映射，保留原始排名与标识。</p>{% endif %}
+</div></article>{% endfor %}</div>
+<p><a href="{% url 'research_pages:recommend' %}">返回研究推荐</a></p>
+{% endblock %}
