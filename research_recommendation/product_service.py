@@ -148,7 +148,7 @@ def cold_start(user, k, seen):
     rows.sort(key=lambda x:x[:4], reverse=True)
     return {'source':'METADATA_PREFERENCE' if weights else 'METADATA_COLD_START',
         'model_name':None, 'checkpoint_sha256':None, 'canonical_user_id':None,
-        'research_demo_only':False, 'reason':'Fixed-user PAMK has no validated inductive account encoder',
+        'research_demo_only':False, 'reason':'MODEL_ADAPTATION_DISABLED',
         'business_history_count':len(seen), 'recommendations':[
             {'rank':i,'django_movie_id':m.pk, 'canonical_movie_id':None,'movie_title':m.title,
              'detail_url':f'/movie/{m.pk}/', 'mapping_status':'BUSINESS_CATALOGUE',

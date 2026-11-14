@@ -22,3 +22,14 @@ class ReleaseBoundaryTests(SimpleTestCase):
  def test_database_error_is_explicit_private_503(self):
   response=PrivateProductResponseMiddleware(lambda r:None).process_exception(None,OperationalError('synthetic-connection-error'))
   self.assertEqual(response.status_code,503);self.assertIn(b'DATABASE_UNAVAILABLE',response.content);self.assertIn('no-store',response['Cache-Control'])
+
+ def test_feature_config_changes_encoding_identity(self):
+  import os,json,tempfile
+  from pathlib import Path
+  original=policy('mean')['encoding_identity']
+  cfg=json.loads(Path(os.environ['PAMK_ASSET_CONFIG']).read_text())
+  cfg['assets']['image_clip_image']['sha256']='0'*64
+  with tempfile.TemporaryDirectory() as d:
+   p=Path(d)/'changed-assets.json';p.write_text(json.dumps(cfg))
+   with patch.dict(os.environ,{'PAMK_ASSET_CONFIG':str(p)}):changed=policy('mean')['encoding_identity']
+  self.assertNotEqual(original,changed)

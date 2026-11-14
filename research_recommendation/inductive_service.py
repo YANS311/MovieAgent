@@ -74,7 +74,7 @@ def recommend_inductive(user,k,seen,explicit=False,encoding_method="learned"):
     if receipt.get('encoding_identity')!=chosen['encoding_identity'] or receipt.get('user')!='business:'+str(user.pk):raise RecommendationError('CACHE_PROVENANCE_MISMATCH',502)
     ids={int(x['canonical_movie_id']) for x in receipt['items']}
     if ids.intersection(exclude):raise RecommendationError('BUSINESS_HISTORY_FILTER_MISMATCH',502)
-    result={'source':chosen['source'],'model_name':chosen['model_name'],'adapter_version':chosen['version'],'adapter_checkpoint_sha256':chosen['encoder_checkpoint_sha256'],'encoding_method':encoding_method,'encoding_identity':chosen['encoding_identity'],'checkpoint_sha256':m['base_sha256'],
+    result={'source':chosen['source'],'model_name':chosen['model_name'],'adapter_version':chosen['version'],'adapter_checkpoint_sha256':chosen['encoder_checkpoint_sha256'],'encoding_method':encoding_method,'encoding_identity':chosen['encoding_identity'],'asset_config_sha256':chosen['asset_config_sha256'],'checkpoint_sha256':m['base_sha256'],
         'canonical_user_id':None,'research_demo_only':False,'identity_mode':'DJANGO_ACCOUNT','history_count':len(h),'unmapped_positive_feedback_count':unmapped,
         'context_identity':context,'cache_status':cache_status,'model_invoked':invoked,'mapping_version':MAPPING_VERSION,
         'recommendations':map_items(receipt['items'],d),'worker':{a:v for a,v in receipt.items() if a!='items'},

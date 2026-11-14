@@ -7,5 +7,5 @@ def policy(method):
  manifest=json.loads(Path(os.environ['PAMK_INDUCTIVE_MANIFEST']).read_text())
  if manifest['NEW_TEST_ACCESS']!=0:raise ValueError('TEST_ACCESS_FORBIDDEN')
  model,source=NAMES[method]
- payload={'version':model,'encoding_method':method,'base_sha256':manifest['base_sha256'],'model_source_sha256':manifest['encoder_source_sha256'],'runtime_source_sha256':hashlib.sha256(Path(__file__).with_name('inductive_runtime.py').read_bytes()).hexdigest(),'encoder_checkpoint_sha256':manifest['sha256'] if method=='learned' else None}
+ payload={'version':model,'encoding_method':method,'base_sha256':manifest['base_sha256'],'model_source_sha256':manifest['encoder_source_sha256'],'runtime_source_sha256':hashlib.sha256(Path(__file__).with_name('inductive_runtime.py').read_bytes()).hexdigest(),'encoder_checkpoint_sha256':manifest['sha256'] if method=='learned' else None,'asset_config_sha256':hashlib.sha256(Path(os.environ['PAMK_ASSET_CONFIG']).read_bytes()).hexdigest()}
  return dict(payload,encoding_identity=hashlib.sha256(json.dumps(payload,sort_keys=True).encode()).hexdigest(),model_name=model,source=source)

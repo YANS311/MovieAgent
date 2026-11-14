@@ -22,6 +22,7 @@ FORMAL=CH4_ROOT
 EVIDENCE=Path(os.environ['PAMK_EVIDENCE_DIR'])
 from pamk_identity import CHECKPOINT as PAMK_CHECKPOINT, CHECKPOINT_SHA256 as PAMK_FULL_SHA
 _cfg=json.loads(Path(os.environ['PAMK_ASSET_CONFIG']).read_text())
+_ASSET_CONFIG_SHA=hashlib.sha256(Path(os.environ['PAMK_ASSET_CONFIG']).read_bytes()).hexdigest()
 PARENT=Path(_cfg['assets']['parent24_checkpoint']['path'])
 PARENT_SHA='b97feb824f427e6437f728459fbeb443af9b8bfdbba18ac33db8786007c33cd6'
 
@@ -123,6 +124,8 @@ class PAMKEngine:
             raise ValueError('INVALID_SCOPE')
 
         self.load()
+        if sha(Path(os.environ['PAMK_ASSET_CONFIG'])) != _ASSET_CONFIG_SHA:
+            raise RuntimeError('ASSET_CONFIGURATION_CHANGED_RESTART_REQUIRED')
         if request.get('action') == 'inductive':
             from inductive_runtime import InductiveRuntime
             if not hasattr(self, 'inductive_runtime'):
@@ -197,6 +200,7 @@ class PAMKEngine:
             'receipt_id': receipt_id,
             'model_name': 'PAMK-Net',
             'checkpoint_identity': PAMK_FULL_SHA,
+            'asset_config_sha256': _ASSET_CONFIG_SHA,
             'parent_identity': PARENT_SHA,
             'user': str(user),
             'items': items,
