@@ -42,7 +42,7 @@ elif a.action=='check':
    for b in iter(lambda:f.read(8<<20),b''):h.update(b)
   if h.hexdigest()!=x['sha256']:raise SystemExit('ASSET_SHA_MISMATCH:'+key)
   print('VERIFIED',key,x['sha256'])
- manage('check');manage('migrate','--check')
+ manage('check');manage('migrate','--check');manage('makemigrations','--check','--dry-run')
 elif a.action=='migrate':manage('migrate','--noinput')
 elif a.action=='status':
  info=readstate();print(json.dumps({'running':valid(info),'state':info,'log':str(log)},ensure_ascii=False))

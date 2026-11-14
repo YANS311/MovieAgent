@@ -10,6 +10,8 @@ class MyappConfig(AppConfig):
     def ready(self):
         from django.conf import settings
         if getattr(settings, 'PAMK_PRODUCT_ENABLED', False):
+            # Preserve existing tables in the app registry without importing heavy views.
+            from . import models_upgrade  # noqa: F401
             return  # GPU inference belongs to the separate PAMK worker.
         """
         [系统启动预热脚本]
