@@ -19,7 +19,7 @@ def mysql():
 def manage(*args):return subprocess.run([web,'-B',str(ROOT/'manage.py'),*args],env=env,cwd=ROOT,check=True)
 if a.action=='init-db':
  c=mysql()
- with c.cursor() as q:q.execute(f'CREATE DATABASE IF NOT EXISTS `{db}` CHARACTER SET utf8mb4')
+ with c.cursor() as q:q.execute(f'CREATE DATABASE IF NOT EXISTS `{db}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci')
  c.close();print('ISOLATED_DATABASE_READY',db)
 elif a.action=='seed-from':
  source=a.source_db or ''
@@ -28,6 +28,13 @@ elif a.action=='seed-from':
  with c.cursor() as q:
   q.execute('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=%s',[db])
   if q.fetchone()[0]:raise SystemExit('TARGET_NOT_EMPTY_NO_OVERWRITE')
+  q.execute("SELECT COLLATION_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME='research_recommendation_recommendationtrace' AND COLUMN_NAME='id'",[source])
+  row=q.fetchone()
+  if row:
+   import re
+   collation=row[0]
+   if not re.fullmatch(r'utf8mb4_[a-zA-Z0-9_]+',collation):raise SystemExit('UNSUPPORTED_SOURCE_COLLATION')
+   q.execute(f'ALTER DATABASE `{db}` DEFAULT CHARACTER SET utf8mb4 COLLATE '+collation)
  c.close();childenv=dict(env,MYSQL_PWD=env['DB_PASSWORD']);base=['-h',env.get('DB_HOST','127.0.0.1'),'-P',env.get('DB_PORT','3306'),'-u',env['DB_USER']]
  dump=subprocess.Popen(['mysqldump',*base,'--single-transaction','--no-tablespaces','--skip-comments',source],stdout=subprocess.PIPE,env=childenv)
  load=subprocess.run(['mysql',*base,db],stdin=dump.stdout,env=childenv);dump.stdout.close();code=dump.wait()

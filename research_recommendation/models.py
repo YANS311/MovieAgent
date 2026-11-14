@@ -127,3 +127,6 @@ class ResearchTrainInteraction(models.Model):
     canonical_movie_id = models.PositiveIntegerField()
     class Meta:
         constraints = [models.UniqueConstraint(fields=['dataset', 'canonical_user_id', 'canonical_movie_id'], name='ch5_train_pair')]
+
+# Registration is explicit; these models store only account-owned online data.
+from .models_completion import UnifiedMovieFeedback, ProductAgentSession, ProductAgentTurn, ProductToolCall, PendingPreferenceAction

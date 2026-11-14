@@ -31,3 +31,9 @@ PAMK_POSTER_ROOT=Path(os.environ.get('PAMK_POSTER_ROOT', str(MEDIA_ROOT/'posters
 DEFAULT_AUTO_FIELD='django.db.models.BigAutoField';LOGIN_URL='/login/'
 REDIS_ANALYTICS_ENABLED=False
 LOGGING={'version':1,'disable_existing_loggers':False,'handlers':{'console':{'class':'logging.StreamHandler'}},'loggers':{'django.server':{'handlers':['console'],'level':'INFO','propagate':False},'django.request':{'handlers':['console'],'level':'ERROR','propagate':False}}}
+
+# Local structured tool calling, with explicit model identity and bounded execution.
+OLLAMA_BASE_URL=os.environ.get('OLLAMA_BASE_URL','http://127.0.0.1:11434')
+AGENT_LLM_MODEL=os.environ.get('AGENT_LLM_MODEL','qwen3:4b-instruct')
+AGENT_LLM_DIGEST=os.environ.get('AGENT_LLM_DIGEST','0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0')
+AGENT_LLM_TIMEOUT=float(os.environ.get('AGENT_LLM_TIMEOUT','45'))

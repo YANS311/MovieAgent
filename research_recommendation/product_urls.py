@@ -11,3 +11,6 @@ urlpatterns=[path('',v.home,name='home'),path('rankings/',v.rankings,name='ranki
 from django.urls import re_path
 from django.contrib.staticfiles.views import serve as static_serve
 urlpatterns += [re_path(r'^static/(?P<path>.*)$',static_serve,{'insecure':True})]
+
+from . import completion_views as c
+urlpatterns += [path('api/catalog/',c.catalogue_api),path('api/catalog/identities/',c.identities_api),path('api/catalog/resolve/',c.resolve_api),path('api/catalog/feedback/',c.feedback_api),path('research/movies/<int:canonical_id>/interaction/',c.canonical_interaction),path('history/',c.history,name='history'),path('api/agent/',c.agent_api,name='agent_api'),path('api/agent/tools/',c.tools_api)]

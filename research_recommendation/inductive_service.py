@@ -16,7 +16,7 @@ def manifest():
     if m['version']!=NAME or m['NEW_TEST_ACCESS']!=0:raise RecommendationError('INDUCTIVE_MANIFEST_INVALID',503)
     return m
 
-def business_context(user,seen):
+def legacy_business_context(user,seen):
     # Positive feedback means explicit rating >=4 or a collection; low scores
     # exclude the movie, never become fabricated positive histories.
     ratings=list(UserRating.objects.filter(user=user).order_by('movie_id').values_list('movie_id','score'))
@@ -51,6 +51,27 @@ def business_context(user,seen):
     identity=hashlib.sha256(json.dumps(evidence,sort_keys=True,separators=(',',':')).encode()).hexdigest()
     return d,history,exclusions,identity,len(set(positive))-len({mid for mid in positive if mid in trusted})
 
+def business_context(user,seen):
+    from .models import UnifiedMovieFeedback
+    from .unified_feedback import positive,has_interaction,mapped_business_ids,state
+    from .product_service import dataset
+    d,h,exclude,legacy_identity,missing=legacy_business_context(user,seen)
+    feedback=list(UnifiedMovieFeedback.objects.filter(user=user).select_related('research_movie').order_by('updated_at','pk'))
+    canonical=[r for r in feedback if r.research_movie is not None]
+    if not feedback:return d,h,exclude,legacy_identity,missing
+    d=d or dataset();h=list(h);exclude=set(exclude)|set(mapped_business_ids(seen).values())
+    for r in canonical:
+        if r.research_movie.dataset_id!=d.pk:raise RecommendationError('FEEDBACK_DATASET_MISMATCH',409)
+        cid=r.research_movie.canonical_movie_id
+        if cid in h:h.remove(cid)
+        if positive(r):h.append(cid)
+        if has_interaction(r):exclude.add(cid)
+    h=h[-20:];exclude|=set(h)
+    evidence={'legacy_context':legacy_identity,'feedback':[(('m3l:'+str(r.research_movie.canonical_movie_id)) if r.research_movie else ('business:'+str(r.business_movie_id)),state(r)) for r in feedback],'history':h,'exclude':sorted(exclude),'protocol':'ONLINE_UNIFIED_FEEDBACK_V1'}
+    context=hashlib.sha256(json.dumps(evidence,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+    return d,h,sorted(exclude),context,missing
+
+
 def recommend_inductive(user,k,seen,explicit=False,encoding_method="learned"):
     from .product_service import backend,map_items
     d,h,exclude,context,unmapped=business_context(user,seen)
@@ -76,7 +97,7 @@ def recommend_inductive(user,k,seen,explicit=False,encoding_method="learned"):
     if ids.intersection(exclude):raise RecommendationError('BUSINESS_HISTORY_FILTER_MISMATCH',502)
     result={'source':chosen['source'],'model_name':chosen['model_name'],'adapter_version':chosen['version'],'adapter_checkpoint_sha256':chosen['encoder_checkpoint_sha256'],'encoding_method':encoding_method,'encoding_identity':chosen['encoding_identity'],'asset_config_sha256':chosen['asset_config_sha256'],'checkpoint_sha256':m['base_sha256'],
         'canonical_user_id':None,'research_demo_only':False,'identity_mode':'DJANGO_ACCOUNT','history_count':len(h),'unmapped_positive_feedback_count':unmapped,
-        'context_identity':context,'cache_status':cache_status,'model_invoked':invoked,'mapping_version':MAPPING_VERSION,
+        'interaction_protocol':'ONLINE_UNIFIED_FEEDBACK_V1','context_identity':context,'cache_status':cache_status,'model_invoked':invoked,'mapping_version':MAPPING_VERSION,
         'recommendations':map_items(receipt['items'],d),'worker':{a:v for a,v in receipt.items() if a!='items'},
         'limitations':'New adapter, not identical to native Chapter 4 PAMK. Current internal holdout is weaker than mean-history PAMK baseline.'}
     return result

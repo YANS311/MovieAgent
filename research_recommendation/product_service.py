@@ -36,9 +36,8 @@ def backend(d):
 
 
 def business_seen(user):
-    return set(UserRating.objects.filter(user=user).values_list('movie_id', flat=True)) | set(
-        Collect.objects.filter(user=user).values_list('movie_id', flat=True)) | set(
-        MovieInteraction.objects.filter(user=user, catalogue_model='myapp.Movie', kind='watched').values_list('movie_id', flat=True))
+    from .unified_feedback import business_feedback_seen
+    return set(UserRating.objects.filter(user=user).values_list('movie_id',flat=True)) | set(Collect.objects.filter(user=user).values_list('movie_id',flat=True)) | set(MovieInteraction.objects.filter(user=user,catalogue_model='myapp.Movie',kind='watched').values_list('movie_id',flat=True)) | business_feedback_seen(user)
 
 
 def valid_grant(user, profile_id):
@@ -98,8 +97,8 @@ def recommend(user, payload):
         uid = int(identifier(p.canonical_user_id))
         if p.train_manifest_sha256 != d.manifest['assets']['train_context_csr']['sha256'] or not ResearchUser.objects.filter(dataset=d, canonical_user_id=uid, train_count__gt=0).exists():
             raise RecommendationError('TRAIN_PROFILE_NOT_VERIFIED', 409)
-        excluded = list(MovieIDBridge.objects.filter(source_dataset=M3L, mapping_version=MAPPING_VERSION,
-            mapping_status='VERIFIED_UNIQUE', django_movie_id__in=seen).values_list('canonical_movie_id', flat=True))
+        from .unified_feedback import canonical_exclusions,mapped_business_ids
+        excluded=sorted(set(mapped_business_ids(seen).values())|canonical_exclusions(user))
         instance = backend(d)
         try:
             receipt = instance.call(str(uid), k, exclude_canonical_ids=[int(x) for x in excluded])
@@ -139,6 +138,17 @@ def cold_start(user, k, seen):
     positive += list(Collect.objects.filter(user=user).values_list('movie_id', flat=True))
     if pref:
         positive += pref.movie_ids
+    from .models import UnifiedMovieFeedback
+    from .unified_feedback import positive as is_positive
+    from .unified_catalogue import resolve
+    positive=set(positive)
+    for row in UnifiedMovieFeedback.objects.filter(user=user).select_related('research_movie'):
+        identity=('m3l:'+str(row.research_movie.canonical_movie_id)) if row.research_movie else ('business:'+str(row.business_movie_id))
+        film=resolve(identity)
+        if film.business:
+            positive.discard(film.business.pk)
+            if is_positive(row):positive.add(film.business.pk)
+        elif is_positive(row):weights.update(film.card['genres'])
     for m in Movie.objects.filter(pk__in=positive).prefetch_related('genres'):
         weights.update(g.name for g in m.genres.all())
     rows = []
@@ -175,7 +185,7 @@ def map_items(raw_items,d):
             status = 'UNMAPPED'
         if movie and not business_identity_verified(b,rm,movie):
             movie = None; status = 'AMBIGUOUS'
-        items.append(dict(raw, rank=rank, movie_title=rm.title, source_movie_id=rm.source_movie_id,
+        items.append(dict(raw, canonical_movie_id=cid, rank=rank, movie_title=rm.title, source_movie_id=rm.source_movie_id,
             mapping_status=status, django_movie_id=movie.pk if movie else None,
             detail_url=f'/movie/{movie.pk}/' if movie else None,
             research_detail_url=f'/research/movies/{cid}/'))

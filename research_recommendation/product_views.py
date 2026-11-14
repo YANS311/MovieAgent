@@ -80,21 +80,20 @@ def rankings(request):
 
 
 def browse(request):
-    q=request.GET.get('q','')[:200];genre=request.GET.get('genre','')[:20];sort=request.GET.get('sort','score')
-    order={'score':'-score','popular':'-vote_count','recent':'-date'}
-    if sort not in order:sort='score'
-    rows=Movie.objects.filter(title__icontains=q).prefetch_related('genres')
-    if genre.isdecimal():rows=rows.filter(genres__pk=int(genre)).distinct()
-    else:genre=''
-    rows=rows.order_by(order[sort],'-vote_count','id')
-    page=Paginator(rows,20).get_page(request.GET.get('page'));page.object_list=display_movies(page.object_list)
-    return render(request,'pamk/browse.html',{'page':page,'q':q,'genres':Genre.objects.order_by('name'),'genre':genre,'sort':sort,
-        'total_movies':Movie.objects.count(),'filter_query':urlencode({'q':q,'genre':genre,'sort':sort})})
+    from .completion_views import unified_browse
+    return unified_browse(request)
 
 
 @login_required
 def assistant(request):
-    return render(request,'pamk/assistant.html')
+    initial={'trace_id':request.GET.get('trace_id'),'selected_identity':request.GET.get('identity')}
+    if initial['trace_id']:
+        try:
+            from uuid import UUID
+            tid=UUID(initial['trace_id'])
+        except ValueError:return JsonResponse({'error':'INVALID_TRACE_ID'},status=400)
+        if not RecommendationTrace.objects.filter(pk=tid,requester=request.user).exists():return JsonResponse({'error':'TRACE_NOT_FOUND'},status=404)
+    return render(request,'pamk/assistant.html',{'agent_initial':initial})
 
 
 def local_poster(request,filename):
@@ -106,13 +105,18 @@ def local_poster(request,filename):
 def add_display_metadata(result):
     ids=[x.get('django_movie_id') for x in result['recommendations'] if x.get('django_movie_id') is not None]
     movies={m.pk:m for m in Movie.objects.filter(pk__in=ids).prefetch_related('genres')}
+    research={r.canonical_movie_id:r for r in ResearchMovie.objects.filter(dataset__protocol='M3L_AUTHOR_ALIGNED_V1',canonical_movie_id__in=[x['canonical_movie_id'] for x in result['recommendations'] if x.get('canonical_movie_id') is not None])}
+    from .unified_catalogue import _metadata,resolve
     for item in result['recommendations']:
-        movie=movies.get(item.get('django_movie_id'))
+        cid=item.get('canonical_movie_id');movie=movies.get(item.get('django_movie_id'))
+        if cid is not None:item['identity']='m3l:'+str(cid)
+        else:item['identity']=resolve('business:'+str(item['django_movie_id'])).identity
         if movie:
             card=PageCatalogue.card(movie)
             item.update(poster_url=card.poster_url,genres=list(card.genres),summary=card.summary[:240],year=movie.date.year if movie.date else None)
         else:
-            item.update(poster_url=None,genres=[],summary='',year=None)
+            meta=_metadata(research[cid]) if cid in research else {'genres':[],'year':None,'summary':''}
+            item.update(poster_url=None,**meta)
     return result
 
 @never_cache
@@ -144,28 +148,27 @@ def movie_detail(request,pk):
     movie=get_object_or_404(Movie.objects.prefetch_related('genres','directors','regions'),pk=pk)
     display_movies([movie])
     rating=UserRating.objects.filter(user=request.user,movie=movie).values_list('score',flat=True).first()
-    return render(request,'pamk/detail.html',{'movie':movie,'my_rating':rating,'collected':Collect.objects.filter(user=request.user,movie=movie).exists()})
+    from .unified_catalogue import resolve
+    from .unified_feedback import feedback_for
+    film=resolve('business:'+str(pk));feedback=feedback_for(request.user,film)
+    return render(request,'pamk/detail.html',{'movie':movie,'my_rating':rating,'collected':Collect.objects.filter(user=request.user,movie=movie).exists(),'identity':film.identity,'feedback':feedback})
 
 @never_cache
 @login_required
 def research_detail(request,canonical_id):
-    movie=get_object_or_404(ResearchMovie,canonical_movie_id=canonical_id,dataset__protocol='M3L_AUTHOR_ALIGNED_V1')
-    return render(request,'pamk/detail.html',{'research_movie':movie})
+    from .completion_views import canonical_detail
+    return canonical_detail(request,canonical_id)
 
 @never_cache
 @login_required
 @require_POST
 def interaction(request,pk):
-    movie=get_object_or_404(Movie,pk=pk)
-    kind=request.POST.get('kind')
-    if kind=='rating':
-        try:score=float(request.POST['score'])
-        except (ValueError,KeyError):return JsonResponse({'error':'INVALID_SCORE'},status=400)
-        if not 0.5<=score<=5:return JsonResponse({'error':'INVALID_SCORE'},status=400)
-        UserRating.objects.update_or_create(user=request.user,movie=movie,defaults={'score':score})
-    elif kind=='collect':Collect.objects.get_or_create(user=request.user,movie=movie)
-    elif kind=='watched':MovieInteraction.objects.create(user=request.user,movie_id=pk,catalogue_model='myapp.Movie',kind=kind)
-    else:return JsonResponse({'error':'INVALID_INTERACTION'},status=400)
+    from .unified_feedback import write_feedback
+    try:
+        kind=request.POST.get('kind');score=float(request.POST['score']) if kind=='rating' else None
+        write_feedback(request.user,'business:'+str(pk),kind,score)
+    except (ValueError,KeyError):return JsonResponse({'error':'INVALID_SCORE'},status=400)
+    except RecommendationError as e:return JsonResponse({'error':e.code},status=e.status)
     return redirect(f'/movie/{pk}/')
 
 @never_cache

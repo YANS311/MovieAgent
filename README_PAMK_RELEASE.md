@@ -32,7 +32,7 @@ Web进程不导入PyTorch，Worker通过显式配置的独立Python启动，科�
 ## 推荐身份和回滚
 
 - 原生研究授权：PAMK-Net，固定科研用户参数，仅受控演示，不证明注册者与科研用户同一人。
-- 普通账户默认：PAMK-HistoryMean-v1；真实映射正反馈的物品Embedding均值，再经过冻结PAMK兼容评分。不是训练编码器。
+- 普通账户默认：PAMK-HistoryMean-v1；本人真实规范电影正反馈（含未匹配旧库电影）的物品Embedding均值，再经过冻结PAMK兼容评分。不是训练编码器。
 - 显式model_name=PAMK-Inductive-v1或配置PAMK_INDUCTIVE_STRATEGY=learned：已训练编码器；其真实内部留出效果低于均值方案，保留研究对照。
 - 空/全不可信历史：明确的METADATA_COLD_START或METADATA_PREFERENCE。
 - 回滚普通模型分流：先stop，把PAMK_INDUCTIVE_ENABLED设0，再start；恢复设1。研究原生路径仍须授权。原生产默认配置不变。
@@ -55,3 +55,21 @@ Web进程不导入PyTorch，Worker通过显式配置的独立Python启动，科�
 PAMK_POSTER_ROOT指向既有可信业务海报目录，必须是公开图片专用目录；只支持单层jpg/jpeg/png/webp文件。海报和数据库内容为外部资产，不伪造海报映射。缺图统一占位；未映射研究电影不借用业务海报。/assistant/仅支持“推荐电影”“查看来源”，真实调用同一推荐API，不声明LLM、RAG和知识图谱闭环。
 
 停止脚本根据私密状态文件中的源码路径与进程启动标识核验自身服务，允许发布版本切换时从另一交付检出执行stop；不能只杀端口上的任意服务。启动前检测端口，忙碌时保留旧状态。
+
+
+## 统一目录与原生工具Agent（2026-11-14）
+
+迁移0005增加规范/业务二择一反馈及会话、工具调用、待确认操作表，不重编号科研电影。
+`/depot/`与`/api/catalog/`统一检索；可信业务别名折叠为同一规范身份，未匹配或歧义对象使用`/research/movies/<cid>/`，ID 0有效。在线反馈不回写科研Train。
+`/history/`查看本人反馈；`/api/catalog/feedback/`保存规范身份交互并改变历史上下文缓存版本。
+
+`/assistant/`通过`/api/agent/`调用已有ToolRegistry的产品适配器。安装受控Ollama 0.17.7及配置中固定digest的qwen3:4b-instruct模型；不会自动下载。工具为search_movies、recommend_movies、explain_recommendation、update_preferences。原生工具选择至多两次规划、每次最多四个调用；无无限循环、无关键词伪装规划。偏好写入先创建10分钟有效的待确认动作，再由本人会话CSRF确认。解释限于所有者Trace事实，不输出因果KG结论。
+LLM与PAMK共享单机GPU；keep_alive=0及时释放LLM，首载延迟独立记录。该Agent是现有Registry上的产品适配器，不等同于验收了所有旧MAAN/RAG分支。
+
+本轮真实验收入口（均须独立数据库、登录测试账号、NEW_TEST_ACCESS=0）：
+```bash
+"$WEB" scripts/acceptance_completion.py --env "$ENV" --base http://127.0.0.1:8770
+"$WEB" scripts/acceptance_http.py --env "$ENV" --accounts /private/research-demo-accounts.json
+```
+前者实际使用本地LLM、MySQL和GPU，不属于Mock测试。无历史用户仍明确冷启动；PAMK-AV仍503。
+新空库明确使用utf8mb4_unicode_ci；复制既有独立库时继承Trace UUID列排序规则，避免新增外键类型不一致。目标非空时seed-from拒绝覆盖。只在临时测试库验证迁移逆向，已含新反馈的库不直接逆迁移。
