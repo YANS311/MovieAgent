@@ -44,6 +44,6 @@ Web进程不导入PyTorch，Worker通过显式配置的独立Python启动，科�
 `acceptance_http.py --env "$ENV" --accounts <private_synthetic_research_accounts.json>`创建合成普通账号并通过真实HTTP评分/模型/Trace验收。
 `acceptance_faults.py`仅供独立库和独占本地端口：测试缺失Worker、真实超时、独立MySQL代理断连/恢复、功能开关回滚；不关停真实MySQL、不故意耗尽GPU。
 测试会新增合成账户/Trace，不要对生产运行。私密测试账号文件不进Git。
-自动化回归用`manage_release.py --env <flag-off-unit-env> test research_recommendation.tests --noinput`，单元/契约含Mock，不能代替上述真实GPU验收。
+自动化回归用`manage_release.py --env <flag-off-unit-env> test research_recommendation.tests --settings=movie.release_test_settings --noinput`，单元/契约含Mock，不能代替上述真实GPU验收。
 
 当前范围是本机单Web进程＋串行单GPU Worker；完整Agent、公开部署、多进程GPU调度未验收。内部512用户留出继承冻结基座的Train信息，不是严格独立新用户泛化基准。

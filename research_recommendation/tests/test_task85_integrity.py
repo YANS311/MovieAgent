@@ -23,8 +23,8 @@ class Backend:
 class Task85IntegrityTests(TestCase):
     def setUp(self):
         cache.clear()
-        self.user=get_user_model().objects.create_user('task85-demo')
-        self.cold=get_user_model().objects.create_user('task85-cold')
+        self.user=get_user_model().objects.create_user('task85-demo', password='Synthetic-fixture-1', email='demo@example.invalid')
+        self.cold=get_user_model().objects.create_user('task85-cold', password='Synthetic-fixture-2', email='cold@example.invalid')
         self.profile=ResearchProfile.objects.create(dataset=M3L,canonical_user_id='0',display_name='Demo',profile_source='TRAIN_ONLY_AUDIT',train_manifest_sha256='a'*64)
         self.grant=ProfileGrant.objects.create(user=self.user,profile=self.profile)
         self.spec=ModelSpec('PAMK-Net',M3L,'b'*64,'v1','a'*64,'c'*64)
