@@ -1,0 +1,10 @@
+{
+  "version": "PAMK-Inductive-v1",
+  "checkpoint": "/path/to/inductive_best.pt",
+  "sha256": "6e3cc5be1d167d5d5d3e97de483c9579bcf87499cf358a62063b419b360f6b67",
+  "base_sha256": "f098c45c993ff10d365a5dc8b2314ef816a465af867861b691f444a719c81088",
+  "encoder_source_sha256": "7863da680c03dcdc16007e66ca0baa0a8c8fa36e14770898d9a4a6727eea83e4",
+  "best_epoch": 3,
+  "max_history": 20,
+  "NEW_TEST_ACCESS": 0
+}

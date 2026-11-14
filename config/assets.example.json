@@ -1,0 +1,130 @@
+{
+  "assets": {
+    "train_context_csr": {
+      "path": "/path/to/assets/TRAIN_CONTEXT_CSR.npz",
+      "sha256": "025d57fa6e9629425ce41da9e3f7bd6a032173919d82367acadf691cb7bb9b27",
+      "bytes": 11680610
+    },
+    "eval_train_history_ids": {
+      "path": "/path/to/assets/EVAL_TRAIN_HISTORY_IDS.npy",
+      "sha256": "60eeefed5ec82b8cf4362f5eeae6d3ca3294341d049bc717c78a3f76ce7125ee",
+      "bytes": 5590368
+    },
+    "parent24_checkpoint": {
+      "path": "/path/to/assets/best.pt",
+      "sha256": "b97feb824f427e6437f728459fbeb443af9b8bfdbba18ac33db8786007c33cd6",
+      "bytes": 144754626
+    },
+    "corrected_relation_evidence_cache": {
+      "path": "/path/to/assets/CORRECTED_RELATION_EVIDENCE_CACHE.pt",
+      "sha256": "3fecfca2faa9f49e8fbe1a8bb4cfd3e6d53d9768fc0cb69b62e193c7730d134b",
+      "bytes": 9285464
+    },
+    "entity_kernels": {
+      "path": "/path/to/assets/ENTITY_KERNELS.npy",
+      "sha256": "8e1efaa93f04ec59da07ae456739ea6b518d6300bf1b1bfec54faea3b5a57452",
+      "bytes": 1304943504
+    },
+    "train_background": {
+      "path": "/path/to/assets/TRAIN_BACKGROUND.npy",
+      "sha256": "44d90127dcb0a5c3a0aae717ebaba8e18af4cda041f7723ea33ccf41b1cdb38f",
+      "bytes": 289120
+    },
+    "mm_similarities": {
+      "path": "/path/to/assets/MM_SIMILARITIES.npy",
+      "sha256": "e11d77f58db6dcf4f8e49ee62d49d631e8ee81a4c3aab5e202e271920fcfdf77",
+      "bytes": 652471816
+    },
+    "text_minilm": {
+      "path": "/path/to/assets/text_minilm.npy",
+      "sha256": "a4de49d050839fb58cc75eb2f4381a35faa4f9493fa9729f4a32d0d8faa96ba4",
+      "bytes": 27743360
+    },
+    "image_clip_image": {
+      "path": "/path/to/assets/image_clip_image.npy",
+      "sha256": "94070bbb5826e2ac420e7ef2213b0a227c65c80ef11e8766bf3293e9200f3517",
+      "bytes": 36991104
+    },
+    "genre_item_ids": {
+      "path": "/path/to/assets/GENRE_ITEM_IDS.npy",
+      "sha256": "0c1f45c24a5a51eea95b67a9e2dc68e9a27717edcc4706b26a3daec694aecf9b",
+      "bytes": 578112
+    },
+    "genre_item_mask": {
+      "path": "/path/to/assets/GENRE_ITEM_MASK.npy",
+      "sha256": "038404c8d32c5e17517d3df4d39184f095ff8c0645813269b73e174aea20e052",
+      "bytes": 72376
+    },
+    "train_user": {
+      "path": "/path/to/assets/train_user.npy",
+      "sha256": "7620eea4f28052a0d5ec822acb2676a6262be96220dc4907393324c9a9ca1e54",
+      "bytes": 30111756
+    },
+    "train_item": {
+      "path": "/path/to/assets/train_item.npy",
+      "sha256": "fa2ce14ff4c2b64b3bfcc76fde95882eac74e878d4e9034793b94e5ca03e0266",
+      "bytes": 30111756
+    }
+  },
+  "checkpoint": {
+    "path": "/path/to/pamk_full_best.pt",
+    "sha256": "f098c45c993ff10d365a5dc8b2314ef816a465af867861b691f444a719c81088"
+  },
+  "model_config": {
+    "project": "chapter4_agy_frontier_2024_2026",
+    "git_branch": "agy/chapter4-frontier-2024-2026",
+    "new_test_access": 0,
+    "seed": 2024,
+    "selection_metric": "validation_recall@20",
+    "data_contract": {
+      "n_users": 69878,
+      "n_items": 9031,
+      "train_interactions": 7527907,
+      "validation_interactions": 940988,
+      "validation_users": 68324
+    },
+    "frozen_sha256": {
+      "train_context_csr": "025d57fa6e9629425ce41da9e3f7bd6a032173919d82367acadf691cb7bb9b27",
+      "eval_train_history_ids": "60eeefed5ec82b8cf4362f5eeae6d3ca3294341d049bc717c78a3f76ce7125ee",
+      "parent24_checkpoint": "b97feb824f427e6437f728459fbeb443af9b8bfdbba18ac33db8786007c33cd6",
+      "corrected_relation_evidence_cache": "3fecfca2faa9f49e8fbe1a8bb4cfd3e6d53d9768fc0cb69b62e193c7730d134b",
+      "entity_kernels": "8e1efaa93f04ec59da07ae456739ea6b518d6300bf1b1bfec54faea3b5a57452",
+      "train_background": "44d90127dcb0a5c3a0aae717ebaba8e18af4cda041f7723ea33ccf41b1cdb38f",
+      "mm_similarities": "e11d77f58db6dcf4f8e49ee62d49d631e8ee81a4c3aab5e202e271920fcfdf77",
+      "text_minilm": "a4de49d050839fb58cc75eb2f4381a35faa4f9493fa9729f4a32d0d8faa96ba4",
+      "image_clip_image": "94070bbb5826e2ac420e7ef2213b0a227c65c80ef11e8766bf3293e9200f3517",
+      "genre_item_ids": "0c1f45c24a5a51eea95b67a9e2dc68e9a27717edcc4706b26a3daec694aecf9b",
+      "genre_item_mask": "038404c8d32c5e17517d3df4d39184f095ff8c0645813269b73e174aea20e052",
+      "train_user": "7620eea4f28052a0d5ec822acb2676a6262be96220dc4907393324c9a9ca1e54",
+      "train_item": "fa2ce14ff4c2b64b3bfcc76fde95882eac74e878d4e9034793b94e5ca03e0266"
+    },
+    "hyperparameters": {
+      "hidden_dim": 256,
+      "kg_dim": 64,
+      "stream_dim": 64,
+      "gate_hidden_dim": 32,
+      "select_temperature": 0.5,
+      "shrinkage_tau0": 20.0,
+      "zscore_clip": 5.0,
+      "graph_topk": 16,
+      "batch_size": 8192,
+      "learning_rate": 0.001,
+      "weight_decay": 0.0,
+      "gradient_clip_norm": 5.0,
+      "max_epochs": 15,
+      "patience": 3,
+      "eval_user_batch": 128,
+      "eval_item_chunk": 1024
+    },
+    "variants": [
+      "pamk_full",
+      "scma_backup",
+      "pamk_wo_select",
+      "pamk_wo_debias",
+      "pamk_graph_r3",
+      "equal_param_null_ctrl"
+    ]
+  },
+  "parent_source_sha256": "8014ee3e877a705f76df80f28ad92a42e6cbcff7c713d9cc8e199fa6251bf6d3",
+  "NEW_TEST_ACCESS": 0
+}

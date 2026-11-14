@@ -58,6 +58,16 @@ INSTALLED_APPS = [
 
 ]
 
+# Task57 candidate is disabled by default. Enabling requires reviewed manifests,
+# a verified backend and a separately authorized migration/deployment plan.
+TASK57_RECOMMENDATION_MVP_ENABLED = False
+PAMK_PRODUCT_ENABLED = os.environ.get('PAMK_PRODUCT_ENABLED') == '1'
+PAMK_INDUCTIVE_AVAILABLE = os.environ.get('PAMK_INDUCTIVE_AVAILABLE') == '1'
+PAMK_INDUCTIVE_ENABLED = os.environ.get('PAMK_INDUCTIVE_ENABLED') == '1'
+PAMK_INDUCTIVE_MANIFEST = os.environ.get('PAMK_INDUCTIVE_MANIFEST', '')
+if TASK57_RECOMMENDATION_MVP_ENABLED or PAMK_PRODUCT_ENABLED:
+    INSTALLED_APPS.append('research_recommendation')
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -194,3 +204,7 @@ REDIS_ANALYTICS_ENABLED = False
 REDIS_ANALYTICS_URL = None
 REDIS_ANALYTICS_WEIGHTS = {"click": 1, "like": 3, "collect": 5, "skip": 0, "dislike": 0, "share": 2}
 REDIS_ANALYTICS_STREAM_CAPACITY = 100000
+
+# Only the opt-in native PAMK product routes need the private response policy.
+if PAMK_PRODUCT_ENABLED:
+    MIDDLEWARE.insert(0, 'research_recommendation.product_middleware.PrivateProductResponseMiddleware')

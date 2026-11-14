@@ -1,0 +1,9 @@
+# Web process only. Torch runs in the existing independently provisioned ML worker.
+Django==5.2.7
+django-redis==6.0.0
+django-select2==8.4.8
+mysqlclient==2.3.1
+Pillow==13.0.0
+python-dotenv==1.2.4
+requests==2.34.2
+numpy==2.5.4

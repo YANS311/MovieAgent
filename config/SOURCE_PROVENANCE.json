@@ -1,0 +1,23 @@
+{
+  "source_engineering_head": "9b2455f02024746258dd37c21956610975097263",
+  "source_engineering_branch": "feat/ch5-inductive-pamk-20261113",
+  "scientific_sources": [
+    {
+      "filename": "pamk_model.py",
+      "sha256": "8d5d3381d93e425314894737a5c8e838623ee76363066e464d52ffba9588a1e1",
+      "bundled_unchanged": true
+    },
+    {
+      "filename": "context_engine.py",
+      "sha256": "9406e58aaf69af5fd7bf29fcbb20aba5b7b34e83780f6faac11b677120d07faa",
+      "bundled_unchanged": true
+    },
+    {
+      "filename": "canonical_skbhif_final.py",
+      "sha256": "8014ee3e877a705f76df80f28ad92a42e6cbcff7c713d9cc8e199fa6251bf6d3",
+      "bundled_unchanged": true
+    }
+  ],
+  "asset_loader": "Portable inference-only copy; original parent constructor/forward and context/PAMK source unmodified",
+  "NEW_TEST_ACCESS": 0
+}

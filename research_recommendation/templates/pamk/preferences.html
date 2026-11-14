@@ -1,0 +1,1 @@
+{% extends 'pamk/base.html' %}{% block content %}<h1>我的电影偏好</h1><p>偏好和真实评分用于业务元数据推荐；不会为账号分配其他研究用户的模型向量。</p><form method="post" class="panel">{% csrf_token %}{% for genre in genres %}<label><input type="checkbox" name="genres" value="{{ genre }}" {% if genre in selected %}checked{% endif %}>{{ genre }}</label>{% endfor %}<p><button>保存偏好</button></p></form>{% endblock %}

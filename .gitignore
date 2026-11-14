@@ -89,3 +89,8 @@ staticfiles/
 # ── OS ─────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+
+# Local-only release inputs and credentials
+runtime/
+*.local.json
+.release.env

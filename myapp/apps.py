@@ -8,6 +8,9 @@ class MyappConfig(AppConfig):
     name = 'myapp'
 
     def ready(self):
+        from django.conf import settings
+        if getattr(settings, 'PAMK_PRODUCT_ENABLED', False):
+            return  # GPU inference belongs to the separate PAMK worker.
         """
         [系统启动预热脚本]
         目标：消除所有首屏加载延迟 (Cold Start Latency)
