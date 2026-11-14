@@ -217,4 +217,3 @@ class PAMKAVAdapter(CheckpointAdapter):
         if self.backend is None:
             raise RecommendationError('PAMK_AV_INFERENCE_PENDING_VERIFICATION', 503)
         return super().infer(profile, top_k)
-
