@@ -1,6 +1,12 @@
 """Actual product routes using native accounts, movies and persistent traces."""
 import json
 import time
+from urllib.parse import urlencode
+from pathlib import Path
+from django.conf import settings
+from django.http import Http404
+from django.views.static import serve
+from .page_catalogue import PageCatalogue
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -44,10 +50,70 @@ def register(request):
 def account_logout(request):
     logout(request);return redirect('/login/')
 
+def display_movies(rows):
+    rows=list(rows)
+    for movie in rows:
+        movie.display_poster=PageCatalogue.card(movie).poster_url
+    return rows
+
+
+def home(request):
+    qs=Movie.objects.all()
+    popular=list(qs.order_by('-vote_count','id')[:8])
+    high=list(qs.filter(score__isnull=False).order_by('-score','-vote_count','id')[:8])
+    groups=[]
+    for title,unit,items,field in [('热门电影','评分人数',popular,'vote_count'),('高分佳作','目录评分',high,'score')]:
+        maximum=max([float(getattr(m,field) or 0) for m in items]+[1])
+        groups.append({'title':title,'unit':unit,'rows':[{'movie':m,'value':getattr(m,field),'width':round(100*float(getattr(m,field) or 0)/maximum,1)} for m in items]})
+    return render(request,'pamk/home.html',{'movie_count':qs.count(),'genre_count':Genre.objects.count(),
+        'my_rating_count':UserRating.objects.filter(user=request.user).count() if request.user.is_authenticated else 0,
+        'featured':display_movies(qs.prefetch_related('genres').filter(score__isnull=False).order_by('-vote_count','id')[:10]),'chart_groups':groups})
+
+
+def rankings(request):
+    mode=request.GET.get('mode','popular')
+    choices={'popular':('-vote_count','热门电影榜'),'score':('-score','高分电影榜'),'recent':('-date','新片上映榜')}
+    if mode not in choices:mode='popular'
+    order,heading=choices[mode]
+    rows=Movie.objects.prefetch_related('genres').order_by(order,'-vote_count','id')[:20]
+    return render(request,'pamk/rankings.html',{'mode':mode,'heading':heading,'rows':display_movies(rows)})
+
+
 def browse(request):
-    q=request.GET.get('q','')[:200]
-    rows=Movie.objects.filter(title__icontains=q).order_by('-score','-vote_count','id')
-    return render(request,'pamk/browse.html',{'page':Paginator(rows,24).get_page(request.GET.get('page')), 'q':q})
+    q=request.GET.get('q','')[:200];genre=request.GET.get('genre','')[:20];sort=request.GET.get('sort','score')
+    order={'score':'-score','popular':'-vote_count','recent':'-date'}
+    if sort not in order:sort='score'
+    rows=Movie.objects.filter(title__icontains=q).prefetch_related('genres')
+    if genre.isdecimal():rows=rows.filter(genres__pk=int(genre)).distinct()
+    else:genre=''
+    rows=rows.order_by(order[sort],'-vote_count','id')
+    page=Paginator(rows,20).get_page(request.GET.get('page'));page.object_list=display_movies(page.object_list)
+    return render(request,'pamk/browse.html',{'page':page,'q':q,'genres':Genre.objects.order_by('name'),'genre':genre,'sort':sort,
+        'total_movies':Movie.objects.count(),'filter_query':urlencode({'q':q,'genre':genre,'sort':sort})})
+
+
+@login_required
+def assistant(request):
+    return render(request,'pamk/assistant.html')
+
+
+def local_poster(request,filename):
+    # The isolated release only serves public image files from an explicitly configured directory.
+    if Path(filename).name!=filename or Path(filename).suffix.lower() not in ('.jpg','.jpeg','.png','.webp'):raise Http404
+    return serve(request,filename,document_root=settings.PAMK_POSTER_ROOT)
+
+
+def add_display_metadata(result):
+    ids=[x.get('django_movie_id') for x in result['recommendations'] if x.get('django_movie_id') is not None]
+    movies={m.pk:m for m in Movie.objects.filter(pk__in=ids).prefetch_related('genres')}
+    for item in result['recommendations']:
+        movie=movies.get(item.get('django_movie_id'))
+        if movie:
+            card=PageCatalogue.card(movie)
+            item.update(poster_url=card.poster_url,genres=list(card.genres),summary=card.summary[:240],year=movie.date.year if movie.date else None)
+        else:
+            item.update(poster_url=None,genres=[],summary='',year=None)
+    return result
 
 @never_cache
 @login_required
@@ -64,7 +130,7 @@ def recommendation_api(request):
     try:
         if len(request.body)>8192:raise RecommendationError('REQUEST_TOO_LARGE',413)
         data=json.loads(request.body)
-        result=recommend(request.user,data)
+        result=add_display_metadata(recommend(request.user,data))
         result['server_total_seconds']=time.monotonic()-start
         return JsonResponse(result,json_dumps_params={'ensure_ascii':False,'allow_nan':False})
     except (json.JSONDecodeError,UnicodeDecodeError):
@@ -75,8 +141,10 @@ def recommendation_api(request):
 @never_cache
 @login_required
 def movie_detail(request,pk):
-    movie=get_object_or_404(Movie,pk=pk)
-    return render(request,'pamk/detail.html',{'movie':movie})
+    movie=get_object_or_404(Movie.objects.prefetch_related('genres','directors','regions'),pk=pk)
+    display_movies([movie])
+    rating=UserRating.objects.filter(user=request.user,movie=movie).values_list('score',flat=True).first()
+    return render(request,'pamk/detail.html',{'movie':movie,'my_rating':rating,'collected':Collect.objects.filter(user=request.user,movie=movie).exists()})
 
 @never_cache
 @login_required
@@ -118,3 +186,9 @@ def preferences(request):
 def trace(request,trace_id):
     obj=get_object_or_404(RecommendationTrace,pk=trace_id,requester=request.user)
     return JsonResponse(obj.provenance,json_dumps_params={'ensure_ascii':False})
+
+@never_cache
+@login_required
+def trace_page(request,trace_id):
+    obj=get_object_or_404(RecommendationTrace,pk=trace_id,requester=request.user)
+    return render(request,'pamk/trace.html',{'p':obj.provenance,'trace_id':str(obj.pk),'provenance_json':json.dumps(obj.provenance,ensure_ascii=False,indent=2)})

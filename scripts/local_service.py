@@ -11,7 +11,7 @@ runtime=config.parent;runtime.mkdir(parents=True,exist_ok=True);state=runtime/f'
 def readstate():return json.loads(state.read_text()) if state.exists() else {}
 def valid(info):
  pid=info.get('pid');q=Path('/proc')/str(pid)
- try:return q.exists() and str(Path(__file__).resolve()) in (q/'cmdline').read_text().replace('\0',' ') and (q/'stat').read_text().split()[21]==info['start_ticks']
+ try:return q.exists() and str(Path(info['source'])/'scripts/local_service.py') in (q/'cmdline').read_text().replace('\0',' ') and (q/'stat').read_text().split()[21]==info['start_ticks']
  except (OSError,KeyError):return False
 def mysql():
  import MySQLdb
@@ -63,6 +63,11 @@ elif a.action=='start':
  print('STARTED',proc.pid,'log',log)
 else:
  if valid(readstate()):raise SystemExit('ALREADY_RUNNING')
+ import socket
+ with socket.socket() as probe:
+  probe.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+  try:probe.bind(('127.0.0.1',a.port))
+  except OSError:raise SystemExit('PORT_BUSY_STATE_NOT_CHANGED')
  pid=os.getpid();state.write_text(json.dumps({'pid':pid,'start_ticks':Path('/proc',str(pid),'stat').read_text().split()[21],'source':str(ROOT),'port':a.port,'database':db,'strategy':env.get('PAMK_INDUCTIVE_STRATEGY','mean')},indent=2));state.chmod(0o600)
  proc=subprocess.Popen([web,'-B',str(ROOT/'manage.py'),'runserver',f'127.0.0.1:{a.port}','--noreload'],env=env,cwd=ROOT)
  def stop(*_):raise KeyboardInterrupt

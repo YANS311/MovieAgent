@@ -47,3 +47,11 @@ Web进程不导入PyTorch，Worker通过显式配置的独立Python启动，科�
 自动化回归用`manage_release.py --env <flag-off-unit-env> test research_recommendation.tests --settings=movie.release_test_settings --noinput`，单元/契约含Mock，不能代替上述真实GPU验收。
 
 当前范围是本机单Web进程＋串行单GPU Worker；完整Agent、公开部署、多进程GPU调度未验收。内部512用户留出继承冻结基座的Train信息，不是严格独立新用户泛化基准。
+
+## 前端与静态资源
+
+新本地入口包含紫色主题首页、/rankings/榜单、/depot/类型筛选与分页、电影详情反馈、海报推荐卡片、Trace可视页和/assistant/受限工具命令界面。静态CSS/JS/SVG随Git固定，无CDN依赖；本地URLconf仅在loopback release settings中使用Django静态视图，不作为公开生产静态方案。
+
+PAMK_POSTER_ROOT指向既有可信业务海报目录，必须是公开图片专用目录；只支持单层jpg/jpeg/png/webp文件。海报和数据库内容为外部资产，不伪造海报映射。缺图统一占位；未映射研究电影不借用业务海报。/assistant/仅支持“推荐电影”“查看来源”，真实调用同一推荐API，不声明LLM、RAG和知识图谱闭环。
+
+停止脚本根据私密状态文件中的源码路径与进程启动标识核验自身服务，允许发布版本切换时从另一交付检出执行stop；不能只杀端口上的任意服务。启动前检测端口，忙碌时保留旧状态。

@@ -27,6 +27,7 @@ CACHES={'default':{'BACKEND':'django_redis.cache.RedisCache','LOCATION':os.envir
 AUTH_PASSWORD_VALIDATORS=[{'NAME':'django.contrib.auth.password_validation.MinimumLengthValidator'}]
 LANGUAGE_CODE='zh-hans';TIME_ZONE='Asia/Singapore';USE_TZ=True;USE_I18N=True
 STATIC_URL='/static/';MEDIA_URL='/media/';MEDIA_ROOT=BASE_DIR/'media'
+PAMK_POSTER_ROOT=Path(os.environ.get('PAMK_POSTER_ROOT', str(MEDIA_ROOT/'posters')))
 DEFAULT_AUTO_FIELD='django.db.models.BigAutoField';LOGIN_URL='/login/'
 REDIS_ANALYTICS_ENABLED=False
 LOGGING={'version':1,'disable_existing_loggers':False,'handlers':{'console':{'class':'logging.StreamHandler'}},'loggers':{'django.server':{'handlers':['console'],'level':'INFO','propagate':False},'django.request':{'handlers':['console'],'level':'ERROR','propagate':False}}}
