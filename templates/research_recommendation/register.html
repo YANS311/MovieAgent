@@ -1,0 +1,11 @@
+{% extends 'research_recommendation/auth_base.html' %}
+{% block title %}注册 · 映界{% endblock %}
+{% block page_class %}auth-page register-page{% endblock %}
+{% block content %}
+<section class="login-panel" aria-labelledby="register-heading">
+  <div class="auth-heading"><span class="auth-mark" aria-hidden="true">映</span><h1 id="register-heading">注册普通用户</h1><p>保存你的电影偏好，开始探索</p></div>
+  <form method="post">{% csrf_token %}{{ form.as_p }}<button class="btn btn-primary btn-block" type="submit">注册</button></form>
+  <p class="auth-switch"><a href="{% url 'research_pages:login' %}">已有账号，去登录</a></p>
+  <p class="muted login-note">使用 Django 账号保存电影偏好，不会绑定研究数据集用户。</p>
+</section>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends 'research_recommendation/base.html' %}{% block title %}我的偏好 · 映界{% endblock %}{% block content %}
+<h1>选择电影偏好</h1><p>选择喜欢的类型，或从<a href="{% url 'research_pages:movies' %}">影片库</a>进入电影详情点击“感兴趣”。也可填写详情中的业务电影ID。</p>
+<p>偏好仅供当前账号的冷启动类型匹配使用，可留空并探索目录。</p>
+<form method="post">{% csrf_token %}{{ form.as_p }}<button class="btn btn-primary" type="submit">保存偏好</button></form>
+{% if selected_movies %}<h2>已选电影</h2>{% for movie in selected_movies %}<p><a href="{% url 'research_pages:detail' movie.id %}">{{ movie.title }}</a>（{{ movie.id }}）</p>{% endfor %}{% endif %}
+<p><a href="{% url 'research_pages:personal' %}">返回我的推荐</a></p>{% endblock %}

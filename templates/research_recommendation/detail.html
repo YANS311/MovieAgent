@@ -1,0 +1,38 @@
+{% extends 'research_recommendation/base.html' %}{% load static %}
+{% block title %}{{ movie.title }} · 电影详情{% endblock %}
+{% block content %}
+<a class="back-link" href="{% url 'research_pages:movies' %}">← 返回影片库</a>
+<article class="movie-detail"><div class="detail-poster">
+{% if detail_poster_url %}<img src="{{ detail_poster_url }}" alt="{{ movie.title }}海报" referrerpolicy="no-referrer">{% else %}<div class="poster-empty"><span class="film-symbol" aria-hidden="true">▤</span><span>暂无海报</span></div>{% endif %}
+</div><div class="detail-copy"><p class="eyebrow">MOVIE DETAILS</p><h1>{{ movie.title }}</h1>
+<div class="genre-list">{% for genre in movie.genres %}<span>{{ genre }}</span>{% empty %}<span>类型暂缺</span>{% endfor %}</div>
+<h2>电影简介</h2><p class="summary-text">{{ movie.summary|default:extended.summary|default:'当前数据源未提供简介。' }}</p>
+<dl class="source-list"><dt>导演</dt><dd id="movie-directors">{% for name in extended.directors %}{{ name }}{% if not forloop.last %}、{% endif %}{% empty %}当前可信资料未提供导演。{% endfor %}</dd>
+<dt>演员</dt><dd id="movie-actors">{% for name in extended.actors %}{{ name }}{% if not forloop.last %}、{% endif %}{% empty %}当前可信资料未提供演员。{% endfor %}</dd>
+<dt>业务电影ID</dt><dd>{{ movie.id }}</dd><dt>MovieLens标识</dt><dd>{{ movie.source_movie_id|default:'未提供' }}</dd>
+<dt>资料状态</dt><dd>{{ extended.status }}</dd></dl>
+<p class="muted">电影简介、海报及演职员为公开目录资料，不作为本次模型评分的因果解释。</p>
+<a class="btn btn-primary" href="{% url 'research_pages:recommend' %}">进入UKMAP研究推荐</a></div></article>
+<section class="detail-section" id="knowledge-relations"><h2>可核验的图谱关系</h2>
+<p>电影—类型关系来自MovieLens公开资料。其他图谱关系尚未开放展示。</p>
+{% if extended.kg_relations %}<ul>{% for relation in extended.kg_relations %}<li>MovieLens {{ movie.source_movie_id }} → {{ relation.relation }} → {{ relation.entity_name }} <span class="muted">（{{ relation.provenance }}，源行{{ relation.source_line }}）</span></li>{% endfor %}</ul>
+{% else %}<p>当前没有可展示的已核验图谱关系。</p>{% endif %}
+{% if extended.sources %}<details><summary>资料来源与核验标识</summary><dl class="source-list">
+<dt>公开电影资料快照 SHA256</dt><dd>{{ extended.sources.public_snapshot_sha256 }}</dd>
+<dt>电影桥接依据 SHA256</dt><dd>{{ extended.sources.reviewed_bridge_sha256 }}</dd>
+<dt>图谱关系来源 SHA256</dt><dd>{{ extended.sources.canonical_edges_sha256 }}</dd>
+</dl></details>{% endif %}</section>
+<section class="detail-section" id="recommendation-origin"><h2>本次打开的推荐来源</h2>
+{% if trace_context %}<p>以下为已保存推荐Trace中的事实。查看详情与解释不重新评分，不改变排名。</p>
+<dl class="source-list" id="detail-provenance"><dt>推荐来源</dt><dd>{{ trace_context.source_type }}{% if trace_context.model_name %} · {{ trace_context.model_name }}{% endif %}</dd>
+<dt>原始排名</dt><dd id="original-rank">{{ trace_context.original_rank }}</dd><dt>原始分数</dt><dd id="original-score">{{ trace_context.original_score_text }}</dd>
+<dt>候选范围</dt><dd>{{ trace_context.candidate_scope }}</dd><dt>Trace ID</dt><dd>{{ trace_context.trace_id }}</dd>
+{% if trace_context.checkpoint_identity %}<dt>Checkpoint SHA256</dt><dd>{{ trace_context.checkpoint_identity }}</dd>{% endif %}
+{% if trace_context.source_reference %}<dt>模型执行记录</dt><dd>{{ trace_context.source_reference }}</dd>{% endif %}</dl>
+{% if trace_context.record_url %}<p><a href="{{ trace_context.record_url }}">查看原始推荐列表</a> · <a href="{{ trace_context.json_url }}">查看Trace JSON</a></p>{% endif %}
+<form id="trace-explanation-form" data-endpoint="{% url 'research_pages:explain' %}" data-trace-id="{{ trace_context.trace_id }}" data-movie-id="{{ movie.id }}">{% csrf_token %}<button class="btn btn-primary" type="submit">查看可核验的推荐解释</button></form>
+<p id="trace-explanation-status" role="status">依据Trace事实生成确定性解释，未启用真实LLM生成。</p><div id="trace-explanation-output" class="summary-text" aria-live="polite"></div>
+{% else %}<p>本页未指定推荐Trace。可从你的推荐列表进入，以核对该次记录的原始排名与分数。</p>{% endif %}</section>
+{% if user.is_authenticated %}<section class="detail-section"><h2>我的电影交互</h2><form method="post" action="{% url 'research_pages:interaction' movie.id %}">{% csrf_token %}{% if personal_trace %}<input type="hidden" name="personal_trace" value="{{ personal_trace.id }}">{% endif %}<button class="btn btn-primary" name="kind" value="interested" type="submit">感兴趣，加入偏好</button> <button class="btn btn-default" name="kind" value="watched" type="submit">记录看过</button></form><p><a href="{% url 'research_pages:personal' %}">返回我的推荐</a></p></section>{% else %}<p><a href="{% url 'research_pages:login' %}?next={{ request.path|urlencode }}">登录以保存电影交互</a></p>{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'research_recommendation/detail.js' %}" defer></script>{% endblock %}

@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "browser_checks_main": 65,
+  "browser_checks_supplement": 8,
+  "total_checks": 73,
+  "frontend_page_errors": [],
+  "static_responses": 144,
+  "static_404": 0,
+  "served_css_sha256": "299fd38b229e7c19af7a4492d3d13289d5f16d107731a51bc64accdd65a9c844",
+  "served_navigation_sha256": "c3e556d3eab947bae1a37c7379e865903770e41885eaf81551911cae353be7da",
+  "protected_business_fields_equal": {
+    "users": true,
+    "preferences": true,
+    "traces": true,
+    "movie_ids": true,
+    "grants": true
+  },
+  "interaction_count_before": 3,
+  "interaction_count_after": 4,
+  "original_trace_order_and_scores_preserved": true,
+  "trace_id": "0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+  "web_image": "sha256:31fa60513423a1e36dde3db244c42331a49384266dc287b02a7981ad02f2aff6",
+  "new_test_access": 0
+}

@@ -1,0 +1,330 @@
+{
+  "completed": true,
+  "checks": [
+    {
+      "name": "medium_nav_no_overlap_900",
+      "pass": true,
+      "detail": {
+        "brand": {
+          "left": 32,
+          "right": 144.015625,
+          "top": 11.578125,
+          "bottom": 60.421875
+        },
+        "nav": {
+          "left": 160.015625,
+          "right": 437.09375,
+          "top": 3.28125,
+          "bottom": 68.71875
+        },
+        "account": {
+          "left": 727.984375,
+          "right": 868,
+          "top": 24.09375,
+          "bottom": 47.890625
+        },
+        "w": 900,
+        "scroll": 900
+      }
+    },
+    {
+      "name": "medium_nav_no_overlap_1024",
+      "pass": true,
+      "detail": {
+        "brand": {
+          "left": 32,
+          "right": 144.015625,
+          "top": 11.578125,
+          "bottom": 60.421875
+        },
+        "nav": {
+          "left": 160.015625,
+          "right": 437.09375,
+          "top": 3.28125,
+          "bottom": 68.71875
+        },
+        "account": {
+          "left": 851.984375,
+          "right": 992,
+          "top": 24.09375,
+          "bottom": 47.890625
+        },
+        "w": 1024,
+        "scroll": 1024
+      }
+    },
+    {
+      "name": "twenty_bound_ranked_results",
+      "pass": true
+    },
+    {
+      "name": "mobile_menu_escape_returns_focus",
+      "pass": true
+    },
+    {
+      "name": "register_scroll_button_accessible_1440",
+      "pass": true,
+      "detail": {
+        "w": 1440,
+        "h": 768,
+        "scroll": 1440,
+        "button": {
+          "x": 520,
+          "y": 720.625,
+          "width": 400,
+          "height": 47,
+          "top": 720.625,
+          "right": 920,
+          "bottom": 767.625,
+          "left": 520
+        }
+      }
+    },
+    {
+      "name": "register_scroll_button_accessible_1366",
+      "pass": true,
+      "detail": {
+        "w": 1366,
+        "h": 768,
+        "scroll": 1366,
+        "button": {
+          "x": 483,
+          "y": 720.625,
+          "width": 400,
+          "height": 47,
+          "top": 720.625,
+          "right": 883,
+          "bottom": 767.625,
+          "left": 483
+        }
+      }
+    },
+    {
+      "name": "register_scroll_button_accessible_390",
+      "pass": true,
+      "detail": {
+        "w": 390,
+        "h": 667,
+        "scroll": 390,
+        "button": {
+          "x": 41,
+          "y": 468.96875,
+          "width": 308,
+          "height": 47,
+          "top": 468.96875,
+          "right": 349,
+          "bottom": 515.96875,
+          "left": 41
+        }
+      }
+    },
+    {
+      "name": "register_scroll_button_accessible_375",
+      "pass": true,
+      "detail": {
+        "w": 375,
+        "h": 667,
+        "scroll": 375,
+        "button": {
+          "x": 41,
+          "y": 448.96875,
+          "width": 293,
+          "height": 47,
+          "top": 448.96875,
+          "right": 334,
+          "bottom": 495.96875,
+          "left": 41
+        }
+      }
+    }
+  ],
+  "traceURL": "http://127.0.0.1:18072/cinema/personal/traces/0bd9ded5-57d2-4a52-89ad-a62b4ef58185/",
+  "rows": [
+    {
+      "rank": 1,
+      "title": "Toy Story",
+      "href": "/cinema/movies/75425/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：2（非模型预测评分）"
+    },
+    {
+      "rank": 2,
+      "title": "Jumanji",
+      "href": "/cinema/movies/75426/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：2（非模型预测评分）"
+    },
+    {
+      "rank": 3,
+      "title": "Tom and Huck",
+      "href": "/cinema/movies/75432/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：2（非模型预测评分）"
+    },
+    {
+      "rank": 4,
+      "title": "GoldenEye",
+      "href": "/cinema/movies/75434/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：2（非模型预测评分）"
+    },
+    {
+      "rank": 5,
+      "title": "Balto",
+      "href": "/cinema/movies/75437/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：2（非模型预测评分）"
+    },
+    {
+      "rank": 6,
+      "title": "Cutthroat Island",
+      "href": "/cinema/movies/75439/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：2（非模型预测评分）"
+    },
+    {
+      "rank": 7,
+      "title": "Ace Ventura: When Nature Calls",
+      "href": "/cinema/movies/75443/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：2（非模型预测评分）"
+    },
+    {
+      "rank": 8,
+      "title": "Assassins",
+      "href": "/cinema/movies/75447/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：2（非模型预测评分）"
+    },
+    {
+      "rank": 9,
+      "title": "Waterworld",
+      "href": "/cinema/movies/75631/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：2（非模型预测评分）"
+    },
+    {
+      "rank": 10,
+      "title": "Cliffhanger",
+      "href": "/cinema/movies/75855/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：2（非模型预测评分）"
+    },
+    {
+      "rank": 11,
+      "title": "Dances with Wolves",
+      "href": "/cinema/movies/76011/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：2（非模型预测评分）"
+    },
+    {
+      "rank": 12,
+      "title": "Grumpier Old Men",
+      "href": "/cinema/movies/75427/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：0（非模型预测评分）"
+    },
+    {
+      "rank": 13,
+      "title": "Waiting to Exhale",
+      "href": "/cinema/movies/75428/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：0（非模型预测评分）"
+    },
+    {
+      "rank": 14,
+      "title": "Father of the Bride Part II",
+      "href": "/cinema/movies/75429/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：0（非模型预测评分）"
+    },
+    {
+      "rank": 15,
+      "title": "Heat",
+      "href": "/cinema/movies/75430/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：0（非模型预测评分）"
+    },
+    {
+      "rank": 16,
+      "title": "Sudden Death",
+      "href": "/cinema/movies/75433/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：0（非模型预测评分）"
+    },
+    {
+      "rank": 17,
+      "title": "American President, The",
+      "href": "/cinema/movies/75435/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：0（非模型预测评分）"
+    },
+    {
+      "rank": 18,
+      "title": "Dracula: Dead and Loving It",
+      "href": "/cinema/movies/75436/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：0（非模型预测评分）"
+    },
+    {
+      "rank": 19,
+      "title": "Nixon",
+      "href": "/cinema/movies/75438/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：0（非模型预测评分）"
+    },
+    {
+      "rank": 20,
+      "title": "Casino",
+      "href": "/cinema/movies/75440/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "score": "类型匹配分：0（非模型预测评分）"
+    }
+  ],
+  "registration": [
+    {
+      "width": 1440,
+      "w": 1440,
+      "h": 768,
+      "scroll": 1440,
+      "button": {
+        "x": 520,
+        "y": 720.625,
+        "width": 400,
+        "height": 47,
+        "top": 720.625,
+        "right": 920,
+        "bottom": 767.625,
+        "left": 520
+      }
+    },
+    {
+      "width": 1366,
+      "w": 1366,
+      "h": 768,
+      "scroll": 1366,
+      "button": {
+        "x": 483,
+        "y": 720.625,
+        "width": 400,
+        "height": 47,
+        "top": 720.625,
+        "right": 883,
+        "bottom": 767.625,
+        "left": 483
+      }
+    },
+    {
+      "width": 390,
+      "w": 390,
+      "h": 667,
+      "scroll": 390,
+      "button": {
+        "x": 41,
+        "y": 468.96875,
+        "width": 308,
+        "height": 47,
+        "top": 468.96875,
+        "right": 349,
+        "bottom": 515.96875,
+        "left": 41
+      }
+    },
+    {
+      "width": 375,
+      "w": 375,
+      "h": 667,
+      "scroll": 375,
+      "button": {
+        "x": 41,
+        "y": 448.96875,
+        "width": 293,
+        "height": 47,
+        "top": 448.96875,
+        "right": 334,
+        "bottom": 495.96875,
+        "left": 41
+      }
+    }
+  ]
+}

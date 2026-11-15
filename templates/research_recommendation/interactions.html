@@ -1,0 +1,5 @@
+{% extends 'research_recommendation/base.html' %}{% block title %}我的交互记录 · 映界{% endblock %}{% block content %}
+<h1>我的交互记录</h1><p>最近50条；查看详情、感兴趣和看过会保存在当前账号下。“感兴趣”会更新偏好；查看和看过仅记录，不作为模型训练历史。</p>
+{% for entry in entries %}<p>{{ entry.record.created_at }} · {{ entry.record.get_kind_display }} · {% if entry.movie %}<a href="{% url 'research_pages:detail' entry.movie.id %}">{{ entry.movie.title }}</a>{% else %}电影已移除（{{ entry.record.movie_id }}）{% endif %}
+{% if entry.record.trace_id %} · <a href="{% url 'research_pages:personal_trace' entry.record.trace_id %}">来源 Trace</a>{% endif %}</p>{% empty %}<div class="state-panel">暂无交互记录。浏览电影详情后，记录会显示在这里。</div>{% endfor %}
+<p><a href="{% url 'research_pages:personal' %}">我的推荐</a></p>{% endblock %}

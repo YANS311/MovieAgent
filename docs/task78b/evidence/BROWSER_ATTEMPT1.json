@@ -1,0 +1,3782 @@
+{
+  "completed": true,
+  "checks": [
+    {
+      "name": "login_1440x900_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440,
+        "card": {
+          "left": 510,
+          "top": 213.875,
+          "right": 930,
+          "bottom": 712.96875,
+          "width": 420,
+          "height": 499.09375
+        },
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 65,
+          "width": 1440,
+          "height": 65
+        },
+        "brand": {
+          "left": 130,
+          "top": 4.28125,
+          "right": 251,
+          "bottom": 59.71875,
+          "width": 121,
+          "height": 55.4375
+        },
+        "menu": null,
+        "account": null,
+        "input": {
+          "left": 545,
+          "top": 417.9375,
+          "right": 895,
+          "bottom": 464.9375,
+          "width": 350,
+          "height": 47
+        },
+        "button": {
+          "left": 545,
+          "top": 573.375,
+          "right": 895,
+          "bottom": 620.375,
+          "width": 350,
+          "height": 47
+        },
+        "switch": {
+          "left": 545,
+          "top": 636.375,
+          "right": 895,
+          "bottom": 656.171875,
+          "width": 350,
+          "height": 19.796875
+        }
+      }
+    },
+    {
+      "name": "login_1440x900_compact_auth_header",
+      "pass": true,
+      "detail": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 65,
+        "width": 1440,
+        "height": 65
+      }
+    },
+    {
+      "name": "login_1440x900_no_duplicate_login_link",
+      "pass": true
+    },
+    {
+      "name": "login_1440x900_usable_input_height",
+      "pass": true,
+      "detail": {
+        "left": 545,
+        "top": 417.9375,
+        "right": 895,
+        "bottom": 464.9375,
+        "width": 350,
+        "height": 47
+      }
+    },
+    {
+      "name": "login_1440x900_whole_card_and_register_visible",
+      "pass": true,
+      "detail": {
+        "left": 510,
+        "top": 213.875,
+        "right": 930,
+        "bottom": 712.96875,
+        "width": 420,
+        "height": 499.09375
+      }
+    },
+    {
+      "name": "login_1440x900_input_focus",
+      "pass": true
+    },
+    {
+      "name": "login_1366x768_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 1366,
+        "height": 768,
+        "scrollWidth": 1366,
+        "card": {
+          "left": 473,
+          "top": 147.875,
+          "right": 893,
+          "bottom": 646.96875,
+          "width": 420,
+          "height": 499.09375
+        },
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 1366,
+          "bottom": 65,
+          "width": 1366,
+          "height": 65
+        },
+        "brand": {
+          "left": 93,
+          "top": 4.28125,
+          "right": 214,
+          "bottom": 59.71875,
+          "width": 121,
+          "height": 55.4375
+        },
+        "menu": null,
+        "account": null,
+        "input": {
+          "left": 508,
+          "top": 351.9375,
+          "right": 858,
+          "bottom": 398.9375,
+          "width": 350,
+          "height": 47
+        },
+        "button": {
+          "left": 508,
+          "top": 507.375,
+          "right": 858,
+          "bottom": 554.375,
+          "width": 350,
+          "height": 47
+        },
+        "switch": {
+          "left": 508,
+          "top": 570.375,
+          "right": 858,
+          "bottom": 590.171875,
+          "width": 350,
+          "height": 19.796875
+        }
+      }
+    },
+    {
+      "name": "login_1366x768_compact_auth_header",
+      "pass": true,
+      "detail": {
+        "left": 0,
+        "top": 0,
+        "right": 1366,
+        "bottom": 65,
+        "width": 1366,
+        "height": 65
+      }
+    },
+    {
+      "name": "login_1366x768_no_duplicate_login_link",
+      "pass": true
+    },
+    {
+      "name": "login_1366x768_usable_input_height",
+      "pass": true,
+      "detail": {
+        "left": 508,
+        "top": 351.9375,
+        "right": 858,
+        "bottom": 398.9375,
+        "width": 350,
+        "height": 47
+      }
+    },
+    {
+      "name": "login_1366x768_whole_card_and_register_visible",
+      "pass": true,
+      "detail": {
+        "left": 473,
+        "top": 147.875,
+        "right": 893,
+        "bottom": 646.96875,
+        "width": 420,
+        "height": 499.09375
+      }
+    },
+    {
+      "name": "login_1366x768_input_focus",
+      "pass": true
+    },
+    {
+      "name": "login_390x844_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "card": {
+          "left": 16,
+          "top": 192.28125,
+          "right": 374,
+          "bottom": 678.578125,
+          "width": 358,
+          "height": 486.296875
+        },
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 390,
+          "bottom": 65,
+          "width": 390,
+          "height": 65
+        },
+        "brand": {
+          "left": 16,
+          "top": 5.921875,
+          "right": 128,
+          "bottom": 58.0625,
+          "width": 112,
+          "height": 52.140625
+        },
+        "menu": null,
+        "account": null,
+        "input": {
+          "left": 41,
+          "top": 383.546875,
+          "right": 349,
+          "bottom": 430.546875,
+          "width": 308,
+          "height": 47
+        },
+        "button": {
+          "left": 41,
+          "top": 538.984375,
+          "right": 349,
+          "bottom": 585.984375,
+          "width": 308,
+          "height": 47
+        },
+        "switch": {
+          "left": 41,
+          "top": 601.984375,
+          "right": 349,
+          "bottom": 621.78125,
+          "width": 308,
+          "height": 19.796875
+        }
+      }
+    },
+    {
+      "name": "login_390x844_compact_auth_header",
+      "pass": true,
+      "detail": {
+        "left": 0,
+        "top": 0,
+        "right": 390,
+        "bottom": 65,
+        "width": 390,
+        "height": 65
+      }
+    },
+    {
+      "name": "login_390x844_no_duplicate_login_link",
+      "pass": true
+    },
+    {
+      "name": "login_390x844_usable_input_height",
+      "pass": true,
+      "detail": {
+        "left": 41,
+        "top": 383.546875,
+        "right": 349,
+        "bottom": 430.546875,
+        "width": 308,
+        "height": 47
+      }
+    },
+    {
+      "name": "login_390x844_input_focus",
+      "pass": true
+    },
+    {
+      "name": "login_375x667_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 375,
+        "height": 667,
+        "scrollWidth": 375,
+        "card": {
+          "left": 16,
+          "top": 103.78125,
+          "right": 359,
+          "bottom": 590.078125,
+          "width": 343,
+          "height": 486.296875
+        },
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 375,
+          "bottom": 65,
+          "width": 375,
+          "height": 65
+        },
+        "brand": {
+          "left": 16,
+          "top": 5.921875,
+          "right": 128,
+          "bottom": 58.0625,
+          "width": 112,
+          "height": 52.140625
+        },
+        "menu": null,
+        "account": null,
+        "input": {
+          "left": 41,
+          "top": 295.046875,
+          "right": 334,
+          "bottom": 342.046875,
+          "width": 293,
+          "height": 47
+        },
+        "button": {
+          "left": 41,
+          "top": 450.484375,
+          "right": 334,
+          "bottom": 497.484375,
+          "width": 293,
+          "height": 47
+        },
+        "switch": {
+          "left": 41,
+          "top": 513.484375,
+          "right": 334,
+          "bottom": 533.28125,
+          "width": 293,
+          "height": 19.796875
+        }
+      }
+    },
+    {
+      "name": "login_375x667_compact_auth_header",
+      "pass": true,
+      "detail": {
+        "left": 0,
+        "top": 0,
+        "right": 375,
+        "bottom": 65,
+        "width": 375,
+        "height": 65
+      }
+    },
+    {
+      "name": "login_375x667_no_duplicate_login_link",
+      "pass": true
+    },
+    {
+      "name": "login_375x667_usable_input_height",
+      "pass": true,
+      "detail": {
+        "left": 41,
+        "top": 295.046875,
+        "right": 334,
+        "bottom": 342.046875,
+        "width": 293,
+        "height": 47
+      }
+    },
+    {
+      "name": "login_375x667_input_focus",
+      "pass": true
+    },
+    {
+      "name": "invalid_login_error_readable",
+      "pass": true
+    },
+    {
+      "name": "invalid_login_mobile_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 375,
+        "height": 667,
+        "scrollWidth": 375,
+        "card": {
+          "left": 16,
+          "top": 85,
+          "right": 359,
+          "bottom": 646.390625,
+          "width": 343,
+          "height": 561.390625
+        },
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 375,
+          "bottom": 65,
+          "width": 375,
+          "height": 65
+        },
+        "brand": {
+          "left": 16,
+          "top": 5.921875,
+          "right": 128,
+          "bottom": 58.0625,
+          "width": 112,
+          "height": 52.140625
+        },
+        "menu": null,
+        "account": null,
+        "input": {
+          "left": 41,
+          "top": 351.359375,
+          "right": 334,
+          "bottom": 398.359375,
+          "width": 293,
+          "height": 47
+        },
+        "button": {
+          "left": 41,
+          "top": 506.796875,
+          "right": 334,
+          "bottom": 553.796875,
+          "width": 293,
+          "height": 47
+        },
+        "switch": {
+          "left": 41,
+          "top": 569.796875,
+          "right": 334,
+          "bottom": 589.59375,
+          "width": 293,
+          "height": 19.796875
+        }
+      }
+    },
+    {
+      "name": "registration_form_present",
+      "pass": true
+    },
+    {
+      "name": "register_mobile_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 375,
+        "height": 667,
+        "scrollWidth": 375,
+        "card": {
+          "left": 16,
+          "top": 85,
+          "right": 359,
+          "bottom": 896.359375,
+          "width": 343,
+          "height": 811.359375
+        },
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 375,
+          "bottom": 65,
+          "width": 375,
+          "height": 65
+        },
+        "brand": {
+          "left": 16,
+          "top": 5.921875,
+          "right": 128,
+          "bottom": 58.0625,
+          "width": 112,
+          "height": 52.140625
+        },
+        "menu": null,
+        "account": null,
+        "input": {
+          "left": 41,
+          "top": 274.265625,
+          "right": 334,
+          "bottom": 319.265625,
+          "width": 293,
+          "height": 45
+        },
+        "button": {
+          "left": 41,
+          "top": 736.96875,
+          "right": 334,
+          "bottom": 783.96875,
+          "width": 293,
+          "height": 47
+        },
+        "switch": {
+          "left": 41,
+          "top": 799.96875,
+          "right": 334,
+          "bottom": 819.765625,
+          "width": 293,
+          "height": 19.796875
+        }
+      }
+    },
+    {
+      "name": "registration_server_validation_visible",
+      "pass": true
+    },
+    {
+      "name": "registration_error_mobile_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 375,
+        "height": 667,
+        "scrollWidth": 375,
+        "card": {
+          "left": 16,
+          "top": 85,
+          "right": 359,
+          "bottom": 926.15625,
+          "width": 343,
+          "height": 841.15625
+        },
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 375,
+          "bottom": 65,
+          "width": 375,
+          "height": 65
+        },
+        "brand": {
+          "left": 16,
+          "top": 5.921875,
+          "right": 128,
+          "bottom": 58.0625,
+          "width": 112,
+          "height": 52.140625
+        },
+        "menu": null,
+        "account": null,
+        "input": {
+          "left": 41,
+          "top": 274.265625,
+          "right": 334,
+          "bottom": 319.265625,
+          "width": 293,
+          "height": 45
+        },
+        "button": {
+          "left": 41,
+          "top": 766.765625,
+          "right": 334,
+          "bottom": 813.765625,
+          "width": 293,
+          "height": 47
+        },
+        "switch": {
+          "left": 41,
+          "top": 829.765625,
+          "right": 334,
+          "bottom": 849.5625,
+          "width": 293,
+          "height": 19.796875
+        }
+      }
+    },
+    {
+      "name": "real_existing_account_login",
+      "pass": true
+    },
+    {
+      "name": "mobile_menu_expands",
+      "pass": true
+    },
+    {
+      "name": "mobile_five_clickable_links",
+      "pass": true
+    },
+    {
+      "name": "mobile_menu_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 375,
+        "height": 667,
+        "scrollWidth": 375,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 375,
+          "bottom": 305.328125,
+          "width": 375,
+          "height": 305.328125
+        },
+        "brand": {
+          "left": 16,
+          "top": 12,
+          "right": 128,
+          "bottom": 64.140625,
+          "width": 112,
+          "height": 52.140625
+        },
+        "menu": {
+          "left": 16,
+          "top": 154.9375,
+          "right": 359,
+          "bottom": 292.328125,
+          "width": 343,
+          "height": 137.390625
+        },
+        "account": {
+          "left": 16,
+          "top": 94.140625,
+          "right": 359,
+          "bottom": 142.9375,
+          "width": 343,
+          "height": 48.796875
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "home_1440_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 73,
+          "width": 1440,
+          "height": 73
+        },
+        "brand": {
+          "left": 130,
+          "top": 8.28125,
+          "right": 251,
+          "bottom": 63.71875,
+          "width": 121,
+          "height": 55.4375
+        },
+        "menu": {
+          "left": 275,
+          "top": 2.453125,
+          "right": 609,
+          "bottom": 69.546875,
+          "width": 334,
+          "height": 67.09375
+        },
+        "account": {
+          "left": 1099.984375,
+          "top": 24.09375,
+          "right": 1310,
+          "bottom": 47.890625,
+          "width": 210.015625,
+          "height": 23.796875
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "desktop_nav_single_row_1440",
+      "pass": true,
+      "detail": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 73,
+          "width": 1440,
+          "height": 73
+        },
+        "brand": {
+          "left": 130,
+          "top": 8.28125,
+          "right": 251,
+          "bottom": 63.71875,
+          "width": 121,
+          "height": 55.4375
+        },
+        "menu": {
+          "left": 275,
+          "top": 2.453125,
+          "right": 609,
+          "bottom": 69.546875,
+          "width": 334,
+          "height": 67.09375
+        },
+        "account": {
+          "left": 1099.984375,
+          "top": 24.09375,
+          "right": 1310,
+          "bottom": 47.890625,
+          "width": 210.015625,
+          "height": 23.796875
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "home_1366_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 1366,
+        "height": 768,
+        "scrollWidth": 1366,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 1366,
+          "bottom": 73,
+          "width": 1366,
+          "height": 73
+        },
+        "brand": {
+          "left": 93,
+          "top": 8.28125,
+          "right": 214,
+          "bottom": 63.71875,
+          "width": 121,
+          "height": 55.4375
+        },
+        "menu": {
+          "left": 238,
+          "top": 2.453125,
+          "right": 572,
+          "bottom": 69.546875,
+          "width": 334,
+          "height": 67.09375
+        },
+        "account": {
+          "left": 1062.984375,
+          "top": 24.09375,
+          "right": 1273,
+          "bottom": 47.890625,
+          "width": 210.015625,
+          "height": 23.796875
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "desktop_nav_single_row_1366",
+      "pass": true,
+      "detail": {
+        "width": 1366,
+        "height": 768,
+        "scrollWidth": 1366,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 1366,
+          "bottom": 73,
+          "width": 1366,
+          "height": 73
+        },
+        "brand": {
+          "left": 93,
+          "top": 8.28125,
+          "right": 214,
+          "bottom": 63.71875,
+          "width": 121,
+          "height": 55.4375
+        },
+        "menu": {
+          "left": 238,
+          "top": 2.453125,
+          "right": 572,
+          "bottom": 69.546875,
+          "width": 334,
+          "height": 67.09375
+        },
+        "account": {
+          "left": 1062.984375,
+          "top": 24.09375,
+          "right": 1273,
+          "bottom": 47.890625,
+          "width": 210.015625,
+          "height": 23.796875
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "home_390_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 390,
+          "bottom": 77.140625,
+          "width": 390,
+          "height": 77.140625
+        },
+        "brand": {
+          "left": 16,
+          "top": 12,
+          "right": 128,
+          "bottom": 64.140625,
+          "width": 112,
+          "height": 52.140625
+        },
+        "menu": {
+          "left": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
+        "account": {
+          "left": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "home_375_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 375,
+        "height": 667,
+        "scrollWidth": 375,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 375,
+          "bottom": 77.140625,
+          "width": 375,
+          "height": 77.140625
+        },
+        "brand": {
+          "left": 16,
+          "top": 12,
+          "right": 128,
+          "bottom": 64.140625,
+          "width": 112,
+          "height": 52.140625
+        },
+        "menu": {
+          "left": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
+        "account": {
+          "left": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "home_visible_real_posters_loaded",
+      "pass": true,
+      "detail": [
+        {
+          "url": "https://image.tmdb.org/t/p/w500/tXAhMF48GYcmzhm45Iw4GDjNnB9.jpg",
+          "loaded": true,
+          "visible": true
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/ftEJqiK00ptMd1QhkWPDmXjACL3.jpg",
+          "loaded": true,
+          "visible": true
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/1FSXpj5e8l4KH6nVFO5SPUeraOt.jpg",
+          "loaded": true,
+          "visible": true
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/8MprEuTY3EwkF9nBBPCUyjRjvs5.jpg",
+          "loaded": true,
+          "visible": true
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/rj4LBtwQ0uGrpBnCELr716Qo3mw.jpg",
+          "loaded": true,
+          "visible": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/j54LgvBrKf8ULkHl7as5XDD3n48.jpg",
+          "loaded": true,
+          "visible": false
+        }
+      ]
+    },
+    {
+      "name": "catalogue_visible_real_posters_loaded",
+      "pass": true,
+      "detail": [
+        {
+          "url": "https://image.tmdb.org/t/p/w500/tXAhMF48GYcmzhm45Iw4GDjNnB9.jpg",
+          "loaded": true,
+          "visible": true
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/ftEJqiK00ptMd1QhkWPDmXjACL3.jpg",
+          "loaded": true,
+          "visible": true
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/1FSXpj5e8l4KH6nVFO5SPUeraOt.jpg",
+          "loaded": true,
+          "visible": true
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/8MprEuTY3EwkF9nBBPCUyjRjvs5.jpg",
+          "loaded": true,
+          "visible": true
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/rj4LBtwQ0uGrpBnCELr716Qo3mw.jpg",
+          "loaded": true,
+          "visible": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/j54LgvBrKf8ULkHl7as5XDD3n48.jpg",
+          "loaded": true,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        }
+      ]
+    },
+    {
+      "name": "catalogue_desktop_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 73,
+          "width": 1440,
+          "height": 73
+        },
+        "brand": {
+          "left": 130,
+          "top": 8.28125,
+          "right": 251,
+          "bottom": 63.71875,
+          "width": 121,
+          "height": 55.4375
+        },
+        "menu": {
+          "left": 275,
+          "top": 2.453125,
+          "right": 609,
+          "bottom": 69.546875,
+          "width": 334,
+          "height": 67.09375
+        },
+        "account": {
+          "left": 1099.984375,
+          "top": 24.09375,
+          "right": 1310,
+          "bottom": 47.890625,
+          "width": 210.015625,
+          "height": 23.796875
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "catalogue_cards_visible",
+      "pass": true
+    },
+    {
+      "name": "catalogue_mobile_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 375,
+        "height": 667,
+        "scrollWidth": 375,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 375,
+          "bottom": 77.140625,
+          "width": 375,
+          "height": 77.140625
+        },
+        "brand": {
+          "left": 16,
+          "top": 12,
+          "right": 128,
+          "bottom": 64.140625,
+          "width": 112,
+          "height": 52.140625
+        },
+        "menu": {
+          "left": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
+        "account": {
+          "left": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "existing_trace_available",
+      "pass": true
+    },
+    {
+      "name": "top20_twenty_cards",
+      "pass": true
+    },
+    {
+      "name": "source_rule_not_ukmap",
+      "pass": true
+    },
+    {
+      "name": "rank_numbers_preserved",
+      "pass": true
+    },
+    {
+      "name": "top20_visible_real_posters_loaded",
+      "pass": true,
+      "detail": [
+        {
+          "url": "https://image.tmdb.org/t/p/w500/tXAhMF48GYcmzhm45Iw4GDjNnB9.jpg",
+          "loaded": true,
+          "visible": true
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/ftEJqiK00ptMd1QhkWPDmXjACL3.jpg",
+          "loaded": true,
+          "visible": true
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/bMY31ikEOIPOHqQwhPhII8UVBln.jpg",
+          "loaded": true,
+          "visible": true
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/5qD5eSKi1uCpgPcdjtZsaXy5rVX.jpg",
+          "loaded": true,
+          "visible": true
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/yV3B0qIwf2jFsqzoA7dwo8hJZZz.jpg",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/wPmZYnaQpxwoHmwNwVhZ2IY0UbF.jpg",
+          "loaded": true,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/1FSXpj5e8l4KH6nVFO5SPUeraOt.jpg",
+          "loaded": true,
+          "visible": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/8MprEuTY3EwkF9nBBPCUyjRjvs5.jpg",
+          "loaded": true,
+          "visible": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/rj4LBtwQ0uGrpBnCELr716Qo3mw.jpg",
+          "loaded": true,
+          "visible": false
+        },
+        {
+          "url": "https://image.tmdb.org/t/p/w500/j54LgvBrKf8ULkHl7as5XDD3n48.jpg",
+          "loaded": true,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        },
+        {
+          "url": "",
+          "loaded": false,
+          "visible": false
+        }
+      ]
+    },
+    {
+      "name": "top20_desktop_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 73,
+          "width": 1440,
+          "height": 73
+        },
+        "brand": {
+          "left": 130,
+          "top": 8.28125,
+          "right": 251,
+          "bottom": 63.71875,
+          "width": 121,
+          "height": 55.4375
+        },
+        "menu": {
+          "left": 275,
+          "top": 2.453125,
+          "right": 609,
+          "bottom": 69.546875,
+          "width": 334,
+          "height": 67.09375
+        },
+        "account": {
+          "left": 1099.984375,
+          "top": 24.09375,
+          "right": 1310,
+          "bottom": 47.890625,
+          "width": 210.015625,
+          "height": 23.796875
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "top20_mobile_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 375,
+        "height": 667,
+        "scrollWidth": 375,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 375,
+          "bottom": 77.140625,
+          "width": 375,
+          "height": 77.140625
+        },
+        "brand": {
+          "left": 16,
+          "top": 12,
+          "right": 128,
+          "bottom": 64.140625,
+          "width": 112,
+          "height": 52.140625
+        },
+        "menu": {
+          "left": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
+        "account": {
+          "left": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "detail_visible_real_posters_loaded",
+      "pass": true,
+      "detail": [
+        {
+          "url": "https://image.tmdb.org/t/p/w500/tXAhMF48GYcmzhm45Iw4GDjNnB9.jpg",
+          "loaded": true,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "name": "detail_desktop_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 73,
+          "width": 1440,
+          "height": 73
+        },
+        "brand": {
+          "left": 130,
+          "top": 8.28125,
+          "right": 251,
+          "bottom": 63.71875,
+          "width": 121,
+          "height": 55.4375
+        },
+        "menu": {
+          "left": 275,
+          "top": 2.453125,
+          "right": 609,
+          "bottom": 69.546875,
+          "width": 334,
+          "height": 67.09375
+        },
+        "account": {
+          "left": 1099.984375,
+          "top": 24.09375,
+          "right": 1310,
+          "bottom": 47.890625,
+          "width": 210.015625,
+          "height": 23.796875
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "detail_original_trace_rank_score",
+      "pass": true
+    },
+    {
+      "name": "verified_existing_cast_asset",
+      "pass": true
+    },
+    {
+      "name": "detail_mobile_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 375,
+        "height": 667,
+        "scrollWidth": 375,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 375,
+          "bottom": 77.140625,
+          "width": 375,
+          "height": 77.140625
+        },
+        "brand": {
+          "left": 16,
+          "top": 12,
+          "right": 128,
+          "bottom": 64.140625,
+          "width": 112,
+          "height": 52.140625
+        },
+        "menu": {
+          "left": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
+        "account": {
+          "left": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "ordinary_account_no_research_form",
+      "pass": true
+    },
+    {
+      "name": "research_permissions_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 73,
+          "width": 1440,
+          "height": 73
+        },
+        "brand": {
+          "left": 130,
+          "top": 8.28125,
+          "right": 251,
+          "bottom": 63.71875,
+          "width": 121,
+          "height": 55.4375
+        },
+        "menu": {
+          "left": 275,
+          "top": 2.453125,
+          "right": 609,
+          "bottom": 69.546875,
+          "width": 334,
+          "height": 67.09375
+        },
+        "account": {
+          "left": 1099.984375,
+          "top": 24.09375,
+          "right": 1310,
+          "bottom": 47.890625,
+          "width": 210.015625,
+          "height": 23.796875
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "ordinary_account_profiles_empty",
+      "pass": true
+    },
+    {
+      "name": "cross_account_trace_denied",
+      "pass": true
+    },
+    {
+      "name": "assistant_actual_boundary_visible",
+      "pass": true
+    },
+    {
+      "name": "assistant_no_horizontal_overflow",
+      "pass": true,
+      "detail": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440,
+        "card": null,
+        "header": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 73,
+          "width": 1440,
+          "height": 73
+        },
+        "brand": {
+          "left": 130,
+          "top": 8.28125,
+          "right": 251,
+          "bottom": 63.71875,
+          "width": 121,
+          "height": 55.4375
+        },
+        "menu": {
+          "left": 275,
+          "top": 2.453125,
+          "right": 609,
+          "bottom": 69.546875,
+          "width": 334,
+          "height": 67.09375
+        },
+        "account": {
+          "left": 1099.984375,
+          "top": 24.09375,
+          "right": 1310,
+          "bottom": 47.890625,
+          "width": 210.015625,
+          "height": 23.796875
+        },
+        "input": null,
+        "button": null,
+        "switch": null
+      }
+    },
+    {
+      "name": "logout_requires_login",
+      "pass": true
+    },
+    {
+      "name": "relogin_succeeds",
+      "pass": true
+    },
+    {
+      "name": "no_frontend_js_exceptions",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no_static_404",
+      "pass": true,
+      "detail": [
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/detail.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+          "status": 200
+        }
+      ]
+    }
+  ],
+  "layouts": [
+    {
+      "name": "login_1440x900",
+      "url": "http://127.0.0.1:18072/cinema/login/",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "card": {
+        "left": 510,
+        "top": 213.875,
+        "right": 930,
+        "bottom": 712.96875,
+        "width": 420,
+        "height": 499.09375
+      },
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 65,
+        "width": 1440,
+        "height": 65
+      },
+      "brand": {
+        "left": 130,
+        "top": 4.28125,
+        "right": 251,
+        "bottom": 59.71875,
+        "width": 121,
+        "height": 55.4375
+      },
+      "menu": null,
+      "account": null,
+      "input": {
+        "left": 545,
+        "top": 417.9375,
+        "right": 895,
+        "bottom": 464.9375,
+        "width": 350,
+        "height": 47
+      },
+      "button": {
+        "left": 545,
+        "top": 573.375,
+        "right": 895,
+        "bottom": 620.375,
+        "width": 350,
+        "height": 47
+      },
+      "switch": {
+        "left": 545,
+        "top": 636.375,
+        "right": 895,
+        "bottom": 656.171875,
+        "width": 350,
+        "height": 19.796875
+      }
+    },
+    {
+      "name": "login_1366x768",
+      "url": "http://127.0.0.1:18072/cinema/login/",
+      "width": 1366,
+      "height": 768,
+      "scrollWidth": 1366,
+      "card": {
+        "left": 473,
+        "top": 147.875,
+        "right": 893,
+        "bottom": 646.96875,
+        "width": 420,
+        "height": 499.09375
+      },
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 1366,
+        "bottom": 65,
+        "width": 1366,
+        "height": 65
+      },
+      "brand": {
+        "left": 93,
+        "top": 4.28125,
+        "right": 214,
+        "bottom": 59.71875,
+        "width": 121,
+        "height": 55.4375
+      },
+      "menu": null,
+      "account": null,
+      "input": {
+        "left": 508,
+        "top": 351.9375,
+        "right": 858,
+        "bottom": 398.9375,
+        "width": 350,
+        "height": 47
+      },
+      "button": {
+        "left": 508,
+        "top": 507.375,
+        "right": 858,
+        "bottom": 554.375,
+        "width": 350,
+        "height": 47
+      },
+      "switch": {
+        "left": 508,
+        "top": 570.375,
+        "right": 858,
+        "bottom": 590.171875,
+        "width": 350,
+        "height": 19.796875
+      }
+    },
+    {
+      "name": "login_390x844",
+      "url": "http://127.0.0.1:18072/cinema/login/",
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "card": {
+        "left": 16,
+        "top": 192.28125,
+        "right": 374,
+        "bottom": 678.578125,
+        "width": 358,
+        "height": 486.296875
+      },
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 390,
+        "bottom": 65,
+        "width": 390,
+        "height": 65
+      },
+      "brand": {
+        "left": 16,
+        "top": 5.921875,
+        "right": 128,
+        "bottom": 58.0625,
+        "width": 112,
+        "height": 52.140625
+      },
+      "menu": null,
+      "account": null,
+      "input": {
+        "left": 41,
+        "top": 383.546875,
+        "right": 349,
+        "bottom": 430.546875,
+        "width": 308,
+        "height": 47
+      },
+      "button": {
+        "left": 41,
+        "top": 538.984375,
+        "right": 349,
+        "bottom": 585.984375,
+        "width": 308,
+        "height": 47
+      },
+      "switch": {
+        "left": 41,
+        "top": 601.984375,
+        "right": 349,
+        "bottom": 621.78125,
+        "width": 308,
+        "height": 19.796875
+      }
+    },
+    {
+      "name": "login_375x667",
+      "url": "http://127.0.0.1:18072/cinema/login/",
+      "width": 375,
+      "height": 667,
+      "scrollWidth": 375,
+      "card": {
+        "left": 16,
+        "top": 103.78125,
+        "right": 359,
+        "bottom": 590.078125,
+        "width": 343,
+        "height": 486.296875
+      },
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 375,
+        "bottom": 65,
+        "width": 375,
+        "height": 65
+      },
+      "brand": {
+        "left": 16,
+        "top": 5.921875,
+        "right": 128,
+        "bottom": 58.0625,
+        "width": 112,
+        "height": 52.140625
+      },
+      "menu": null,
+      "account": null,
+      "input": {
+        "left": 41,
+        "top": 295.046875,
+        "right": 334,
+        "bottom": 342.046875,
+        "width": 293,
+        "height": 47
+      },
+      "button": {
+        "left": 41,
+        "top": 450.484375,
+        "right": 334,
+        "bottom": 497.484375,
+        "width": 293,
+        "height": 47
+      },
+      "switch": {
+        "left": 41,
+        "top": 513.484375,
+        "right": 334,
+        "bottom": 533.28125,
+        "width": 293,
+        "height": 19.796875
+      }
+    },
+    {
+      "name": "invalid_login_mobile",
+      "url": "http://127.0.0.1:18072/cinema/login/",
+      "width": 375,
+      "height": 667,
+      "scrollWidth": 375,
+      "card": {
+        "left": 16,
+        "top": 85,
+        "right": 359,
+        "bottom": 646.390625,
+        "width": 343,
+        "height": 561.390625
+      },
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 375,
+        "bottom": 65,
+        "width": 375,
+        "height": 65
+      },
+      "brand": {
+        "left": 16,
+        "top": 5.921875,
+        "right": 128,
+        "bottom": 58.0625,
+        "width": 112,
+        "height": 52.140625
+      },
+      "menu": null,
+      "account": null,
+      "input": {
+        "left": 41,
+        "top": 351.359375,
+        "right": 334,
+        "bottom": 398.359375,
+        "width": 293,
+        "height": 47
+      },
+      "button": {
+        "left": 41,
+        "top": 506.796875,
+        "right": 334,
+        "bottom": 553.796875,
+        "width": 293,
+        "height": 47
+      },
+      "switch": {
+        "left": 41,
+        "top": 569.796875,
+        "right": 334,
+        "bottom": 589.59375,
+        "width": 293,
+        "height": 19.796875
+      }
+    },
+    {
+      "name": "register_mobile",
+      "url": "http://127.0.0.1:18072/cinema/register/",
+      "width": 375,
+      "height": 667,
+      "scrollWidth": 375,
+      "card": {
+        "left": 16,
+        "top": 85,
+        "right": 359,
+        "bottom": 896.359375,
+        "width": 343,
+        "height": 811.359375
+      },
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 375,
+        "bottom": 65,
+        "width": 375,
+        "height": 65
+      },
+      "brand": {
+        "left": 16,
+        "top": 5.921875,
+        "right": 128,
+        "bottom": 58.0625,
+        "width": 112,
+        "height": 52.140625
+      },
+      "menu": null,
+      "account": null,
+      "input": {
+        "left": 41,
+        "top": 274.265625,
+        "right": 334,
+        "bottom": 319.265625,
+        "width": 293,
+        "height": 45
+      },
+      "button": {
+        "left": 41,
+        "top": 736.96875,
+        "right": 334,
+        "bottom": 783.96875,
+        "width": 293,
+        "height": 47
+      },
+      "switch": {
+        "left": 41,
+        "top": 799.96875,
+        "right": 334,
+        "bottom": 819.765625,
+        "width": 293,
+        "height": 19.796875
+      }
+    },
+    {
+      "name": "registration_error_mobile",
+      "url": "http://127.0.0.1:18072/cinema/register/",
+      "width": 375,
+      "height": 667,
+      "scrollWidth": 375,
+      "card": {
+        "left": 16,
+        "top": 85,
+        "right": 359,
+        "bottom": 926.15625,
+        "width": 343,
+        "height": 841.15625
+      },
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 375,
+        "bottom": 65,
+        "width": 375,
+        "height": 65
+      },
+      "brand": {
+        "left": 16,
+        "top": 5.921875,
+        "right": 128,
+        "bottom": 58.0625,
+        "width": 112,
+        "height": 52.140625
+      },
+      "menu": null,
+      "account": null,
+      "input": {
+        "left": 41,
+        "top": 274.265625,
+        "right": 334,
+        "bottom": 319.265625,
+        "width": 293,
+        "height": 45
+      },
+      "button": {
+        "left": 41,
+        "top": 766.765625,
+        "right": 334,
+        "bottom": 813.765625,
+        "width": 293,
+        "height": 47
+      },
+      "switch": {
+        "left": 41,
+        "top": 829.765625,
+        "right": 334,
+        "bottom": 849.5625,
+        "width": 293,
+        "height": 19.796875
+      }
+    },
+    {
+      "name": "mobile_menu",
+      "url": "http://127.0.0.1:18072/cinema/personal/",
+      "width": 375,
+      "height": 667,
+      "scrollWidth": 375,
+      "card": null,
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 375,
+        "bottom": 305.328125,
+        "width": 375,
+        "height": 305.328125
+      },
+      "brand": {
+        "left": 16,
+        "top": 12,
+        "right": 128,
+        "bottom": 64.140625,
+        "width": 112,
+        "height": 52.140625
+      },
+      "menu": {
+        "left": 16,
+        "top": 154.9375,
+        "right": 359,
+        "bottom": 292.328125,
+        "width": 343,
+        "height": 137.390625
+      },
+      "account": {
+        "left": 16,
+        "top": 94.140625,
+        "right": 359,
+        "bottom": 142.9375,
+        "width": 343,
+        "height": 48.796875
+      },
+      "input": null,
+      "button": null,
+      "switch": null
+    },
+    {
+      "name": "home_1440",
+      "url": "http://127.0.0.1:18072/cinema/",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "card": null,
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 73,
+        "width": 1440,
+        "height": 73
+      },
+      "brand": {
+        "left": 130,
+        "top": 8.28125,
+        "right": 251,
+        "bottom": 63.71875,
+        "width": 121,
+        "height": 55.4375
+      },
+      "menu": {
+        "left": 275,
+        "top": 2.453125,
+        "right": 609,
+        "bottom": 69.546875,
+        "width": 334,
+        "height": 67.09375
+      },
+      "account": {
+        "left": 1099.984375,
+        "top": 24.09375,
+        "right": 1310,
+        "bottom": 47.890625,
+        "width": 210.015625,
+        "height": 23.796875
+      },
+      "input": null,
+      "button": null,
+      "switch": null
+    },
+    {
+      "name": "home_1366",
+      "url": "http://127.0.0.1:18072/cinema/",
+      "width": 1366,
+      "height": 768,
+      "scrollWidth": 1366,
+      "card": null,
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 1366,
+        "bottom": 73,
+        "width": 1366,
+        "height": 73
+      },
+      "brand": {
+        "left": 93,
+        "top": 8.28125,
+        "right": 214,
+        "bottom": 63.71875,
+        "width": 121,
+        "height": 55.4375
+      },
+      "menu": {
+        "left": 238,
+        "top": 2.453125,
+        "right": 572,
+        "bottom": 69.546875,
+        "width": 334,
+        "height": 67.09375
+      },
+      "account": {
+        "left": 1062.984375,
+        "top": 24.09375,
+        "right": 1273,
+        "bottom": 47.890625,
+        "width": 210.015625,
+        "height": 23.796875
+      },
+      "input": null,
+      "button": null,
+      "switch": null
+    },
+    {
+      "name": "home_390",
+      "url": "http://127.0.0.1:18072/cinema/",
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "card": null,
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 390,
+        "bottom": 77.140625,
+        "width": 390,
+        "height": 77.140625
+      },
+      "brand": {
+        "left": 16,
+        "top": 12,
+        "right": 128,
+        "bottom": 64.140625,
+        "width": 112,
+        "height": 52.140625
+      },
+      "menu": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "account": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "input": null,
+      "button": null,
+      "switch": null
+    },
+    {
+      "name": "home_375",
+      "url": "http://127.0.0.1:18072/cinema/",
+      "width": 375,
+      "height": 667,
+      "scrollWidth": 375,
+      "card": null,
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 375,
+        "bottom": 77.140625,
+        "width": 375,
+        "height": 77.140625
+      },
+      "brand": {
+        "left": 16,
+        "top": 12,
+        "right": 128,
+        "bottom": 64.140625,
+        "width": 112,
+        "height": 52.140625
+      },
+      "menu": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "account": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "input": null,
+      "button": null,
+      "switch": null
+    },
+    {
+      "name": "catalogue_desktop",
+      "url": "http://127.0.0.1:18072/cinema/movies/",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "card": null,
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 73,
+        "width": 1440,
+        "height": 73
+      },
+      "brand": {
+        "left": 130,
+        "top": 8.28125,
+        "right": 251,
+        "bottom": 63.71875,
+        "width": 121,
+        "height": 55.4375
+      },
+      "menu": {
+        "left": 275,
+        "top": 2.453125,
+        "right": 609,
+        "bottom": 69.546875,
+        "width": 334,
+        "height": 67.09375
+      },
+      "account": {
+        "left": 1099.984375,
+        "top": 24.09375,
+        "right": 1310,
+        "bottom": 47.890625,
+        "width": 210.015625,
+        "height": 23.796875
+      },
+      "input": null,
+      "button": null,
+      "switch": null
+    },
+    {
+      "name": "catalogue_mobile",
+      "url": "http://127.0.0.1:18072/cinema/movies/",
+      "width": 375,
+      "height": 667,
+      "scrollWidth": 375,
+      "card": null,
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 375,
+        "bottom": 77.140625,
+        "width": 375,
+        "height": 77.140625
+      },
+      "brand": {
+        "left": 16,
+        "top": 12,
+        "right": 128,
+        "bottom": 64.140625,
+        "width": 112,
+        "height": 52.140625
+      },
+      "menu": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "account": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "input": null,
+      "button": null,
+      "switch": null
+    },
+    {
+      "name": "top20_desktop",
+      "url": "http://127.0.0.1:18072/cinema/personal/traces/0bd9ded5-57d2-4a52-89ad-a62b4ef58185/",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "card": null,
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 73,
+        "width": 1440,
+        "height": 73
+      },
+      "brand": {
+        "left": 130,
+        "top": 8.28125,
+        "right": 251,
+        "bottom": 63.71875,
+        "width": 121,
+        "height": 55.4375
+      },
+      "menu": {
+        "left": 275,
+        "top": 2.453125,
+        "right": 609,
+        "bottom": 69.546875,
+        "width": 334,
+        "height": 67.09375
+      },
+      "account": {
+        "left": 1099.984375,
+        "top": 24.09375,
+        "right": 1310,
+        "bottom": 47.890625,
+        "width": 210.015625,
+        "height": 23.796875
+      },
+      "input": null,
+      "button": null,
+      "switch": null
+    },
+    {
+      "name": "top20_mobile",
+      "url": "http://127.0.0.1:18072/cinema/personal/traces/0bd9ded5-57d2-4a52-89ad-a62b4ef58185/",
+      "width": 375,
+      "height": 667,
+      "scrollWidth": 375,
+      "card": null,
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 375,
+        "bottom": 77.140625,
+        "width": 375,
+        "height": 77.140625
+      },
+      "brand": {
+        "left": 16,
+        "top": 12,
+        "right": 128,
+        "bottom": 64.140625,
+        "width": 112,
+        "height": 52.140625
+      },
+      "menu": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "account": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "input": null,
+      "button": null,
+      "switch": null
+    },
+    {
+      "name": "detail_desktop",
+      "url": "http://127.0.0.1:18072/cinema/movies/75425/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "card": null,
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 73,
+        "width": 1440,
+        "height": 73
+      },
+      "brand": {
+        "left": 130,
+        "top": 8.28125,
+        "right": 251,
+        "bottom": 63.71875,
+        "width": 121,
+        "height": 55.4375
+      },
+      "menu": {
+        "left": 275,
+        "top": 2.453125,
+        "right": 609,
+        "bottom": 69.546875,
+        "width": 334,
+        "height": 67.09375
+      },
+      "account": {
+        "left": 1099.984375,
+        "top": 24.09375,
+        "right": 1310,
+        "bottom": 47.890625,
+        "width": 210.015625,
+        "height": 23.796875
+      },
+      "input": null,
+      "button": null,
+      "switch": null
+    },
+    {
+      "name": "detail_mobile",
+      "url": "http://127.0.0.1:18072/cinema/movies/75425/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "width": 375,
+      "height": 667,
+      "scrollWidth": 375,
+      "card": null,
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 375,
+        "bottom": 77.140625,
+        "width": 375,
+        "height": 77.140625
+      },
+      "brand": {
+        "left": 16,
+        "top": 12,
+        "right": 128,
+        "bottom": 64.140625,
+        "width": 112,
+        "height": 52.140625
+      },
+      "menu": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "account": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "input": null,
+      "button": null,
+      "switch": null
+    },
+    {
+      "name": "research_permissions",
+      "url": "http://127.0.0.1:18072/cinema/recommend/",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "card": null,
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 73,
+        "width": 1440,
+        "height": 73
+      },
+      "brand": {
+        "left": 130,
+        "top": 8.28125,
+        "right": 251,
+        "bottom": 63.71875,
+        "width": 121,
+        "height": 55.4375
+      },
+      "menu": {
+        "left": 275,
+        "top": 2.453125,
+        "right": 609,
+        "bottom": 69.546875,
+        "width": 334,
+        "height": 67.09375
+      },
+      "account": {
+        "left": 1099.984375,
+        "top": 24.09375,
+        "right": 1310,
+        "bottom": 47.890625,
+        "width": 210.015625,
+        "height": 23.796875
+      },
+      "input": null,
+      "button": null,
+      "switch": null
+    },
+    {
+      "name": "assistant",
+      "url": "http://127.0.0.1:18072/cinema/assistant/",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "card": null,
+      "header": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 73,
+        "width": 1440,
+        "height": 73
+      },
+      "brand": {
+        "left": 130,
+        "top": 8.28125,
+        "right": 251,
+        "bottom": 63.71875,
+        "width": 121,
+        "height": 55.4375
+      },
+      "menu": {
+        "left": 275,
+        "top": 2.453125,
+        "right": 609,
+        "bottom": 69.546875,
+        "width": 334,
+        "height": 67.09375
+      },
+      "account": {
+        "left": 1099.984375,
+        "top": 24.09375,
+        "right": 1310,
+        "bottom": 47.890625,
+        "width": 210.015625,
+        "height": 23.796875
+      },
+      "input": null,
+      "button": null,
+      "switch": null
+    }
+  ],
+  "shots": [
+    {
+      "file": "01_login_desktop.png",
+      "url": "http://127.0.0.1:18072/cinema/login/",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "file": "06_login_1366.png",
+      "url": "http://127.0.0.1:18072/cinema/login/",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      }
+    },
+    {
+      "file": "02_login_mobile.png",
+      "url": "http://127.0.0.1:18072/cinema/login/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "file": "07_login_375.png",
+      "url": "http://127.0.0.1:18072/cinema/login/",
+      "viewport": {
+        "width": 375,
+        "height": 667
+      }
+    },
+    {
+      "file": "08_login_error.png",
+      "url": "http://127.0.0.1:18072/cinema/login/",
+      "viewport": {
+        "width": 375,
+        "height": 667
+      }
+    },
+    {
+      "file": "09_register_error.png",
+      "url": "http://127.0.0.1:18072/cinema/register/",
+      "viewport": {
+        "width": 375,
+        "height": 667
+      }
+    },
+    {
+      "file": "10_mobile_menu.png",
+      "url": "http://127.0.0.1:18072/cinema/personal/",
+      "viewport": {
+        "width": 375,
+        "height": 667
+      }
+    },
+    {
+      "file": "03_home.png",
+      "url": "http://127.0.0.1:18072/cinema/",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "file": "11_catalogue_mobile.png",
+      "url": "http://127.0.0.1:18072/cinema/movies/",
+      "viewport": {
+        "width": 375,
+        "height": 667
+      }
+    },
+    {
+      "file": "04_recommend_top20.png",
+      "url": "http://127.0.0.1:18072/cinema/personal/traces/0bd9ded5-57d2-4a52-89ad-a62b4ef58185/",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "file": "12_top20_mobile.png",
+      "url": "http://127.0.0.1:18072/cinema/personal/traces/0bd9ded5-57d2-4a52-89ad-a62b4ef58185/",
+      "viewport": {
+        "width": 375,
+        "height": 667
+      }
+    },
+    {
+      "file": "05_movie_detail.png",
+      "url": "http://127.0.0.1:18072/cinema/movies/75425/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "file": "13_detail_mobile.png",
+      "url": "http://127.0.0.1:18072/cinema/movies/75425/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+      "viewport": {
+        "width": 375,
+        "height": 667
+      }
+    },
+    {
+      "file": "14_research_permissions.png",
+      "url": "http://127.0.0.1:18072/cinema/recommend/",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      }
+    }
+  ],
+  "errors": [],
+  "resources": [
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/detail.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/plugins/bootstrap-3.4.1/css/bootstrap.min.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/classic.css?v=78b",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/navigation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/pages.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:18072/static/research_recommendation/favicon.svg",
+      "status": 200
+    }
+  ],
+  "browser": "155.0.8059.84",
+  "new_test_access": 0
+}

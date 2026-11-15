@@ -1,0 +1,212 @@
+[
+  {
+    "file": "01_login_desktop.png",
+    "url": "http://127.0.0.1:18072/cinema/login/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "width": 1440,
+    "height": 900,
+    "sha256": "75849d6e66a917630f528cb2a5fc564ad15330edd0ac5da7b2a281936dcd5aa4",
+    "modified_at_utc": "2026-10-22T10:04:28.248191+00:00",
+    "browser": "155.0.8059.84",
+    "visual_result": "PASS",
+    "full_page": false
+  },
+  {
+    "file": "06_login_1366.png",
+    "url": "http://127.0.0.1:18072/cinema/login/",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "width": 1366,
+    "height": 768,
+    "sha256": "c7a9a73f4ce7fca8fb3b595575a6fc2622b4ee259a0fe2c6f0934609c6c99795",
+    "modified_at_utc": "2026-10-22T10:04:29.001210+00:00",
+    "browser": "155.0.8059.84",
+    "visual_result": "PASS",
+    "full_page": false
+  },
+  {
+    "file": "02_login_mobile.png",
+    "url": "http://127.0.0.1:18072/cinema/login/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "width": 390,
+    "height": 844,
+    "sha256": "f49996c2a0d36102adfad66f0941cd60082608185386a166ed47cdcf4a302563",
+    "modified_at_utc": "2026-10-22T10:04:29.660228+00:00",
+    "browser": "155.0.8059.84",
+    "visual_result": "PASS",
+    "full_page": false
+  },
+  {
+    "file": "07_login_375.png",
+    "url": "http://127.0.0.1:18072/cinema/login/",
+    "viewport": {
+      "width": 375,
+      "height": 667
+    },
+    "width": 375,
+    "height": 667,
+    "sha256": "467086b01c7445c7200b671dbfc0382e2d5ba421d0753bcd62a93078eba677d9",
+    "modified_at_utc": "2026-10-22T10:04:30.287244+00:00",
+    "browser": "155.0.8059.84",
+    "visual_result": "PASS",
+    "full_page": false
+  },
+  {
+    "file": "08_login_error.png",
+    "url": "http://127.0.0.1:18072/cinema/login/",
+    "viewport": {
+      "width": 375,
+      "height": 667
+    },
+    "width": 375,
+    "height": 705,
+    "sha256": "a7caa3f6610c44e872c965e9205bc24f6c02d5763e3e96f8fc8cce9b325d71b5",
+    "modified_at_utc": "2026-10-22T10:04:31.198268+00:00",
+    "browser": "155.0.8059.84",
+    "visual_result": "PASS",
+    "full_page": true
+  },
+  {
+    "file": "09_register_error.png",
+    "url": "http://127.0.0.1:18072/cinema/register/",
+    "viewport": {
+      "width": 375,
+      "height": 667
+    },
+    "width": 375,
+    "height": 984,
+    "sha256": "305c009da30675f88c9e58e1e31d388a55c42b05ffdedae9ae09410c48f9ded0",
+    "modified_at_utc": "2026-10-22T10:04:31.488276+00:00",
+    "browser": "155.0.8059.84",
+    "visual_result": "PASS",
+    "full_page": true
+  },
+  {
+    "file": "10_mobile_menu.png",
+    "url": "http://127.0.0.1:18072/cinema/personal/",
+    "viewport": {
+      "width": 375,
+      "height": 667
+    },
+    "width": 375,
+    "height": 1380,
+    "sha256": "20097b8d42d5aa39aecf77ee65f6451fc926546feee34de54bbc17cf47f70aba",
+    "modified_at_utc": "2026-10-22T10:04:32.430300+00:00",
+    "browser": "155.0.8059.84",
+    "visual_result": "PASS",
+    "full_page": true
+  },
+  {
+    "file": "03_home.png",
+    "url": "http://127.0.0.1:18072/cinema/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "width": 1440,
+    "height": 900,
+    "sha256": "7c44025cacf458671650fb9308fad35b738d6cae89e4d2972339c556ecf4f39d",
+    "modified_at_utc": "2026-10-22T10:04:36.140397+00:00",
+    "browser": "155.0.8059.84",
+    "visual_result": "PASS",
+    "full_page": false
+  },
+  {
+    "file": "11_catalogue_mobile.png",
+    "url": "http://127.0.0.1:18072/cinema/movies/",
+    "viewport": {
+      "width": 375,
+      "height": 667
+    },
+    "width": 375,
+    "height": 667,
+    "sha256": "8c4156eb0449907abddd5d70749b0cf5fbf3e4e2268b6c1c18a50b9b3698b937",
+    "modified_at_utc": "2026-10-22T10:04:36.296401+00:00",
+    "browser": "155.0.8059.84",
+    "visual_result": "PASS",
+    "full_page": false
+  },
+  {
+    "file": "04_recommend_top20.png",
+    "url": "http://127.0.0.1:18072/cinema/personal/traces/0bd9ded5-57d2-4a52-89ad-a62b4ef58185/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "width": 1440,
+    "height": 3437,
+    "sha256": "9abc0e8d6d53acc30ee510f7b2698a3f6126935bb12241299ada245571c22994",
+    "modified_at_utc": "2026-10-22T10:07:42.673336+00:00",
+    "browser": "155.0.8059.84",
+    "visual_result": "PASS",
+    "full_page": true
+  },
+  {
+    "file": "12_top20_mobile.png",
+    "url": "http://127.0.0.1:18072/cinema/personal/traces/0bd9ded5-57d2-4a52-89ad-a62b4ef58185/",
+    "viewport": {
+      "width": 375,
+      "height": 667
+    },
+    "width": 375,
+    "height": 667,
+    "sha256": "6f3a33568bee12b206f00a2e75dc82748a1bc209733a9b69aba1207b267f2631",
+    "modified_at_utc": "2026-10-22T10:04:37.329428+00:00",
+    "browser": "155.0.8059.84",
+    "visual_result": "PASS",
+    "full_page": false
+  },
+  {
+    "file": "05_movie_detail.png",
+    "url": "http://127.0.0.1:18072/cinema/movies/75425/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "width": 1440,
+    "height": 900,
+    "sha256": "fa84cb4dbacd0d3129f44e1f165f041bc104ed53fe2cf1999e97768aebb9678d",
+    "modified_at_utc": "2026-10-22T10:04:37.570435+00:00",
+    "browser": "155.0.8059.84",
+    "visual_result": "PASS",
+    "full_page": false
+  },
+  {
+    "file": "13_detail_mobile.png",
+    "url": "http://127.0.0.1:18072/cinema/movies/75425/?personal_trace=0bd9ded5-57d2-4a52-89ad-a62b4ef58185",
+    "viewport": {
+      "width": 375,
+      "height": 667
+    },
+    "width": 375,
+    "height": 2795,
+    "sha256": "603eb09cb0f63985246599365c3933e49b08f599ec72a098b5664ac94c7a0a4e",
+    "modified_at_utc": "2026-10-22T10:04:37.674437+00:00",
+    "browser": "155.0.8059.84",
+    "visual_result": "PASS",
+    "full_page": true
+  },
+  {
+    "file": "14_research_permissions.png",
+    "url": "http://127.0.0.1:18072/cinema/recommend/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "width": 1440,
+    "height": 900,
+    "sha256": "e544046209d70219bc682eaeba1bddaf651714583281a659018e7798098a89a9",
+    "modified_at_utc": "2026-10-22T10:04:37.844442+00:00",
+    "browser": "155.0.8059.84",
+    "visual_result": "PASS",
+    "full_page": false
+  }
+]

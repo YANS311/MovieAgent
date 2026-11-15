@@ -1,0 +1,219 @@
+/* Restore the original project's blue-purple visual language.
+   Presentation only: no changes to recommendations, identities or forms. */
+.cinema-app {
+  --ink: #263148;
+  --muted: #737d90;
+  --teal: #6265cf;
+  --line: #e8eaf2;
+  --paper: #f5f6fa;
+  --cream: #eceffc;
+  --classic-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: var(--ink);
+  background: var(--paper);
+  font-size: 14px;
+}
+.cinema-app a:hover, .cinema-app a:focus { color: #5947a6; }
+.cinema-app .site-header { box-shadow: 0 2px 16px #27336506; }
+.cinema-app .nav-row { min-height: 72px; gap: 24px; flex-wrap: nowrap; }
+.cinema-app .brand { flex: 0 0 auto; white-space: nowrap; }
+.cinema-app .brand-mark { flex: 0 0 auto; }
+.cinema-app .site-menu { display: flex; flex: 1; min-width: 0; align-items: center; justify-content: space-between; gap: 18px; }
+.cinema-app .menu-toggle { display: none; }
+.cinema-app .account { flex-shrink: 0; gap: 12px; }
+.cinema-app .account > span { max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cinema-app .brand { font-size: 23px; letter-spacing: 1px; }
+.cinema-app .brand-mark {
+  width: 43px; height: 43px; background: var(--classic-gradient);
+  border-radius: 12px; box-shadow: 0 5px 14px #667eea25;
+}
+.cinema-app .brand small { font-size: 10px; letter-spacing: 1px; }
+.cinema-app .nav-row nav { gap: clamp(12px, 1.8vw, 24px); margin-left: 0; white-space: nowrap; }
+.cinema-app .nav-row nav a { position: relative; padding: 22px 0; color: #626b7d; font-weight: 500; }
+.cinema-app .nav-row nav a[aria-current="page"] { color: #6265cf; }
+.cinema-app .nav-row nav a[aria-current="page"]::after {
+  content: ""; position: absolute; bottom: 13px; left: 15%; right: 15%;
+  height: 3px; border-radius: 5px; background: var(--classic-gradient);
+}
+.cinema-app .main-content { padding-top: 32px; padding-bottom: 48px; }
+.cinema-app .btn {
+  border-radius: 9px; font-size: 13px; padding: 11px 22px;
+  transition: box-shadow .18s ease, background-color .18s ease;
+}
+.cinema-app .btn-primary {
+  background: var(--classic-gradient); border: 1px solid transparent;
+  box-shadow: 0 4px 12px #667eea26; color: #fff;
+}
+.cinema-app .btn-primary:hover, .cinema-app .btn-primary:focus {
+  color: #fff; background: linear-gradient(135deg, #596fda, #694092);
+  box-shadow: 0 6px 18px #667eea38;
+}
+.cinema-app .btn-default { border-color: #e1e4f2; background: #fff; color: #6265cf; }
+.cinema-app .hero {
+  color: #fff; background: var(--classic-gradient); border: none;
+  border-radius: 20px; padding: 42px 48px; min-height: 320px;
+  box-shadow: 0 14px 34px #667eea25; overflow: hidden;
+}
+.cinema-app .hero::before {
+  content: ""; position: absolute; pointer-events: none;
+  width: 480px; height: 480px; right: -180px; top: -240px;
+  border: 65px solid #ffffff09; border-radius: 50%;
+}
+.cinema-app .hero h1 { font-size: 40px; margin-top: 8px; }
+.cinema-app .hero .eyebrow { color: #e7eaff; }
+.cinema-app .hero-description, .cinema-app .hero-note p,
+.cinema-app .hero-note > span + span { color: #f0edff; }
+.cinema-app .hero-note { border-color: #ffffff40; }
+.cinema-app .note-number { font-size: 62px; font-weight: 650; }
+.cinema-app .note-rule { border-color: #ffffff90; }
+.cinema-app .hero .btn-primary { background: #fff; color: #6265cf; box-shadow: 0 5px 16px #303c7b22; }
+.cinema-app .hero .btn-outline { border-color: #ffffff85; color: #fff; }
+.cinema-app .features { gap: 20px; padding: 0; margin: 26px 0 36px; border: none; }
+.cinema-app .features > div {
+  background: #fff; border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: 0 4px 18px #25327204; padding: 23px 22px 23px 67px;
+}
+.cinema-app .features > div > span {
+  left: 19px; top: 23px; width: 34px; height: 34px; border-radius: 10px;
+  display: grid; place-items: center; background: #edf0fe; color: #6c6ad2;
+}
+.cinema-app .features > div:nth-child(2) > span { background: #fcf0f6; color: #cb7ba0; }
+.cinema-app .features > div:nth-child(3) > span { background: #edf7f5; color: #439c8c; }
+.cinema-app .features h2 { font-size: 15px; }
+.cinema-app .section-heading h2 { font-size: 24px; }
+.cinema-app .film-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+.cinema-app .film-card {
+  background: #fff; border: 1px solid var(--line); border-radius: 13px;
+  overflow: hidden; box-shadow: 0 4px 18px #2d396f06;
+  transition: box-shadow .18s ease;
+}
+.cinema-app .film-card:hover { box-shadow: 0 9px 26px #2d396f13; }
+.cinema-app .poster-wrap { position: relative; height: auto; aspect-ratio: 2 / 2.8; min-width: 0; border: none; border-radius: 0; }
+.cinema-app .poster-empty { background: linear-gradient(145deg, #e8ecfa, #f4effa); color: #8c92b3; }
+.cinema-app .film-card > a > .poster-empty { min-height: 0; }
+.cinema-app .film-info { padding: 15px 17px 18px; }
+.cinema-app .film-info h3 { font-size: 15px; margin: 0 0 10px; min-height: 44px; }
+.cinema-app .film-info p { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.cinema-app .film-info .rule-score { font-size: 11px; }
+.cinema-app .genre-list span { background: #f0effc; color: #7771b5; border-radius: 12px; padding: 3px 8px; }
+.cinema-app .detail-link { font-size: 12px; font-weight: 600; }
+.cinema-app .card-rank {
+  position: absolute; right: 11px; top: 11px; background: var(--classic-gradient);
+  color: #fff; min-width: 27px; padding: 2px 8px; border-radius: 6px; text-align: center;
+}
+.cinema-app .page-heading { margin-bottom: 26px; }
+.cinema-app .page-heading h1 { font-size: 30px; }
+.cinema-app .form-control {
+  height: 46px; border: 1px solid #e0e3ee; border-radius: 9px; font-size: 14px;
+}
+.cinema-app .form-control:focus { border-color: #7c82df; box-shadow: 0 0 0 3px #667eea13; }
+.cinema-app .detail-copy { min-width: 0; overflow-wrap: anywhere; }
+.cinema-app .movie-detail { padding: 28px; background: #fff; border: 1px solid var(--line); border-radius: 16px; gap: 35px; }
+.cinema-app .detail-poster { border: none; border-radius: 10px; }
+.cinema-app .detail-copy h1 { font-size: 32px; }
+.cinema-app .detail-copy p { font-size: 14px; }
+.cinema-app .identity-note { background: #eeeffb; border-color: #7776d1; border-radius: 8px; }
+.cinema-app .recommend-form, .cinema-app .provenance { border-radius: 13px; }
+.cinema-app .recommend-card { border-radius: 12px; box-shadow: 0 3px 12px #2d396f04; }
+.cinema-app .recommend-card .rank-number { color: #7776c7; }
+.cinema-app .state-panel { background: #f0f1fc; border-color: #d4d7ed; border-radius: 12px; }
+.cinema-app .state-panel.is-error { background: #fff1eb; border-color: #d9b4a6; }
+.cinema-app .recommendation-meta { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.cinema-app pre { border: 1px solid var(--line); border-radius: 10px; font-size: 12px; }
+.cinema-app .site-footer { font-size: 11px; line-height: 1.8; }
+
+/* Auth uses the actual available height, independently of content navigation. */
+.cinema-app.auth-page { min-height: 100svh; display: flex; flex-direction: column; }
+.cinema-app .auth-header { flex: 0 0 auto; }
+.cinema-app .auth-nav { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.cinema-app .auth-home { font-size: 13px; white-space: nowrap; }
+.cinema-app.auth-page .main-content {
+  flex: 1 0 auto; width: 100%; max-width: none; min-height: 0;
+  padding: 24px; display: flex; align-items: center; justify-content: center;
+  background: var(--classic-gradient);
+}
+.cinema-app .auth-footer { flex: 0 0 auto; padding: 10px 16px; font-size: 11px; text-align: center; color: var(--muted); }
+.cinema-app .login-panel {
+  width: 100%; max-width: 420px; margin: 0; padding: 28px 34px 24px;
+  border: 1px solid #ffffffc9; border-radius: 20px;
+  background: #fffffff7; box-shadow: 0 20px 60px #25235435;
+}
+.cinema-app .auth-heading { text-align: center; margin-bottom: 20px; }
+.cinema-app .auth-mark {
+  width: 52px; height: 52px; border-radius: 15px; margin: 0 auto 12px;
+  display: grid; place-items: center; background: var(--classic-gradient);
+  box-shadow: 0 7px 20px #667eea35; color: #fff; font-size: 28px;
+}
+.cinema-app .auth-mark svg { width: 32px; height: 32px; }
+.cinema-app .auth-heading h1 { font-size: 23px; margin: 0 0 8px; font-weight: 700; line-height: 1.4; }
+.cinema-app .auth-heading p { color: var(--muted); font-size: 13px; margin: 0; }
+.cinema-app .login-panel form { margin-top: 0; }
+.cinema-app .login-panel .form-group { margin-bottom: 16px; }
+.cinema-app .login-panel label { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.cinema-app .login-panel .form-control { height: 47px; padding: 11px 14px; border-radius: 10px; }
+.cinema-app .login-panel .btn-block { height: 47px; font-size: 15px; margin-top: 9px; }
+.cinema-app .login-panel .auth-switch { text-align: center; margin: 16px 0 0; font-size: 12px; color: var(--muted); }
+.cinema-app .auth-switch a { margin-left: 6px; font-weight: 600; }
+.cinema-app .login-panel .login-note { font-size: 11px; text-align: center; margin: 12px 0 0; line-height: 1.8; }
+.cinema-app.register-page .login-panel { max-width: 470px; }
+.cinema-app .login-panel form > p { margin: 0 0 17px; }
+.cinema-app .login-panel form > p > label { display: block; }
+.cinema-app .login-panel form > p > input {
+  display: block; width: 100%; height: 45px; padding: 10px 14px;
+  border: 1px solid #e0e3ee; border-radius: 9px; background: #fff;
+}
+.cinema-app .login-panel .helptext { display: block; font-size: 11px; color: var(--muted); line-height: 1.7; margin-top: 6px; }
+.cinema-app .login-panel ul { padding-left: 18px; font-size: 11px; color: var(--muted); }
+.cinema-app .login-panel .errorlist { color: #b13b49; font-size: 12px; }
+
+@media (min-width: 781px) and (max-width: 1050px) {
+  .cinema-app .nav-row { gap: 16px; }
+  .cinema-app .brand { font-size: 20px; gap: 9px; }
+  .cinema-app .brand small { font-size: 9px; }
+  .cinema-app .nav-row nav { gap: 14px; }
+  .cinema-app .nav-row nav a { font-size: 13px; }
+  .cinema-app .account > span { max-width: 100px; }
+  .cinema-app .account .btn { padding: 8px 12px; }
+  .cinema-app .film-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 780px) {
+  .cinema-app .nav-row { flex-wrap: wrap; min-height: 66px; padding: 12px 0; gap: 0; justify-content: space-between; }
+  .cinema-app.navigation-ready .menu-toggle { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 8px; padding: 9px 13px; background: white; color: var(--ink); }
+  .cinema-app .site-menu { flex: 1 0 100%; flex-direction: column; align-items: stretch; gap: 12px; padding-top: 16px; }
+  .cinema-app.navigation-ready .site-menu:not(.is-open) { display: none; }
+  .cinema-app .site-menu nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 0; width: 100%; }
+  .cinema-app .site-menu nav a { padding: 11px 14px; border-radius: 8px; }
+  .cinema-app .site-menu nav a[aria-current="page"] { background: #eeeffb; }
+  .cinema-app .site-menu nav a[aria-current="page"]::after { content: none; }
+  .cinema-app .account { margin-left: 0; padding: 12px 14px; border-top: 1px solid var(--line); }
+  .cinema-app .account > span { max-width: 220px; }
+  .cinema-app .film-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+}
+@media (max-width: 650px) {
+  .cinema-app .shell { width: calc(100% - 32px); }
+  .cinema-app .nav-row { gap: 14px; }
+  .cinema-app .brand { font-size: 21px; gap: 10px; }
+  .cinema-app .brand-mark { width: 36px; height: 39px; border-radius: 10px; }
+  .cinema-app .account { gap: 12px; font-size: 12px; }
+  .cinema-app .account .btn { padding: 8px 14px; }
+  .cinema-app .nav-row nav a { font-size: 12px; }
+  .cinema-app .hero { padding: 28px; border-radius: 15px; min-height: 0; }
+  .cinema-app .hero h1 { font-size: 31px; }
+  .cinema-app .hero .btn { padding: 10px 14px; font-size: 12px; }
+  .cinema-app .features { grid-template-columns: 1fr; gap: 12px; }
+  .cinema-app .film-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+  .cinema-app .film-card > a > .poster-empty { min-height: 0; }
+.cinema-app .film-info { padding: 12px; }
+  .cinema-app .film-info h3 { font-size: 13px; }
+  .cinema-app .genre-list span { font-size: 10px; padding: 2px 5px; }
+  .cinema-app .detail-copy { min-width: 0; overflow-wrap: anywhere; }
+.cinema-app .movie-detail { padding: 20px; grid-template-columns: 1fr; }
+  .cinema-app .site-footer { gap: 5px; }
+  .cinema-app.auth-page .main-content { padding: 20px 16px; }
+  .cinema-app .login-panel { padding: 24px; border-radius: 17px; }
+  .cinema-app .auth-heading h1 { font-size: 21px; }
+  .cinema-app .auth-mark { width: 46px; height: 46px; }
+  .cinema-app .personal-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cinema-app .btn, .cinema-app .film-card { transition: none; }
+}

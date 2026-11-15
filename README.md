@@ -1,5 +1,9 @@
 # MovieAgent
 
+> **前端与多视口回归展示分支（`feat/ch5-frontend-playwright-regression`）说明**：
+> 本分支在 `release/ch5-final-20261114` 基础上归档了第五章 `/cinema/*` 模块的原生 ES6+ 前端代码（`static/research_recommendation/`、`templates/research_recommendation/`）、Agent POST-SSE 终态状态机单测（`tests/test_agent_sse_terminal_isolated.cjs`）、SQLite 内存态页面/安全契约测试，以及借助 Playwright CLI 与 AI/MCP 工具辅助执行的 73 项多视口浏览器历史回归脚本与脱敏证据（`docs/task78b/`）。
+> 架构细节、历史验证环境边界及纯 CPU 测试复跑命令请参见 **[README_FRONTEND_PLAYWRIGHT.md](./README_FRONTEND_PLAYWRIGHT.md)** 与 **[docs/task78b/BROWSER_REGRESSION.md](./docs/task78b/BROWSER_REGRESSION.md)**。
+
 基于 ReAct Agent 与知识图谱的可解释电影推荐系统。
 
 用户通过自然语言对话获取推荐，Agent 自主完成意图识别、多路召回、精排、重排、生成推荐理由的完整推理链，全程可追溯。

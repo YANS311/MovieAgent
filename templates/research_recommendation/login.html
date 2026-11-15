@@ -1,0 +1,21 @@
+{% extends 'research_recommendation/auth_base.html' %}
+{% block title %}登录 · 映界{% endblock %}
+{% block page_class %}auth-page{% endblock %}
+{% block content %}
+<section class="login-panel" aria-labelledby="login-heading">
+  <div class="auth-heading">
+    <span class="auth-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><rect x="5" y="4" width="22" height="24" rx="3" stroke="currentColor" stroke-width="2"/><path d="M10 4v24M22 4v24M5 10h5M5 16h5M5 22h5M22 10h5M22 16h5M22 22h5" stroke="currentColor" stroke-width="2"/></svg></span>
+    <h1 id="login-heading">登录电影推荐系统</h1>
+    <p>欢迎回来，继续发现好电影</p>
+  </div>
+  {% if form.errors %}<div class="alert alert-danger" role="alert">账号或密码不正确，请重试。</div>{% endif %}
+  <form method="post">
+    {% csrf_token %}<input type="hidden" name="next" value="{{ next }}">
+    <div class="form-group"><label for="id_username">账号</label><input class="form-control" id="id_username" name="username" autocomplete="username" placeholder="请输入账号" required maxlength="150"></div>
+    <div class="form-group"><label for="id_password">密码</label><input class="form-control" id="id_password" name="password" type="password" autocomplete="current-password" placeholder="请输入密码" required></div>
+    <button class="btn btn-primary btn-block" type="submit">登录</button>
+  </form>
+  <p class="auth-switch">还没有账号？<a href="{% url 'research_pages:register' %}">注册普通账号</a></p>
+  <p class="muted login-note">普通账号不会自动绑定M3L或ML-1M用户。</p>
+</section>
+{% endblock %}

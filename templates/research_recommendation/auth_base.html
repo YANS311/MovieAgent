@@ -1,0 +1,9 @@
+{% extends 'research_recommendation/base.html' %}
+{% block page_class %}auth-page{% endblock %}
+{% block header %}
+<header class="site-header auth-header"><div class="shell auth-nav">
+  <a class="brand" href="{% url 'research_pages:home' %}"><span class="brand-mark" aria-hidden="true">映</span><span>映界<small>电影推荐系统</small></span></a>
+  <a class="auth-home" href="{% url 'research_pages:home' %}">返回首页 <span aria-hidden="true">↗</span></a>
+</div></header>
+{% endblock %}
+{% block footer %}<footer class="auth-footer">映界 · 多源信息电影推荐</footer>{% endblock %}

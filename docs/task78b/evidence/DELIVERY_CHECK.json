@@ -1,0 +1,18 @@
+{
+  "reports": [
+    "VISUAL_FIX_REPORT.md",
+    "CHANGED_FILES.md",
+    "BROWSER_REGRESSION.md",
+    "SCREENSHOT_INDEX.md"
+  ],
+  "png_count": 14,
+  "sha256_verified": true,
+  "links_valid": true,
+  "credential_scan_pass": true,
+  "reports_sha256": {
+    "VISUAL_FIX_REPORT.md": "8f2cdfbd7acb84e95a366131edc784b195d7447f9d747b46c9c92c37e571752f",
+    "CHANGED_FILES.md": "35ee330bcff18baf8e26663f7d370f499062436e4c460ddd00c4e264f850f0bd",
+    "BROWSER_REGRESSION.md": "bec538197cab573879c7a45b9404eb501713da9f200b501e051e106b01521dd7",
+    "SCREENSHOT_INDEX.md": "f1e34fb25ef7d9c51ae6be276d8084d93ec32cb0764e37e1221c3f0e10fe3bd6"
+  }
+}

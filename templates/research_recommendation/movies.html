@@ -1,0 +1,7 @@
+{% extends 'research_recommendation/base.html' %}{% block title %}影片库 · 映界{% endblock %}{% block content %}
+<div class="page-heading"><p class="eyebrow">MOVIE CATALOGUE</p><h1>影片库</h1><p>按片名检索，发现下一部想看的电影。</p></div>
+<form class="search-form" method="get" role="search"><label class="sr-only" for="movie-query">搜索片名</label><input class="form-control" id="movie-query" name="q" value="{{ query }}" maxlength="100" placeholder="输入电影片名，例如 Toy Story"><button class="btn btn-primary" type="submit">搜索电影</button></form>
+<div class="results-heading"><span>{% if query %}“{{ query }}”的检索结果{% else %}全部影片{% endif %}</span><span>{{ page.paginator.count }}部</span></div>
+<div class="film-grid">{% for movie in movies %}{% include 'research_recommendation/_movie_card.html' %}{% empty %}<div class="state-panel wide"><h2>没有找到相关电影</h2><p>试试其他片名或缩短关键词。</p><a href="{% url 'research_pages:movies' %}">返回全部影片</a></div>{% endfor %}</div>
+{% if page.paginator.num_pages > 1 %}<nav class="pagination-row" aria-label="影片分页">{% if page.has_previous %}<a href="?q={{ query|urlencode }}&amp;page={{ page.previous_page_number }}">← 上一页</a>{% endif %}<span>第{{ page.number }} / {{ page.paginator.num_pages }}页</span>{% if page.has_next %}<a href="?q={{ query|urlencode }}&amp;page={{ page.next_page_number }}">下一页 →</a>{% endif %}</nav>{% endif %}
+{% endblock %}

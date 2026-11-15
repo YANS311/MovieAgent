@@ -1,0 +1,11 @@
+{% extends 'research_recommendation/base.html' %}{% block title %}我的推荐 · 映界{% endblock %}{% block content %}
+<h1>我的电影推荐</h1><p><strong>普通用户 · 元数据冷启动</strong>：依据类型偏好和喜欢的电影进行规则匹配。未使用 UKMAP、研究画像或训练历史。</p>
+<p><a href="{% url 'research_pages:preferences' %}">更新偏好</a> · <a href="{% url 'research_pages:interactions' %}">我的交互记录</a></p>
+{% if not preference or not preference.genres and not preference.movie_ids %}<div class="state-panel">尚未设置偏好。可以先选择喜欢的类型，也可以生成目录探索结果；目录顺序不代表热门程度。</div>{% endif %}
+<form method="post" action="{% url 'research_pages:personal' %}">{% csrf_token %}<button class="btn btn-primary" type="submit">生成推荐</button></form>
+{% if trace %}<h2>本次推荐</h2><p class="recommendation-meta">来源：{{ trace.provenance.source }} · 策略：{{ trace.provenance.strategy }} · 候选：{{ trace.provenance.candidate_count }}</p><p class="recommendation-meta">Trace：{{ trace.id }} · {{ trace.created_at }}</p>
+<div class="film-grid personal-grid">{% for row in results %}<article class="film-card">
+<a class="poster-wrap" href="{% url 'research_pages:detail' row.movie.id %}?personal_trace={{ trace.id }}" aria-label="查看{{ row.movie.title }}详情">{% if row.movie.poster_url %}<img src="{{ row.movie.poster_url }}" alt="{{ row.movie.title }}海报" loading="lazy" referrerpolicy="no-referrer">{% else %}<div class="poster-empty"><span class="film-symbol" aria-hidden="true">▤</span><span>暂无海报</span></div>{% endif %}<span class="card-rank">{{ forloop.counter }}</span></a>
+<div class="film-info"><h3><a href="{% url 'research_pages:detail' row.movie.id %}?personal_trace={{ trace.id }}">{{ row.movie.title }}</a></h3><p>{{ row.reason }}</p><p class="rule-score">类型匹配分：{{ row.score }}（非模型预测评分）</p><a class="detail-link" href="{% url 'research_pages:detail' row.movie.id %}?personal_trace={{ trace.id }}">电影详情 <span aria-hidden="true">↗</span></a></div></article>{% empty %}<div class="state-panel">暂无可推荐电影：目录可能为空、电影已移除或全部已选择。请更新偏好或稍后再试。</div>{% endfor %}</div>
+<details><summary>查看推荐来源 Trace（生成时快照）</summary><pre>{{ trace_json }}</pre></details>{% else %}<p>保存偏好后，点击生成推荐；每次生成会保留来源记录。</p>{% endif %}
+{% if recent_traces %}<h2>最近推荐记录</h2>{% for item in recent_traces %}<p><a href="{% url 'research_pages:personal_trace' item.id %}">{{ item.created_at }} · {{ item.provenance.strategy }} · {{ item.id }}</a></p>{% endfor %}{% endif %}{% endblock %}

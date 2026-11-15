@@ -1,0 +1,4 @@
+<article class="film-card">
+<a class="poster-wrap" href="{% url 'research_pages:detail' movie.id %}" aria-label="查看{{ movie.title }}详情">
+{% if movie.poster_url %}<img src="{{ movie.poster_url }}" alt="{{ movie.title }}海报" loading="lazy" referrerpolicy="no-referrer">{% else %}<div class="poster-empty"><span class="film-symbol" aria-hidden="true">▤</span><span>暂无海报</span></div>{% endif %}</a>
+<div class="film-info"><h3><a href="{% url 'research_pages:detail' movie.id %}">{{ movie.title }}</a></h3><div class="genre-list">{% for genre in movie.genres %}<span>{{ genre }}</span>{% empty %}<span class="muted">类型暂缺</span>{% endfor %}</div><a class="detail-link" href="{% url 'research_pages:detail' movie.id %}">电影详情 <span aria-hidden="true">↗</span></a></div></article>

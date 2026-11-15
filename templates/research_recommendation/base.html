@@ -1,0 +1,18 @@
+{% load static %}<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="{% static 'research_recommendation/favicon.svg' %}">
+<title>{% block title %}映界 · 电影推荐{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'plugins/bootstrap-3.4.1/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'research_recommendation/pages.css' %}">
+<link rel="stylesheet" href="{% static 'research_recommendation/classic.css' %}?v=78b">
+{% block head %}{% endblock %}</head><body class="cinema-app {% block page_class %}{% endblock %}">
+<a class="skip-link" href="#main">跳到主要内容</a>
+{% block header %}<header class="site-header"><div class="shell nav-row"><a class="brand" href="{% url 'research_pages:home' %}"><span class="brand-mark">映</span><span>映界<small>电影推荐系统</small></span></a>
+<button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu">菜单 <span aria-hidden="true">☰</span></button><div class="site-menu" id="site-menu"><nav aria-label="主导航"><a href="{% url 'research_pages:home' %}" {% if request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %}>首页</a><a href="{% url 'research_pages:movies' %}" {% if request.resolver_match.url_name == 'movies' or request.resolver_match.url_name == 'detail' %}aria-current="page"{% endif %}>影片库</a><a href="{% url 'research_pages:personal' %}" {% if '/cinema/personal/' in request.path %}aria-current="page"{% endif %}>我的推荐</a><a href="{% url 'research_pages:recommend' %}" {% if request.resolver_match.url_name == 'recommend' %}aria-current="page"{% endif %}>研究推荐</a><a href="{{ agent_url }}">智能助手</a></nav>
+<div class="account">{% if user.is_authenticated %}<span>{{ user.username }}</span><form method="post" action="{% url 'research_pages:logout' %}">{% csrf_token %}<button class="text-button" type="submit">退出</button></form>{% else %}<a class="btn btn-default" href="{% url 'research_pages:login' %}">登录</a><a href="{% url 'research_pages:register' %}">注册</a>{% endif %}</div></div></div></header>{% endblock %}
+{% if cpu_demo %}<div class="demo-strip"><div class="shell"><strong>TEST_DOUBLE · 页面验收模式</strong><span>本轮不调用GPU模型，实时模型页面闭环待验收（PENDING_REAL_MODEL_E2E）。</span></div></div>{% endif %}
+<main id="main" class="shell main-content">{% block content %}{% endblock %}</main>
+{% block footer %}<footer class="shell site-footer"><span>映界 · 多源信息电影推荐</span><span>研究画像独立授权，不代表登录者的真实兴趣。</span></footer>{% endblock %}
+<script src="{% static 'research_recommendation/navigation.js' %}" defer></script>
+<script src="{% static 'research_recommendation/pages.js' %}" defer></script>
+{% block scripts %}{% endblock %}</body></html>
